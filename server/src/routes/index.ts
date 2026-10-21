@@ -38,6 +38,8 @@ export const loginLimiter = rateLimit({
 
 const router = Router();
 
+router.get("/", (_req, res) => res.redirect("/login"));
+
 router.get("/login", getLogin);
 router.post("/login", loginLimiter, postLogin);
 router.post("/logout", postLogout);
