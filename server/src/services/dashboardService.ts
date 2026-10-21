@@ -169,7 +169,7 @@ export async function getDashboardSummary(
   // All duties in the range, joined with assignee info
   const { rows } = await pool.query(
     `SELECT d.id, d.title, d.area, d.status, d.start_time, d.end_time,
-            u.id AS assigned_to_id, u.school_id, u.full_name, u.role
+            u.id AS assigned_to_id, u.school_id, u.name AS full_name, u.role
      FROM duties d
      LEFT JOIN users u ON u.id = d.assigned_to
      WHERE d.start_time >= $1 AND d.start_time <= $2
