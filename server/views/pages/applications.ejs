@@ -1,0 +1,12 @@
+<%- include("../layouts/app-shell", {
+  title: title,
+  bodyClass: bodyClass,
+  user: user,
+  nav: nav,
+  csrfToken: csrfToken,
+  activePath: activePath,
+  pageStyles: pageStyles,
+  pageScripts: pageScripts,
+  contentPartial: "../pages/applications-content",
+  contentLocals: { apps: apps, tab: tab }
+}) %>

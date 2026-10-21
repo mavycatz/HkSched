@@ -1,0 +1,75 @@
+<section class="page-header">
+  <h1 class="page-title">Profile & Settings</h1>
+  <p class="page-subtitle">Edit your name, contact info, password, and notification preferences.</p>
+</section>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <section class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Personal Information</h5>
+        <form id="ps-form">
+          <div class="mb-2">
+            <label class="form-label">Full Name</label>
+            <input class="form-control" name="name" value="<%= profile.name || '' %>">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" value="<%= profile.email || '' %>">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Phone</label>
+            <input class="form-control" name="phone" value="<%= profile.phone || '' %>">
+          </div>
+          <button class="btn btn-primary" type="submit">Save Profile</button>
+          <div id="ps-msg" class="mt-2 small"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card mt-3">
+      <div class="card-body">
+        <h5 class="mb-3">Notification Preferences</h5>
+        <form id="np-form">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="np-email" name="email" <%= profile.notification_preferences?.email ? 'checked' : '' %>>
+            <label class="form-check-label" for="np-email">Email notifications</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="np-inapp" name="in_app" <%= profile.notification_preferences?.in_app ? 'checked' : '' %>>
+            <label class="form-check-label" for="np-inapp">In-app notifications</label>
+          </div>
+          <button class="btn btn-primary mt-2" type="submit">Save Preferences</button>
+          <div id="np-msg" class="mt-2 small"></div>
+        </form>
+      </div>
+    </section>
+  </div>
+  <div class="col-12 col-lg-6">
+    <section class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Change Password</h5>
+        <form id="cp-form">
+          <div class="mb-2">
+            <label class="form-label">Current Password</label>
+            <input type="password" class="form-control" name="current_password" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-control" name="new_password" minlength="8" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" name="confirm_password" minlength="8" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Change Password</button>
+          <div id="cp-msg" class="mt-2 small"></div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  window.__PS__ = { profile: <%- JSON.stringify(profile) %> };
+</script>

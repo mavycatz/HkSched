@@ -1,0 +1,53 @@
+/* Shared page styles for all duty schedule app pages */
+.page-header {
+  margin-bottom: 1rem;
+}
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+}
+.page-subtitle {
+  color: var(--text-muted);
+  margin: 0.25rem 0 0 0;
+}
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: var(--soft-shadow);
+  background: var(--white);
+}
+.card-body {
+  padding: 20px 24px;
+}
+@media (max-width: 576px) {
+  .card-body {
+    padding: 16px 18px;
+  }
+}
+.state-block {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.state-icon {
+  font-size: 2rem;
+  color: var(--text-muted);
+}
+.state-title {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.state-text {
+  color: var(--text-muted);
+}
+.badge-status {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+.badge-pending { background: #fff3cd; color: #856404; }
+.badge-done, .badge-completed { background: #d1e7dd; color: #0f5132; }
+.badge-overdue, .badge-missed { background: #f8d7da; color: #842029; }
+.badge-ongoing, .badge-assigned { background: #e7f1ff; color: #0c63e4; }
+.list-group-item { cursor: pointer; }
+.table th { font-weight: 600; color: var(--text-muted); }

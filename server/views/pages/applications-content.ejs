@@ -1,0 +1,68 @@
+<section class="page-header">
+  <h1 class="page-title">Applications</h1>
+  <p class="page-subtitle">Manage duty applications with status tabs, approvals, rejections, and notifications.</p>
+</section>
+
+<section class="card mb-3">
+  <div class="card-body d-flex gap-2 flex-wrap">
+    <a class="btn <%= tab==='pending' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=pending">Pending</a>
+    <a class="btn <%= tab==='approved' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=approved">Approved</a>
+    <a class="btn <%= tab==='rejected' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=rejected">Rejected</a>
+    <a class="btn <%= tab==='all' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=all">All</a>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-body">
+    <div id="app-loading" class="state-block">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="state-text">Loading applications...</div>
+    </div>
+    <div id="app-empty" class="state-block d-none">
+      <div class="state-icon"><i class="bi bi-inbox"></i></div>
+      <div class="state-title">No applications</div>
+      <div class="state-text">There are no applications in this tab.</div>
+    </div>
+    <div class="table-responsive" id="app-table-wrap" style="display:none">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Applicant</th>
+            <th>Duty</th>
+            <th>Date</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="app-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="reviewModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Review Application</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="review-app-id">
+        <div class="mb-2">
+          <label class="form-label">Note (optional)</label>
+          <textarea class="form-control" id="review-note" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" id="btn-approve">Approve</button>
+        <button class="btn btn-danger" id="btn-reject">Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__APP__ = { apps: <%- JSON.stringify(apps || []) %>, tab: <%- JSON.stringify(tab) %>, role: <%- JSON.stringify(user.role) %> };
+</script>

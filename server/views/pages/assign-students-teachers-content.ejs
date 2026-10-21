@@ -1,0 +1,49 @@
+<section class="page-header">
+  <h1 class="page-title">Assign Students & Teachers</h1>
+  <p class="page-subtitle">Pick a duty slot, search and select people to assign. Prevent conflicts and reassign/remove as needed.</p>
+</section>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-5">
+    <section class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Select Duty Slot</h5>
+        <div id="ast-loading" class="state-block">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="state-text">Loading slots...</div>
+        </div>
+        <div id="ast-slots" class="list-group" style="display:none"></div>
+      </div>
+    </section>
+  </div>
+  <div class="col-12 col-lg-7">
+    <section class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Assignments</h5>
+        <div id="ast-no-slot" class="state-block">
+          <div class="state-icon"><i class="bi bi-hand-index"></i></div>
+          <div class="state-title">Select a duty slot</div>
+          <div class="state-text">Choose a duty from the left to manage assignments.</div>
+        </div>
+        <div id="ast-slot-info" class="d-none mb-3"></div>
+        <div id="ast-assigned" class="d-none mb-3">
+          <div class="fw-semibold mb-2">Already Assigned</div>
+          <div id="ast-assigned-list" class="list-group"></div>
+        </div>
+        <div id="ast-assign-form" class="d-none">
+          <div class="fw-semibold mb-2">Assign Student/Teacher</div>
+          <div class="input-group mb-2">
+            <input type="text" class="form-control" id="ast-search" placeholder="Search by name or school ID">
+            <button class="btn btn-outline-secondary" type="button" id="ast-search-btn">Search</button>
+          </div>
+          <div id="ast-results" class="list-group"></div>
+          <div id="ast-assign-msg" class="mt-2 small"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  window.__AST__ = { slots: <%- JSON.stringify(slots || []) %> };
+</script>

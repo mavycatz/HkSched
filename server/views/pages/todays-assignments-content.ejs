@@ -1,0 +1,45 @@
+<section class="page-header">
+  <h1 class="page-title">Today's Assignments</h1>
+  <p class="page-subtitle">Duties due today — view details, locations, times, and mark complete.</p>
+</section>
+
+<section class="card">
+  <div class="card-body">
+    <div id="ta-loading" class="state-block">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="state-text">Loading assignments...</div>
+    </div>
+    <div id="ta-empty" class="state-block d-none">
+      <div class="state-icon"><i class="bi bi-calendar-check"></i></div>
+      <div class="state-title">No assignments for today</div>
+      <div class="state-text">You're all caught up for today.</div>
+    </div>
+    <div id="ta-error" class="state-block d-none">
+      <div class="state-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="state-title">Something went wrong</div>
+      <div class="state-text">We couldn't load your assignments. Please try again.</div>
+    </div>
+    <div class="table-responsive" id="ta-table-wrap" style="display:none">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Duty</th>
+            <th>Location/Area</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ta-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.__TA__ = {
+    slots: <%- JSON.stringify(slots || []) %>,
+    assignments: <%- JSON.stringify(assignments || []) %>,
+    today: <%- JSON.stringify(today) %>
+  };
+</script>

@@ -1,0 +1,68 @@
+<section class="page-header">
+  <h1 class="page-title">Monitor Completion</h1>
+  <p class="page-subtitle">Track duty status, assignees, completion time. Filter by date/status/person and highlight overdue.</p>
+</section>
+
+<section class="card mb-3">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold"><%= stats.total %></div><div class="small text-muted">Total</div></div></div>
+      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-success"><%= stats.completed %></div><div class="small text-muted">Completed</div></div></div>
+      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-warning"><%= stats.pending %></div><div class="small text-muted">Pending</div></div></div>
+      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-danger"><%= stats.overdue %></div><div class="small text-muted">Overdue</div></div></div>
+    </div>
+    <div class="mt-2 small text-muted">Completion rate: <strong><%= stats.rate %>%</strong></div>
+  </div>
+</section>
+
+<section class="card mb-3">
+  <div class="card-body">
+    <form class="row g-2 align-items-end" id="mc-filter-form" method="get" action="/monitor-completion">
+      <div class="col-12 col-md-3">
+        <label class="form-label">From</label>
+        <input type="date" class="form-control" name="from" value="<%= filters.from || '' %>">
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">To</label>
+        <input type="date" class="form-control" name="to" value="<%= filters.to || '' %>">
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Person</label>
+        <input type="text" class="form-control" name="person" placeholder="Name or ID" value="<%= filters.person || '' %>">
+      </div>
+      <div class="col-12 col-md-3 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Apply</button>
+        <a class="btn btn-outline-secondary" href="/monitor-completion">Clear</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Duty</th>
+            <th>Area</th>
+            <th>Date/Time</th>
+            <th>Assignee</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="mc-tbody"></tbody>
+      </table>
+    </div>
+    <div id="mc-empty" class="state-block d-none">
+      <div class="state-icon"><i class="bi bi-clipboard-check"></i></div>
+      <div class="state-title">No duties to monitor</div>
+      <div class="state-text">Try adjusting filters.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.__MC__ = { slots: <%- JSON.stringify(slots || []) %> };
+</script>

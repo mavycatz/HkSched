@@ -1,7 +1,9 @@
 <%- include("partials/head", { title: "Sign in" }) %>
-<%# Preload the hero background so the login screen paints without a flash. %>
-<link rel="preload" as="image" href="/img/bg.png">
-<link rel="preload" as="image" href="/img/cdslweb.png">
+<%# Preload the hero background so the login screen paints without a flash.
+    Each viewport only fetches the crop it shows: the portrait bg.png below
+    900px, the wide cdslweb.png on desktop. %>
+<link rel="preload" as="image" href="/img/bg.png" media="(max-width: 899.98px)">
+<link rel="preload" as="image" href="/img/cdslweb.png" media="(min-width: 900px)">
 
 <div class="login-page">
   <div class="login-wrap">

@@ -31,13 +31,14 @@ const ICONS = {
     <% }); %>
   </nav>
 
-  <div class="sidebar-footer p-3 border-top">
+  <div class="sidebar-footer">
     <form method="post" action="/logout" class="d-flex align-items-center">
       <input type="hidden" name="_csrf" value="<%- csrfToken %>">
-      <button class="nav-item-link nav-item-button w-100" type="submit">
+      <button class="nav-item-link nav-item-button" type="submit" id="logout-btn">
         <span class="nav-icon" aria-hidden="true"><%- ICONS.logout %></span>
         <span class="nav-label">Logout</span>
       </button>
     </form>
   </div>
+
 </aside>
