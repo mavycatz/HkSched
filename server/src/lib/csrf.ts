@@ -2,7 +2,7 @@ import { doubleCsrf } from "csrf-csrf";
 import type { Request, Response, NextFunction } from "express";
 import { isProd, sessionSecret } from "../config/env";
 
-export const CSRF_COOKIE_NAME = isProd() ? "__Host-hkduty-csrf" : "hkduty-csrf";
+export const CSRF_COOKIE_NAME = "hkduty-csrf";
 
 const cookieOptions = {
   sameSite: "lax" as const,
@@ -23,9 +23,9 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
 });
 
 export function csrfToken(req: Request, res: Response): string {
+  if (res.locals.csrfToken) return res.locals.csrfToken;
   const token = generateCsrfToken(req, res);
-  // The token is bound to the session id; persist anonymous sessions that mint
-  // tokens so the id survives from the form render (GET) to the submit (POST).
+  res.locals.csrfToken = token;
   if (req.session && !req.session.userId && !req.session.csrfAnchor) {
     req.session.csrfAnchor = true;
   }
