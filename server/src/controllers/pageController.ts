@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { navFor, type NavItem } from "../config/navigation";
 import type { Role } from "../../config/permissions";
 import { requireAuth, requirePermission } from "../middleware/auth";
@@ -138,36 +138,44 @@ export async function getAttendanceProfile(
 }
 
 /** CSDL Dashboard — greeting computed in Asia/Manila timezone, data from stub service. */
-export async function getCsdlDashboard(req: Request, res: Response): Promise<void> {
-  const user = req.user!;
-  const data = await getDashboardData();
+export async function getCsdlDashboard(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const user = req.user!;
+    const data = await getDashboardData();
 
-  // Greeting by time of day in Asia/Manila (UTC+8).
-  const manilaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-  const hours = manilaTime.getHours();
-  const greeting = hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
+    // Greeting by time of day in Asia/Manila (UTC+8).
+    const manilaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+    const hours = manilaTime.getHours();
+    const greeting = hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
 
-  // Display name: first name (no honorific data is stored on the user record).
-  const displayName = user.full_name.split(/\s+/)[0];
+    // Display name: first name (no honorific data is stored on the user record).
+    const displayName = user.full_name.split(/\s+/)[0];
 
-  // Today's date, e.g. "Wednesday, October 21, 2026".
-  const todayDate = manilaTime.toLocaleDateString("en-PH", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+    // Today's date, e.g. "Wednesday, October 21, 2026".
+    const todayDate = manilaTime.toLocaleDateString("en-PH", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
-  res.render("pages/csdl/dashboard", {
-    ...shellLocals(req, res),
-    title: "Dashboard",
-    activePath: "/csdl/dashboard",
-    greeting,
-    displayName,
-    todayDate,
-    totals: data.totals,
-    assignmentsToday: data.assignmentsToday,
-  });
+    res.render("pages/csdl/dashboard", {
+      ...shellLocals(req, res),
+      title: "Dashboard",
+      activePath: "/csdl/dashboard",
+      greeting,
+      displayName,
+      todayDate,
+      totals: data.totals,
+      assignmentsToday: data.assignmentsToday,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function getCsdlDutyManagement(req: Request, res: Response): void {

@@ -12,7 +12,7 @@
     </nav>
 
     <main class="content flex-grow-1 p-0">
-      <%- include(contentPartial, contentLocals || {}) %>
+      <%- include(contentPartial, Object.assign({}, contentLocals || {})) %>
     </main>
   </div>
 </div>
