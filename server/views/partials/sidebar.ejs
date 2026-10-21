@@ -1,0 +1,19 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/img/logo.png" alt="">
+    <span>HK Scholastics</span>
+  </div>
+  <nav class="side-nav" aria-label="Main navigation">
+    <% nav.forEach(function (item) { %>
+      <a class="side-link<%= item.path === activePath ? " active" : "" %>"
+         href="<%= item.path %>"
+         <%= item.path === activePath ? 'aria-current="page"' : "" %>><%= item.label %></a>
+    <% }); %>
+  </nav>
+  <div class="sidebar-footer">
+    <form method="post" action="/logout">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="logout-btn" type="submit">Logout</button>
+    </form>
+  </div>
+</aside>

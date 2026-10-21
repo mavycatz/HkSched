@@ -1,0 +1,25 @@
+services:
+  - type: postgresql
+    name: hkduty-db
+    plan: starter
+    databaseName: hkduty_app
+    user: hkduty_app
+
+  - type: web
+    name: hkduty-app
+    env: node
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm run db:migrate && npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hkduty-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_BASE_URL
+        sync: false
+    # Health check path /health is configured in the Render dashboard after creation.

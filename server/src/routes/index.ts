@@ -1,0 +1,56 @@
+import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
+import { getLogin, postLogin, postLogout, readRememberedId } from "../controllers/authController";
+import {
+  getAttendanceProfile,
+  getDashboard,
+  getForgotPassword,
+  registerPlaceholderRoutes,
+} from "../controllers/pageController";
+import { requireAuth, requirePermission } from "../middleware/auth";
+import { csrfToken } from "../lib/csrf";
+import { audit } from "../lib/audit";
+
+export const loginLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 5,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) =>
+    `${req.ip}::${String((req.body as Record<string, unknown> | undefined)?.identifier ?? "")
+      .toLowerCase()
+      .trim()}`,
+  handler: (req, res) => {
+    void audit("login_rate_limited", req, null, {
+      identifier: String((req.body as Record<string, unknown> | undefined)?.identifier ?? ""),
+    });
+    res.status(429).render("login", {
+      error: "Too many failed attempts. Please wait a minute and try again.",
+      fieldErrors: null,
+      identifier:
+        readRememberedId(req) ||
+        String((req.body as Record<string, unknown> | undefined)?.identifier ?? ""),
+      csrfToken: csrfToken(req, res),
+    });
+  },
+});
+
+const router = Router();
+
+router.get("/login", getLogin);
+router.post("/login", loginLimiter, postLogin);
+router.post("/logout", postLogout);
+
+router.get("/forgot-password", getForgotPassword);
+
+router.get("/dashboard", requireAuth, requirePermission("dashboard.view"), getDashboard);
+router.get(
+  "/attendance-profile",
+  requireAuth,
+  requirePermission("attendance.own.view"),
+  getAttendanceProfile,
+);
+registerPlaceholderRoutes(router);
+
+export default router;
