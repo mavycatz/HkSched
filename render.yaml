@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: hkduty-app
+    name: HkSched-app
     env: node
     rootDir: server
     buildCommand: npm ci && npm run build
@@ -12,5 +12,5 @@ services:
         generateValue: true
       - key: APP_BASE_URL
         sync: false
-    # DATABASE_URL: set manually in Render dashboard after creating the hkduty-db Postgres instance.
+    # DATABASE_URL: set manually in Render dashboard after creating the HkSched-db Postgres instance.
     # Health check path /health: set in Render dashboard after creation.
