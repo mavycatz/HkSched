@@ -5,6 +5,7 @@ import {
   getAttendanceProfile,
   getCsdlApplications,
   getCsdlDashboard,
+  getCsdlDashboardJson,
   getCsdlDutyManagement,
   getCsdlProfile,
   getCsdlSchedule,
@@ -67,6 +68,13 @@ router.get(
   requireRole("CSDL"),
   requirePermission("dashboard.view"),
   getCsdlDashboard,
+);
+router.get(
+  "/csdl/dashboard.json",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("dashboard.view"),
+  getCsdlDashboardJson,
 );
 router.get(
   "/csdl/duty-management",

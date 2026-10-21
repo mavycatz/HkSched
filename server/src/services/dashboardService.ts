@@ -1,6 +1,6 @@
 /**
  * Dashboard data service — queries the real database.
- * Tables used: users, duties, duty_assignments (created by migrations 003/004).
+ * Tables used: users, duties (created by migrations 003/004).
  */
 import { getPool } from "../db/pool";
 
@@ -26,64 +26,204 @@ export interface DashboardData {
   assignmentsToday: AssignmentToday[];
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
-  const pool = getPool();
+/** Compute Manila (Asia/Manila, UTC+8) start/end of day for a given UTC date. */
+function manilaDayBounds(utcDate: Date): { from: Date; to: Date } {
+  // Get the date components in Manila timezone
+  const manilaString = utcDate.toLocaleString("en-US", { timeZone: "Asia/Manila" });
+  const manilaDate = new Date(manilaString);
 
-  // Total students
-  const { rows: studentRows } = await pool.query(
-    `SELECT COUNT(*)::int AS n FROM users WHERE role = 'STUDENT' AND is_active = true`
-  );
-  const students = studentRows[0].n;
+  const from = new Date(manilaDate);
+  from.setHours(0, 0, 0, 0);
 
-  // Duty status counts
-  const { rows: dutyRows } = await pool.query(
-    `SELECT status, COUNT(*)::int AS n FROM duties GROUP BY status`
-  );
-  const dutyCounts: Record<string, number> = {};
-  for (const r of dutyRows) {
-    dutyCounts[r.status] = r.n;
+  const to = new Date(manilaDate);
+  to.setHours(23, 59, 59, 999);
+
+  return { from, to };
+}
+
+/** Compute the start/end of the Manila week (Sunday-Saturday) containing the date. */
+function manilaWeekBounds(utcDate: Date): { from: Date; to: Date } {
+  const manilaString = utcDate.toLocaleString("en-US", { timeZone: "Asia/Manila" });
+  const manilaDate = new Date(manilaString);
+
+  const day = manilaDate.getDay(); // 0 = Sunday
+  const from = new Date(manilaDate);
+  from.setDate(manilaDate.getDate() - day);
+  from.setHours(0, 0, 0, 0);
+
+  const to = new Date(from);
+  to.setDate(from.getDate() + 6);
+  to.setHours(23, 59, 59, 999);
+
+  return { from, to };
+}
+
+/** Compute the start/end of the Manila month containing the date. */
+function manilaMonthBounds(utcDate: Date): { from: Date; to: Date } {
+  const manilaString = utcDate.toLocaleString("en-US", { timeZone: "Asia/Manila" });
+  const manilaDate = new Date(manilaString);
+
+  const from = new Date(manilaDate.getFullYear(), manilaDate.getMonth(), 1, 0, 0, 0, 0);
+  const to = new Date(manilaDate.getFullYear(), manilaDate.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  return { from, to };
+}
+
+/** Format a date as "Wednesday, October 21, 2026" in Manila. */
+function formatLongDate(date: Date): string {
+  return date.toLocaleDateString("en-PH", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/** Format a date range label, e.g. "Oct 19 - Oct 25, 2026". */
+function formatRangeLabel(from: Date, to: Date): string {
+  const fromStr = from.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const toStr = to.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `${fromStr} - ${toStr}`;
+}
+
+/** Parse range params from the request query. Returns { from, to, rangeLabel, rangeKey }. */
+export function computeRange(query: Record<string, string>): {
+  from: Date;
+  to: Date;
+  rangeLabel: string;
+  rangeKey: string;
+} {
+  const range = query.range || "today";
+  const fromParam = query.from;
+  const toParam = query.to;
+  const now = new Date();
+
+  let from: Date;
+  let to: Date;
+  let rangeLabel: string;
+  let rangeKey: string;
+
+  if (range === "today") {
+    const b = manilaDayBounds(now);
+    from = b.from;
+    to = b.to;
+    rangeKey = "today";
+    rangeLabel = formatLongDate(from);
+  } else if (range === "week") {
+    const b = manilaWeekBounds(now);
+    from = b.from;
+    to = b.to;
+    rangeKey = "week";
+    rangeLabel = formatRangeLabel(from, to);
+  } else if (range === "month") {
+    const b = manilaMonthBounds(now);
+    from = b.from;
+    to = b.to;
+    rangeKey = "month";
+    rangeLabel = formatRangeLabel(from, to);
+  } else if (range === "custom" && fromParam && toParam) {
+    const parsedFrom = new Date(fromParam + "T00:00:00+08:00");
+    const parsedTo = new Date(toParam + "T23:59:59+08:00");
+    if (!isNaN(parsedFrom.getTime()) && !isNaN(parsedTo.getTime()) && parsedTo >= parsedFrom) {
+      from = parsedFrom;
+      to = parsedTo;
+      rangeKey = "custom";
+      rangeLabel = formatRangeLabel(from, to);
+    } else {
+      // Invalid custom range, fall back to today
+      const b = manilaDayBounds(now);
+      from = b.from;
+      to = b.to;
+      rangeKey = "today";
+      rangeLabel = formatLongDate(from);
+    }
+  } else {
+    const b = manilaDayBounds(now);
+    from = b.from;
+    to = b.to;
+    rangeKey = "today";
+    rangeLabel = formatLongDate(from);
   }
 
-  // Total assignments today (duty_assignments joined with duties starting today)
-  const { rows: assignmentRows } = await pool.query(
-    `SELECT COUNT(*)::int AS n
-     FROM duty_assignments da
-     JOIN duties d ON d.id = da.duty_id
-     WHERE d.start_time::date = CURRENT_DATE`
-  );
-  const assignmentsTodayCount = assignmentRows[0].n;
+  return { from, to, rangeLabel, rangeKey };
+}
 
-  // Today's assignments detail
-  const { rows: todayRows } = await pool.query(
-    `SELECT d.start_time::date AS date,
-            to_char(d.start_time, 'HH12:MI AM') AS time,
-            d.area AS area,
-            d.title AS tasks,
-            d.status AS status
+/**
+ * Dashboard summary for a given date range.
+ * Computes all 4 KPIs and the assignments table from the duties table.
+ */
+export async function getDashboardSummary(
+  actor: { role: string; school_id: string; full_name: string },
+  range: { from: Date; to: Date },
+): Promise<DashboardData> {
+  const pool = getPool();
+
+  // All duties in the range, joined with assignee info
+  const { rows } = await pool.query(
+    `SELECT d.id, d.title, d.area, d.status, d.start_time, d.end_time,
+            u.id AS assigned_to_id, u.school_id, u.full_name, u.role
      FROM duties d
-     WHERE d.start_time::date = CURRENT_DATE
-     ORDER BY d.start_time ASC`
+     LEFT JOIN users u ON u.id = d.assigned_to
+     WHERE d.start_time >= $1 AND d.start_time <= $2
+     ORDER BY d.start_time ASC`,
+    [range.from, range.to],
   );
-  const assignmentsToday: AssignmentToday[] = todayRows.map((r) => ({
-    date: r.date ? new Date(r.date).toLocaleDateString("en-PH", {
+
+  // Total students: DISTINCT students with a duty in the period
+  const students = new Set(
+    rows.filter((r) => r.role === "STUDENT").map((r) => r.assigned_to_id),
+  ).size;
+
+  // Completed: duties with status 'completed' in the period
+  const completed = rows.filter((r) => r.status === "completed").length;
+
+  // Ongoing: duties happening now within the period (start <= now < end, not cancelled)
+  const now = new Date();
+  const ongoing = rows.filter((r) => {
+    if (r.status === "cancelled") return false;
+    const start = new Date(r.start_time);
+    const end = r.end_time ? new Date(r.end_time) : null;
+    return start <= now && (!end || now < end);
+  }).length;
+
+  // Assignment: all non-cancelled duties in the period
+  const assignments = rows.filter((r) => r.status !== "cancelled").length;
+
+  // Assignments table detail
+  const assignmentsToday: AssignmentToday[] = rows.map((r) => ({
+    date: new Date(r.start_time).toLocaleDateString("en-PH", {
       month: "short",
       day: "numeric",
       year: "numeric",
-    }) : "",
-    time: r.time || "",
+    }),
+    time: new Date(r.start_time).toLocaleTimeString("en-PH", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }),
     area: r.area || "",
-    tasks: r.tasks || "",
-    status: (r.status || "ongoing").charAt(0).toUpperCase() + (r.status || "ongoing").slice(1),
+    tasks: r.title || "",
+    status: (r.status || "ongoing")
+      .charAt(0)
+      .toUpperCase() + (r.status || "ongoing").slice(1),
   }));
 
   return {
     totals: {
       students,
-      completed: dutyCounts.completed || 0,
-      ongoing: dutyCounts.ongoing || 0,
-      assignments: assignmentsTodayCount,
+      completed,
+      ongoing,
+      assignments,
       pendingApplications: 0, // applications table not yet in schema
-      missed: dutyCounts.missed || 0,
+      missed: rows.filter((r) => r.status === "missed").length,
     },
     assignmentsToday,
   };

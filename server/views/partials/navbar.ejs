@@ -11,7 +11,7 @@ function initialsOf(name) {
 
 <nav class="navbar" id="top-navbar">
   <div class="container-fluid px-3">
-    <!-- Search field -->
+    <!-- Search field (left) -->
     <div class="search-wrapper me-auto">
       <div class="input-group">
         <span class="input-group-text bg-light border-0">
@@ -21,11 +21,11 @@ function initialsOf(name) {
       </div>
     </div>
 
-    <!-- Right side: notification + user -->
+    <!-- Right: bell + user block -->
     <div class="d-flex align-items-center gap-3">
       <!-- Notification bell -->
-      <div class="nav-item dropdown">
-        <a class="nav-link p-0 text-decoration-none" href="#" id="bellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+      <div class="nav-item dropdown position-relative">
+        <a class="nav-link p-0 text-decoration-none" href="#" id="bellDropdown" role="button" aria-expanded="false" aria-label="Notifications">
           <i class="bi bi-bell fs-5 text-navy"></i>
           <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
         </a>
@@ -34,9 +34,9 @@ function initialsOf(name) {
         </ul>
       </div>
 
-      <!-- User profile dropdown -->
-      <div class="nav-item dropdown">
-        <a class="nav-link d-flex align-items-center text-decoration-none" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <!-- User block (avatar + name + role, not a link) -->
+      <div class="nav-item dropdown position-relative">
+        <a class="nav-link d-flex align-items-center text-decoration-none" href="#" id="userDropdown" role="button" aria-expanded="false">
           <div class="user-avatar me-2">
             <i class="bi bi-person fs-4"></i>
           </div>
@@ -45,9 +45,9 @@ function initialsOf(name) {
             <div class="user-role text-truncate" style="max-width: 140px;">CSDL Staff</div>
           </div>
         </a>
-<ul class="dropdown-menu dropdown-menu-end hidden" id="userDropdown-menu" aria-labelledby="userDropdown">
-  <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
-</ul>
+        <ul class="dropdown-menu dropdown-menu-end hidden" id="userDropdown-menu" aria-labelledby="userDropdown">
+          <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
+        </ul>
       </div>
     </div>
   </div>

@@ -1,58 +1,72 @@
-<!-- Dashboard greeting -->
+<!-- Dashboard greeting + date filter -->
 <div class="greeting-row">
   <div class="greeting">
     <h1 class="dashboard-greeting fw-bold"><%= greeting %>, <%= displayName %>!</h1>
-    <p class="greeting-subtitle mb-0">Here's your duty summary for today</p>
+    <p class="greeting-subtitle mb-0">Here's your duty summary for <%= rangeLabel.toLowerCase() %></p>
   </div>
-  <div class="text-end">
-    <p class="today-date fw-medium mb-0"><%= todayDate %></p>
+  <div class="range-filter d-flex align-items-center gap-2">
+    <span class="range-label fw-medium text-navy small">Range:</span>
+    <div class="range-segment">
+      <a class="range-btn<%= rangeKey === "today" ? " active" : "" %>"
+         href="/csdl/dashboard?range=today">Today</a>
+      <a class="range-btn<%= rangeKey === "week" ? " active" : "" %>"
+         href="/csdl/dashboard?range=week">This Week</a>
+      <a class="range-btn<%= rangeKey === "month" ? " active" : "" %>"
+         href="/csdl/dashboard?range=month">This Month</a>
+      <a class="range-btn<%= rangeKey === "custom" ? " active" : "" %>"
+         href="/csdl/dashboard?range=custom<%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">Custom</a>
+    </div>
+    <% if (rangeKey === "custom") { %>
+    <form class="range-custom-form d-none" method="get" action="/csdl/dashboard">
+      <input type="hidden" name="range" value="custom">
+      <label class="range-label fw-medium text-navy small me-1">From</label>
+      <input type="date" name="from" value="<%= rangeFrom %>" class="form-control form-control-sm range-date-input">
+      <label class="range-label fw-medium text-navy small me-1 ms-2">To</label>
+      <input type="date" name="to" value="<%= rangeTo %>" class="form-control form-control-sm range-date-input">
+      <button type="submit" class="btn btn-sm btn-primary ms-2">Apply</button>
+    </form>
+    <% } %>
   </div>
 </div>
 
-<!-- Summary stat cards -->
+<!-- Summary stat cards (4 only) -->
 <div class="stats-grid mb-4">
-  <a class="stat-card stat-blue" href="/csdl/duty-management">
-    <div class="stat-icon-tile"><i class="bi bi-people"></i></div>
+  <a class="stat-card stat-blue" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
+    <div class="stat-icon-tile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
     <p class="stat-label">Total Students</p>
     <p class="stat-number"><%= totals.students %></p>
+    <p class="stat-caption mt-1 mb-0"><%= totals.students %> of <%= totals.students %> total students</p>
   </a>
-  <a class="stat-card stat-green" href="/csdl/duty-management">
-    <div class="stat-icon-tile"><i class="bi bi-check-circle"></i></div>
-    <p class="stat-label">Completed Duties</p>
+  <a class="stat-card stat-green" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
+    <div class="stat-icon-tile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <p class="stat-label">Completed</p>
     <p class="stat-number"><%= totals.completed %></p>
   </a>
-  <a class="stat-card stat-amber" href="/csdl/duty-management">
-    <div class="stat-icon-tile"><i class="bi bi-clock"></i></div>
+  <a class="stat-card stat-amber" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
+    <div class="stat-icon-tile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
     <p class="stat-label">Ongoing Duties</p>
     <p class="stat-number"><%= totals.ongoing %></p>
   </a>
-  <a class="stat-card stat-purple" href="/csdl/schedule">
-    <div class="stat-icon-tile"><i class="bi bi-card-text"></i></div>
-    <p class="stat-label">Total Assignments</p>
+  <a class="stat-card stat-purple" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
+    <div class="stat-icon-tile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-14 0c0-2.54-1.07-4.74 2.59-6.64"/></svg>
+    </div>
+    <p class="stat-label">Assignment</p>
     <p class="stat-number"><%= totals.assignments %></p>
   </a>
 </div>
 
-<!-- Needs attention row -->
-<div class="stats-grid mb-4">
-  <a class="stat-card stat-orange" href="/csdl/applications">
-    <div class="stat-icon-tile"><i class="bi bi-file-earmark-person"></i></div>
-    <p class="stat-label">Pending Applications</p>
-    <p class="stat-number"><%= totals.pendingApplications %></p>
-  </a>
-  <a class="stat-card stat-red" href="/csdl/duty-management">
-    <div class="stat-icon-tile"><i class="bi bi-exclamation-triangle"></i></div>
-    <p class="stat-label">Missed Duties</p>
-    <p class="stat-number"><%= totals.missed %></p>
-  </a>
-</div>
-
-<!-- Today's Assignments -->
+<!-- Today's Assignment table -->
 <div class="card border-0 shadow-sm">
   <div class="card-header bg-white border-bottom py-3">
     <div class="d-flex justify-content-between align-items-center">
-      <h5 class="section-title mb-0">Today's Assignment</h5>
-      <a href="/csdl/duty-management" class="view-all">View all</a>
+      <h5 class="section-title mb-0"><%= sectionTitle %></h5>
     </div>
   </div>
   <div class="card-body p-0">
@@ -67,7 +81,7 @@
             <th class="border-0 fw-medium small text-navy text-end">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="assignments-table-body">
           <% if (assignmentsToday && assignmentsToday.length > 0) { %>
             <% assignmentsToday.forEach(function (a) { %>
             <tr>
@@ -85,7 +99,7 @@
             <td colspan="5" class="text-center py-5">
               <div class="empty-state">
                 <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-                <p class="text-muted mb-0">No tasks for today</p>
+                <p class="text-muted mb-0"><%= emptyMessage %></p>
               </div>
             </td>
           </tr>
@@ -94,4 +108,15 @@
       </table>
     </div>
   </div>
+</div>
+
+<!-- Skeleton placeholders (shown during JS fetch, hidden on initial server render) -->
+<div id="dashboard-skeleton" class="d-none">
+  <div class="skeleton-row mb-4">
+    <div class="skeleton-col"></div>
+    <div class="skeleton-col"></div>
+    <div class="skeleton-col"></div>
+    <div class="skeleton-col"></div>
+  </div>
+  <div class="skeleton-table mb-4"></div>
 </div>

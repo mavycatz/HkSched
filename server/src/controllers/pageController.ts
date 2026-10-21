@@ -4,7 +4,7 @@ import type { Role } from "../../config/permissions";
 import { requireAuth, requirePermission } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { canViewStudentRecord, sendNotFound } from "../lib/authorization";
-import { getDashboardData } from "../services/dashboardService";
+import { getDashboardSummary, computeRange } from "../services/dashboardService";
 
 interface Placeholder {
   path: string;
@@ -142,7 +142,7 @@ export async function getAttendanceProfile(
   }
 }
 
-/** CSDL Dashboard — greeting computed in Asia/Manila timezone, data from stub service. */
+/** CSDL Dashboard — greeting computed in Asia/Manila timezone, data from real DB with range filter. */
 export async function getCsdlDashboard(
   req: Request,
   res: Response,
@@ -150,7 +150,12 @@ export async function getCsdlDashboard(
 ): Promise<void> {
   try {
     const user = req.user!;
-    const data = await getDashboardData();
+
+    // Parse range from query string (default: today)
+    const range = computeRange(req.query as Record<string, string>);
+
+    // Fetch summary + assignments for the range
+    const data = await getDashboardSummary(user, range);
 
     // Greeting by time of day in Asia/Manila (UTC+8).
     const manilaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
@@ -160,13 +165,8 @@ export async function getCsdlDashboard(
     // Display name: first name (no honorific data is stored on the user record).
     const displayName = user.full_name.split(/\s+/)[0];
 
-    // Today's date, e.g. "Wednesday, October 21, 2026".
-    const todayDate = manilaTime.toLocaleDateString("en-PH", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    // Active range label for display, e.g. "Wednesday, October 21, 2026"
+    const todayDate = range.rangeLabel;
 
     res.render("pages/csdl/dashboard", {
       ...shellLocals(req, res),
@@ -176,6 +176,10 @@ export async function getCsdlDashboard(
       greeting,
       displayName,
       todayDate,
+      rangeKey: range.rangeKey,
+      rangeLabel: range.rangeLabel,
+      rangeFrom: range.from.toISOString().split("T")[0],
+      rangeTo: range.to.toISOString().split("T")[0],
       totals: data.totals,
       assignmentsToday: data.assignmentsToday,
     });
@@ -218,4 +222,28 @@ export function getCsdlProfile(req: Request, res: Response): void {
     activePath: "/csdl/profile",
     bodyClass: "csdl-page",
   });
+}
+
+/** JSON endpoint for the dashboard summary — used by the range filter without full reload. */
+export async function getCsdlDashboardJson(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const user = req.user!;
+    const range = computeRange(req.query as Record<string, string>);
+    const data = await getDashboardSummary(user, range);
+
+    res.json({
+      rangeKey: range.rangeKey,
+      rangeLabel: range.rangeLabel,
+      rangeFrom: range.from.toISOString().split("T")[0],
+      rangeTo: range.to.toISOString().split("T")[0],
+      totals: data.totals,
+      assignmentsToday: data.assignmentsToday,
+    });
+  } catch (err) {
+    next(err);
+  }
 }

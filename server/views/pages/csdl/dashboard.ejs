@@ -1,3 +1,14 @@
+<%
+// Determine section title and empty message based on range
+const rangeTitles = {
+  today: "Today's Assignment",
+  week: "This Week's Assignments",
+  month: "This Month's Assignments",
+  custom: "Assignments: " + (rangeLabel || "this period"),
+};
+const sectionTitle = rangeTitles[rangeKey] || rangeTitles.today;
+const emptyMessage = rangeKey === "today" ? "No tasks for today" : "No tasks for this period";
+%>
 <%- include("../../layouts/app-shell", {
   title: "Dashboard",
   bodyClass: "csdl-page",
@@ -10,6 +21,12 @@
     greeting: greeting,
     displayName: displayName,
     todayDate: todayDate,
+    rangeKey: rangeKey,
+    rangeLabel: rangeLabel,
+    rangeFrom: rangeFrom,
+    rangeTo: rangeTo,
+    sectionTitle: sectionTitle,
+    emptyMessage: emptyMessage,
     totals: totals,
     assignmentsToday: assignmentsToday
   }

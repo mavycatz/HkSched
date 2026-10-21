@@ -848,7 +848,7 @@ a {
 }
 
 /* ==========================================================================
-   HK Duty Dashboard â€” Bootstrap custom branding
+   HK Duty Dashboard — Bootstrap custom branding
    All custom colors live here; Bootstrap provides the layout framework.
    ========================================================================== */
 
@@ -972,7 +972,6 @@ body.csdl-page {
   outline-offset: 2px;
 }
 
-/* Logout styled like nav item */
 .sidebar-footer {
   margin-top: auto;
   padding: 1rem 1rem;
@@ -1150,56 +1149,33 @@ body.csdl-page {
   }
 }
 
-/* ---------- Stat Cards ---------- */
-.stat-card {
-  background: #FFFFFF;
-  border: none;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
-  height: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(12, 66, 95, 0.18);
-}
-
-.stat-card .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+/* ---------- Greeting Row ---------- */
+.greeting-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  justify-content: space-between;
+  margin-bottom: 32px;
 }
 
-.stat-card .stat-icon.bg-blue { background: #E3EEFB; color: #3B82F6; }
-.stat-card .stat-icon.bg-green { background: #DDF3E8; color: #2E9E6B; }
-.stat-card .stat-icon.bg-amber { background: #FDEBB0; color: #E8A800; }
-.stat-card .stat-icon.bg-purple { background: #EEDFFB; color: #A855F7; }
-
-.stat-card .card-title {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-size: 0.9rem;
-  color: #6B7280;
+.greeting {
+  display: flex;
+  flex-direction: column;
 }
 
-.stat-card .display-6 {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-size: 2rem;
-  color: #1F2D33;
-}
-
-/* ---------- Greeting ---------- */
 .dashboard-greeting {
   font-family: "Poppins", sans-serif;
   font-weight: 700;
   font-size: 1.75rem;
   color: #0B4F3A;
+  margin: 0 0 4px;
+}
+
+.greeting-subtitle {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #0D5974;
+  margin: 0;
 }
 
 .today-date {
@@ -1208,6 +1184,70 @@ body.csdl-page {
   font-size: 14px;
   color: #1F2D33;
   white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+  .today-date {
+    white-space: normal;
+    text-align: right;
+  }
+}
+
+/* ---------- Date Filter (segmented control) ---------- */
+.range-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-label {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: #1F2D33;
+  white-space: nowrap;
+}
+
+.range-segment {
+  display: inline-flex;
+  border: 1px solid #DCE8EE;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+.range-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: #1F2D33;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.range-btn:hover {
+  background: #F0F4F8;
+}
+
+.range-btn.active {
+  background: #0D5974;
+  color: #FFFFFF;
+}
+
+.range-custom-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range-date-input {
+  width: 130px;
+  font-size: 0.85rem;
 }
 
 /* ---------- Stat Cards Grid ---------- */
@@ -1286,31 +1326,72 @@ body.csdl-page {
   margin: 0;
 }
 
+.stat-card .stat-caption {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #8FB3BF;
+  margin: 0;
+}
+
 .stat-blue .stat-icon-tile { background: #E3EEFB; }
-.stat-blue .stat-icon-tile i { color: #3B82F6; }
+.stat-blue .stat-icon-tile i,
+.stat-blue .stat-icon-tile svg { color: #3B82F6; }
 .stat-blue .stat-number { color: #3B82F6; }
 
 .stat-green .stat-icon-tile { background: #DDF3E8; }
-.stat-green .stat-icon-tile i { color: #2E9E6B; }
+.stat-green .stat-icon-tile i,
+.stat-green .stat-icon-tile svg { color: #2E9E6B; }
 .stat-green .stat-number { color: #2E9E6B; }
 
 .stat-amber .stat-icon-tile { background: #FDEBB0; }
-.stat-amber .stat-icon-tile i { color: #E8A800; }
+.stat-amber .stat-icon-tile i,
+.stat-amber .stat-icon-tile svg { color: #E8A800; }
 .stat-amber .stat-number { color: #E8A800; }
 
 .stat-purple .stat-icon-tile { background: #EEDFFB; }
-.stat-purple .stat-icon-tile i { color: #A855F7; }
+.stat-purple .stat-icon-tile i,
+.stat-purple .stat-icon-tile svg { color: #A855F7; }
 .stat-purple .stat-number { color: #A855F7; }
 
 .stat-orange .stat-icon-tile { background: #FFE8D6; }
-.stat-orange .stat-icon-tile i { color: #F97316; }
+.stat-orange .stat-icon-tile i,
+.stat-orange .stat-icon-tile svg { color: #F97316; }
 .stat-orange .stat-number { color: #F97316; }
 
 .stat-red .stat-icon-tile { background: #FDE2E2; }
-.stat-red .stat-icon-tile i { color: #E24B4B; }
+.stat-red .stat-icon-tile i,
+.stat-red .stat-icon-tile svg { color: #E24B4B; }
 .stat-red .stat-number { color: #E24B4B; }
 
 /* ---------- Assignments Table ---------- */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #0B4F3A;
+  margin: 0;
+}
+
+.view-all {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #0D5974;
+  text-decoration: none;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
 .card.border-0.shadow-sm {
   border: none;
   box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
@@ -1379,167 +1460,6 @@ body.csdl-page {
   font-size: 0.95rem;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 991.98px) {
-  .today-date {
-    white-space: normal;
-    text-align: right;
-  }
-}
-
-.mobile-menu-btn {
-  background: none;
-  border: none;
-  color: #0C425F;
-  font-size: 1.25rem;
-  padding: 0.25rem 0.5rem;
-}
-
-/* Overlay for mobile sidebar */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 900;
-  display: none;
-  backdrop-filter: blur(2px);
-}
-
-.sidebar-overlay.show {
-  display: block;
-}
-
-/* ---------- Stat Cards Grid ---------- */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 1199px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 520px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stat-card {
-  background: #FFFFFF;
-  border: none;
-  border-radius: 14px;
-  padding: 24px;
-  min-height: 140px;
-  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-  color: inherit;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(12, 66, 95, 0.18);
-}
-
-.stat-card:focus-visible {
-  outline: 2px solid #7C3AED;
-  outline-offset: 3px;
-}
-
-.stat-icon-tile {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-icon-tile svg,
-.stat-icon-tile i {
-  width: 20px;
-  height: 20px;
-}
-
-.stat-card .stat-label {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  color: #1F2D33;
-  margin: 0;
-}
-
-.stat-card .stat-number {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-size: 2rem;
-  margin: 0;
-}
-
-.stat-blue .stat-icon-tile { background: #E3EEFB; }
-.stat-blue .stat-icon-tile i { color: #3B82F6; }
-.stat-blue .stat-number { color: #3B82F6; }
-
-.stat-green .stat-icon-tile { background: #DDF3E8; }
-.stat-green .stat-icon-tile i { color: #2E9E6B; }
-.stat-green .stat-number { color: #2E9E6B; }
-
-.stat-amber .stat-icon-tile { background: #FDEBB0; }
-.stat-amber .stat-icon-tile i { color: #E8A800; }
-.stat-amber .stat-number { color: #E8A800; }
-
-.stat-purple .stat-icon-tile { background: #EEDFFB; }
-.stat-purple .stat-icon-tile i { color: #A855F7; }
-.stat-purple .stat-number { color: #A855F7; }
-
-.stat-orange .stat-icon-tile { background: #FFE8D6; }
-.stat-orange .stat-icon-tile i { color: #F97316; }
-.stat-orange .stat-number { color: #F97316; }
-
-.stat-red .stat-icon-tile { background: #FDE2E2; }
-.stat-red .stat-icon-tile i { color: #E24B4B; }
-.stat-red .stat-number { color: #E24B4B; }
-
-/* ---------- Greeting Row ---------- */
-.greeting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-}
-
-.greeting {
-  display: flex;
-  flex-direction: column;
-}
-
-.greeting-subtitle {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  color: #0D5974;
-  margin: 0;
-}
-
-@media (max-width: 991.98px) {
-  .today-date {
-    white-space: normal;
-    text-align: right;
-  }
-}
-
 /* ---------- Dropdowns ---------- */
 .dropdown-menu {
   border: none;
@@ -1575,3 +1495,87 @@ body.csdl-page {
   padding: 0.5rem 1rem;
 }
 
+/* ---------- Skeleton Loading ---------- */
+.skeleton-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.skeleton-col {
+  flex: 1;
+  height: 140px;
+  background: #E9EBEF;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-col::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #E9EBEF, #F5F5F5, #E9EBEF);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.skeleton-table {
+  height: 300px;
+  background: #E9EBEF;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.skeleton-table::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #E9EBEF, #F5F5F5, #E9EBEF);
+  animation: shimmer 1.5s infinite;
+}
+
+/* ---------- Mobile ---------- */
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  color: #0C425F;
+  font-size: 1.25rem;
+  padding: 0.25rem 0.5rem;
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  display: none;
+  backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
