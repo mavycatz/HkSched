@@ -3,11 +3,16 @@ import { rateLimit } from "express-rate-limit";
 import { getLogin, postLogin, postLogout, readRememberedId } from "../controllers/authController";
 import {
   getAttendanceProfile,
+  getCsdlApplications,
+  getCsdlDashboard,
+  getCsdlDutyManagement,
+  getCsdlProfile,
+  getCsdlSchedule,
   getDashboard,
   getForgotPassword,
   registerPlaceholderRoutes,
 } from "../controllers/pageController";
-import { requireAuth, requirePermission } from "../middleware/auth";
+import { requireAuth, requirePermission, requireRole } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { audit } from "../lib/audit";
 
@@ -54,5 +59,42 @@ router.get(
   getAttendanceProfile,
 );
 registerPlaceholderRoutes(router);
+
+// CSDL dashboard and placeholder pages (CSDL role only).
+router.get(
+  "/csdl/dashboard",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("dashboard.view"),
+  getCsdlDashboard,
+);
+router.get(
+  "/csdl/duty-management",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("assignments.today.view"),
+  getCsdlDutyManagement,
+);
+router.get(
+  "/csdl/schedule",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("schedules.view"),
+  getCsdlSchedule,
+);
+router.get(
+  "/csdl/applications",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("applications.manage"),
+  getCsdlApplications,
+);
+router.get(
+  "/csdl/profile",
+  requireAuth,
+  requireRole("CSDL"),
+  requirePermission("profile.own"),
+  getCsdlProfile,
+);
 
 export default router;

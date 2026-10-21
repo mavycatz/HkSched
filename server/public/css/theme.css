@@ -846,3 +846,548 @@ a {
     margin-top: 14px;
   }
 }
+
+/* ==========================================================================
+   CSDL Dashboard — theme tokens & layout
+   All colors live here; no hardcoded hex outside this file.
+   ========================================================================== */
+
+.csdl-page {
+  min-height: 100dvh;
+  background: #F0F4F8;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+/* ---------- Sidebar ---------- */
+.csdl-sidebar {
+  width: clamp(220px, 16vw, 260px);
+  background: linear-gradient(180deg, #69B15B 0%, #0D5974 55%, #0C425F 100%);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 24px 0;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.csdl-sidebar-brand {
+  padding: 0 16px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.csdl-sidebar-logo {
+  width: 72px;
+  height: auto;
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.csdl-sidebar-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.csdl-nav {
+  list-style: none;
+  padding: 0 16px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.csdl-nav-item {
+  position: relative;
+}
+
+.csdl-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  text-decoration: none;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.csdl-nav-link svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #F5E050;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.csdl-nav-link:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.csdl-nav-link.active {
+  background: linear-gradient(90deg, #69B15B, #C3CF3F);
+  box-shadow: 0 2px 8px rgba(12, 66, 95, 0.15);
+}
+
+.csdl-nav-link.active svg {
+  stroke: #FFFFFF;
+}
+
+.csdl-nav-link:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
+}
+
+.csdl-sidebar-footer {
+  margin-top: auto;
+  padding: 24px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Top navbar ---------- */
+.csdl-navbar {
+  height: 72px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(12, 66, 95, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  box-sizing: border-box;
+  margin-left: clamp(220px, 16vw, 260px);
+}
+
+.csdl-search {
+  position: relative;
+  max-width: 420px;
+  width: 40%;
+}
+
+.csdl-search-input {
+  width: 100%;
+  height: 44px;
+  background: #F0F4F8;
+  border: none;
+  border-radius: 999px;
+  padding: 0 16px 0 44px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #1F2D33;
+}
+
+.csdl-search-input::placeholder {
+  color: #9AA5AB;
+}
+
+.csdl-search-input:focus {
+  outline: none;
+}
+
+.csdl-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #9AA5AB;
+  stroke-width: 1.5;
+}
+
+.csdl-navbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.csdl-bell {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #0C425F;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.csdl-notification-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #F5C518;
+  border-radius: 50%;
+  display: none;
+}
+
+.csdl-user-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.csdl-avatar {
+  width: 44px;
+  height: 44px;
+  background: #0C425F;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.csdl-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.csdl-user-name {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0C425F;
+  margin: 0;
+}
+
+.csdl-user-role {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  color: #8FB3BF;
+  margin: 0;
+}
+
+/* ---------- Main content ---------- */
+.csdl-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: clamp(220px, 16vw, 260px);
+}
+
+.csdl-content {
+  flex: 1;
+  padding: 32px 40px;
+  box-sizing: border-box;
+  min-height: calc(100dvh - 72px);
+}
+
+/* ---------- Greeting ---------- */
+.csdl-greeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.csdl-greeting {
+  display: flex;
+  flex-direction: column;
+}
+
+.csdl-greeting-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
+  color: #0B4F3A;
+  margin: 0 0 4px;
+}
+
+.csdl-greeting-subtitle {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #0D5974;
+  margin: 0;
+}
+
+.csdl-today-date {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #1F2D33;
+  white-space: nowrap;
+}
+
+/* ---------- Stat cards ---------- */
+.csdl-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.csdl-stat-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  padding: 24px;
+  min-height: 140px;
+  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.csdl-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(12, 66, 95, 0.18);
+}
+
+.csdl-stat-card:focus-visible {
+  outline: 2px solid #7C3AED;
+  outline-offset: 3px;
+}
+
+.csdl-stat-icon-tile {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.csdl-stat-icon-tile svg {
+  width: 20px;
+  height: 20px;
+}
+
+.csdl-stat-label {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #1F2D33;
+  margin: 0 0 8px;
+}
+
+.csdl-stat-number {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  margin: 0;
+}
+
+.csdl-stat-blue .csdl-stat-icon-tile { background: #E3EEFB; }
+.csdl-stat-blue .csdl-stat-icon-tile svg { stroke: #3B82F6; }
+.csdl-stat-blue .csdl-stat-number { color: #3B82F6; }
+
+.csdl-stat-green .csdl-stat-icon-tile { background: #DDF3E8; }
+.csdl-stat-green .csdl-stat-icon-tile svg { stroke: #2E9E6B; }
+.csdl-stat-green .csdl-stat-number { color: #2E9E6B; }
+
+.csdl-stat-amber .csdl-stat-icon-tile { background: #FDEBB0; }
+.csdl-stat-amber .csdl-stat-icon-tile svg { stroke: #E8A800; }
+.csdl-stat-amber .csdl-stat-number { color: #E8A800; }
+
+.csdl-stat-purple .csdl-stat-icon-tile { background: #EEDFFB; }
+.csdl-stat-purple .csdl-stat-icon-tile svg { stroke: #A855F7; }
+.csdl-stat-purple .csdl-stat-number { color: #A855F7; }
+
+.csdl-stat-orange .csdl-stat-icon-tile { background: #FFE8D6; }
+.csdl-stat-orange .csdl-stat-icon-tile svg { stroke: #F97316; }
+.csdl-stat-orange .csdl-stat-number { color: #F97316; }
+
+.csdl-stat-red .csdl-stat-icon-tile { background: #FDE2E2; }
+.csdl-stat-red .csdl-stat-icon-tile svg { stroke: #E24B4B; }
+.csdl-stat-red .csdl-stat-number { color: #E24B4B; }
+
+/* ---------- Today's Assignment ---------- */
+.csdl-section {
+  margin-bottom: 32px;
+}
+
+.csdl-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.csdl-section-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #0B4F3A;
+  margin: 0;
+}
+
+.csdl-view-all {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #0D5974;
+  text-decoration: none;
+}
+
+.csdl-view-all:hover {
+  text-decoration: underline;
+}
+
+.csdl-table-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
+  overflow: hidden;
+}
+
+.csdl-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.csdl-table th {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #0C425F;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #DCE8EE;
+}
+
+.csdl-table td {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #1F2D33;
+  padding: 12px 16px;
+  border-bottom: 1px solid #DCE8EE;
+  height: 56px;
+}
+
+.csdl-table tr:last-child td {
+  border-bottom: none;
+}
+
+.csdl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.csdl-empty-icon {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: #9AA5AB;
+  stroke-width: 1.5;
+  margin-bottom: 12px;
+}
+
+.csdl-empty-text {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #1F2D33;
+  margin: 0;
+}
+
+/* ---------- Status badges ---------- */
+.csdl-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.csdl-badge-ongoing { background: #FFEBA8; color: #D99A00; }
+.csdl-badge-completed { background: #D9EBC7; color: #2E8B3E; }
+.csdl-badge-pending { background: #FFE8D6; color: #E26A0F; }
+.csdl-badge-missed { background: #FDE2E2; color: #C93C3C; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1199px) {
+  .csdl-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 899px) {
+  .csdl-sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+    z-index: 30;
+  }
+
+  .csdl-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .csdl-navbar {
+    margin-left: 0;
+    padding: 0 16px;
+  }
+
+  .csdl-search {
+    max-width: 200px;
+    width: auto;
+  }
+
+  .csdl-search-input {
+    padding: 0 12px 0 36px;
+  }
+
+  .csdl-user-info {
+    display: none;
+  }
+
+  .csdl-content {
+    padding: 20px 16px;
+  }
+
+  .csdl-greeting-title {
+    font-size: 26px;
+  }
+
+  .csdl-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .csdl-table-card {
+    overflow-x: auto;
+  }
+
+  .csdl-table {
+    min-width: 600px;
+  }
+}

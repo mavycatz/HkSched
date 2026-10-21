@@ -4,6 +4,7 @@ import type { Role } from "../../config/permissions";
 import { requireAuth, requirePermission } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { canViewStudentRecord, sendNotFound } from "../lib/authorization";
+import { getDashboardData } from "../services/dashboardService";
 
 interface Placeholder {
   path: string;
@@ -134,4 +135,69 @@ export async function getAttendanceProfile(
   } catch (err) {
     next(err);
   }
+}
+
+/** CSDL Dashboard — greeting computed in Asia/Manila timezone, data from stub service. */
+export function getCsdlDashboard(req: Request, res: Response): void {
+  const user = req.user!;
+  const data = getDashboardData();
+
+  // Greeting by time of day in Asia/Manila (UTC+8).
+  const manilaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+  const hours = manilaTime.getHours();
+  const greeting = hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
+
+  // Display name: first name (no honorific data is stored on the user record).
+  const displayName = user.full_name.split(/\s+/)[0];
+
+  // Today's date, e.g. "Wednesday, October 21, 2026".
+  const todayDate = manilaTime.toLocaleDateString("en-PH", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  res.render("pages/csdl/dashboard", {
+    ...shellLocals(req, res),
+    title: "Dashboard",
+    activePath: "/csdl/dashboard",
+    greeting,
+    displayName,
+    todayDate,
+    totals: data.totals,
+    assignmentsToday: data.assignmentsToday,
+  });
+}
+
+export function getCsdlDutyManagement(req: Request, res: Response): void {
+  res.render("pages/csdl/duty-management", {
+    ...shellLocals(req, res),
+    title: "Duty Management",
+    activePath: "/csdl/duty-management",
+  });
+}
+
+export function getCsdlSchedule(req: Request, res: Response): void {
+  res.render("pages/csdl/schedule", {
+    ...shellLocals(req, res),
+    title: "Schedule",
+    activePath: "/csdl/schedule",
+  });
+}
+
+export function getCsdlApplications(req: Request, res: Response): void {
+  res.render("pages/csdl/applications", {
+    ...shellLocals(req, res),
+    title: "Applications",
+    activePath: "/csdl/applications",
+  });
+}
+
+export function getCsdlProfile(req: Request, res: Response): void {
+  res.render("pages/csdl/profile", {
+    ...shellLocals(req, res),
+    title: "Profile & Settings",
+    activePath: "/csdl/profile",
+  });
 }

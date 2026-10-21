@@ -69,3 +69,24 @@ export function requirePermission(key: string) {
     next();
   };
 }
+
+/** Ensures the session user has the exact role. Used for role-scoped routes. */
+export function requireRole(role: "STUDENT" | "TEACHER" | "CSDL") {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const user = req.user;
+    if (!user) {
+      res.redirect("/login");
+      return;
+    }
+    if (user.role !== role) {
+      void audit("permission_denied", req, user.id, { permission: `role:${role}` });
+      res.status(403).render("status", {
+        code: 403,
+        message: "You don't have access to this page.",
+        title: "Access denied",
+      });
+      return;
+    }
+    next();
+  };
+}
