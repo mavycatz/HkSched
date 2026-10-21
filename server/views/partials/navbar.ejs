@@ -9,15 +9,15 @@ function initialsOf(name) {
 }
 %>
 
-<nav class="navbar" id="top-navbar" style="position:sticky;top:0;z-index:50;width:100%;background:#FFFFFF;box-shadow:0 1px 3px rgba(12,66,95,0.08);height:72px;display:flex;align-items:center;padding:0 32px;margin-left:clamp(220px,16vw,260px);">
-  <div class="container-fluid" style="width:100%;max-width:none;padding:0;display:flex;align-items:center;justify-content:space-between;">
+<nav class="navbar" id="top-navbar">
+  <div class="container-fluid">
     <!-- Search field (left) -->
-    <div class="search-wrapper me-auto" style="flex:1;max-width:420px;">
-      <div class="input-group" style="background:#F0F4F8;border-radius:999px;width:100%;">
-        <span class="input-group-text bg-light border-0" style="background:transparent;border:none;padding:0 0.75rem;">
+    <div class="search-wrapper me-auto">
+      <div class="input-group">
+        <span class="input-group-text bg-light border-0">
           <i class="bi bi-search text-muted"></i>
         </span>
-        <input type="text" class="form-control form-control-sm border-0 bg-light" placeholder="Search" autocomplete="off" style="background:transparent;border:none;padding:0.5rem 1rem;font-family:'Poppins',sans-serif;font-size:0.9rem;color:#1F2D33;width:100%;">
+        <input type="text" class="form-control form-control-sm border-0 bg-light" placeholder="Search" autocomplete="off">
       </div>
     </div>
 
@@ -25,28 +25,28 @@ function initialsOf(name) {
     <div class="d-flex align-items-center gap-3">
       <!-- Notification bell -->
       <div class="nav-item dropdown position-relative">
-        <a class="nav-link p-0 text-decoration-none" href="#" id="bellDropdown" role="button" aria-expanded="false" aria-label="Notifications" style="color:#0C425F;font-size:1.25rem;">
-          <i class="bi bi-bell"></i>
-          <span class="notification-dot" id="notificationDot" aria-hidden="true" style="position:absolute;top:0;right:0;width:8px;height:8px;background:#F5C518;border-radius:50%;display:none;"></span>
+        <a class="nav-link p-0 text-decoration-none" href="#" id="bellDropdown" role="button" aria-expanded="false" aria-label="Notifications">
+          <i class="bi bi-bell fs-5 text-navy"></i>
+          <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end p-2 hidden" id="bellDropdown-menu" aria-labelledby="bellDropdown" style="border:none;box-shadow:0 4px 12px rgba(12,66,95,0.12);border-radius:12px;padding:0.5rem;min-width:200px;background:#FFFFFF;">
+        <ul class="dropdown-menu dropdown-menu-end p-2 hidden" id="bellDropdown-menu" aria-labelledby="bellDropdown">
           <li><p class="dropdown-item-text text-muted small m-0">No notifications</p></li>
         </ul>
       </div>
 
       <!-- User block (avatar + name + role) -->
       <div class="nav-item dropdown position-relative">
-        <a class="nav-link d-flex align-items-center text-decoration-none" href="#" id="userDropdown" role="button" aria-expanded="false" style="color:#0C425F;text-decoration:none;">
-          <div class="user-avatar me-2" style="width:44px;height:44px;background:#0C425F;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-family:'Poppins',sans-serif;font-weight:600;font-size:16px;flex-shrink:0;">
-            <i class="bi bi-person" style="font-size:1.25rem;"></i>
+        <a class="nav-link d-flex align-items-center text-decoration-none" href="#" id="userDropdown" role="button" aria-expanded="false">
+          <div class="user-avatar me-2">
+            <i class="bi bi-person fs-4"></i>
           </div>
           <div class="user-info d-none d-md-block">
-            <div class="user-name fw-semibold" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;color:#0C425F;margin:0;text-decoration:none;"><%= user.full_name %></div>
-            <div class="user-role text-truncate" style="max-width:140px;font-family:'Poppins',sans-serif;font-weight:400;font-size:11px;color:#8FB3BF;margin:0;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CSDL Staff</div>
+            <div class="user-name fw-semibold"><%= user.full_name %></div>
+            <div class="user-role text-truncate" style="max-width: 140px;">CSDL Staff</div>
           </div>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end hidden" id="userDropdown-menu" aria-labelledby="userDropdown" style="border:none;box-shadow:0 4px 12px rgba(12,66,95,0.12);border-radius:12px;padding:0.5rem;min-width:200px;background:#FFFFFF;">
-          <li><a class="dropdown-item" href="/csdl/profile" style="font-family:'Poppins',sans-serif;font-size:0.9rem;border-radius:8px;margin:0.125rem 0;padding:0.5rem 1rem;">Profile &amp; Settings</a></li>
+        <ul class="dropdown-menu dropdown-menu-end hidden" id="userDropdown-menu" aria-labelledby="userDropdown">
+          <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
         </ul>
       </div>
     </div>
