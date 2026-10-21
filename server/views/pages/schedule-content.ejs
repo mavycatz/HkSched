@@ -1,0 +1,115 @@
+<!-- Page header -->
+<div class="schedule-page-head">
+  <div>
+    <h1 class="schedule-page-title"><%= title %></h1>
+    <p class="schedule-page-subtitle"><%= subtitle %></p>
+  </div>
+</div>
+
+<!-- Calendar on the left, the selected day's duties on the right. -->
+<div class="schedule-layout">
+  <section class="schedule-calendar" aria-labelledby="schedule-calendar-heading">
+    <div class="schedule-calendar-head">
+      <h2 class="schedule-calendar-title" id="schedule-calendar-heading"><%= monthLabel %></h2>
+      <div class="schedule-calendar-nav">
+        <a class="schedule-nav-btn" href="<%= previousUrl %>" rel="prev" aria-label="Previous month">
+          <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </a>
+        <a class="schedule-nav-btn schedule-nav-btn--current" href="<%= currentUrl %>">Today</a>
+        <a class="schedule-nav-btn" href="<%= nextUrl %>" rel="next" aria-label="Next month">
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="schedule-weekdays" aria-hidden="true">
+      <% weekdayLabels.forEach(function (label) { %>
+      <span class="schedule-weekday"><%= label %></span>
+      <% }); %>
+    </div>
+
+    <div class="schedule-days">
+      <% weeks.forEach(function (week) { %>
+      <div class="schedule-week">
+        <% week.forEach(function (cell) { %>
+        <% if (!cell) { %>
+        <span class="schedule-day schedule-day--empty" aria-hidden="true"></span>
+        <% } else { %>
+        <a class="schedule-day<%= cell.isSelected ? " is-selected" : "" %><%= cell.isToday ? " is-today" : "" %><%= cell.count > 0 ? " has-duties" : "" %>"
+           href="<%= cell.url %>"
+           <% if (cell.isSelected) { %>aria-current="date"<% } %>
+           aria-label="<%= cell.label %>">
+          <span class="schedule-day-number"><%= cell.day %></span>
+          <% if (cell.count > 0) { %>
+          <span class="schedule-dots" aria-hidden="true">
+            <% cell.statuses.forEach(function (status) { %>
+            <span class="schedule-dot schedule-dot--<%= status %>"></span>
+            <% }); %>
+          </span>
+          <% } %>
+          <% if (cell.stateLabel) { %>
+          <span class="visually-hidden"><%= cell.stateLabel %></span>
+          <% } %>
+        </a>
+        <% } %>
+        <% }); %>
+      </div>
+      <% }); %>
+    </div>
+
+    <ul class="schedule-legend" aria-label="Status legend">
+      <% legend.forEach(function (entry) { %>
+      <li class="schedule-legend-item">
+        <span class="schedule-dot schedule-dot--<%= entry.status %>" aria-hidden="true"></span>
+        <span class="schedule-legend-label"><%= entry.label %></span>
+      </li>
+      <% }); %>
+    </ul>
+  </section>
+
+  <section class="schedule-panel" aria-labelledby="schedule-panel-heading">
+    <div class="schedule-panel-head">
+      <h2 class="schedule-panel-title" id="schedule-panel-heading"><%= selectedDayLabel %></h2>
+      <p class="schedule-panel-subtitle">
+        <% if (dutyCount === 0) { %>
+        No duties on this day
+        <% } else { %>
+        <%= dutyCount %> <%= dutyCount === 1 ? "duty" : "duties" %> on this day
+        <% } %>
+      </p>
+    </div>
+
+    <% if (duties.length > 0) { %>
+    <ul class="schedule-duty-list">
+      <% duties.forEach(function (duty) { %>
+      <li class="schedule-duty-card schedule-duty-card--<%= duty.status %>">
+        <div class="schedule-duty-top">
+          <span class="schedule-duty-title"><%= duty.title %></span>
+          <span class="status-badge status-badge--<%= duty.status %>"><%= duty.statusLabel %></span>
+        </div>
+        <div class="schedule-duty-time">
+          <i class="bi bi-clock" aria-hidden="true"></i>
+          <%= duty.timeLabel %>
+        </div>
+        <div class="schedule-duty-meta">
+          <span class="schedule-duty-area">
+            <i class="bi bi-geo-alt" aria-hidden="true"></i>
+            <%= duty.area %>
+          </span>
+          <span class="schedule-duty-students">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            <%= duty.studentCount %> <%= duty.studentCount === 1 ? "student" : "students" %>
+          </span>
+        </div>
+      </li>
+      <% }); %>
+    </ul>
+    <% } else { %>
+    <div class="empty-state schedule-empty">
+      <i class="bi bi-calendar2-check fs-1 text-muted mb-3" aria-hidden="true"></i>
+      <h3>No duties on <%= selectedDayShort %></h3>
+      <p class="text-muted mb-0">Pick another day in the calendar to see its duties.</p>
+    </div>
+    <% } %>
+  </section>
+</div>

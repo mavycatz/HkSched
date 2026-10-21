@@ -28,7 +28,9 @@
     });
   }
 
-  /* ---------- Dropdown toggling (bell + user menu) ---------- */
+  /* ---------- Dropdown toggling (bell + user menu) ----------
+     Bootstrap keeps .dropdown-menu hidden unless it also carries .show,
+     so the class and the hidden attribute stay in sync. */
   function setupDropdown(btnId, menuId) {
     var btn = document.getElementById(btnId);
     var menu = document.getElementById(menuId);
@@ -36,11 +38,13 @@
 
     function close() {
       menu.setAttribute("hidden", "");
+      menu.classList.remove("show");
       btn.setAttribute("aria-expanded", "false");
     }
 
     function open() {
       menu.removeAttribute("hidden");
+      menu.classList.add("show");
       btn.setAttribute("aria-expanded", "true");
     }
 
@@ -113,8 +117,10 @@
             // Update stat cards
             updateStatCards(data.totals, url);
 
-            // Update table
-            updateTable(data.assignmentsToday, data.rangeLabel);
+            // Update table. The range key ("today", "week", "month",
+            // "custom") decides the wording; the label is only the human
+            // date range, so it cannot be used as a key.
+            updateTable(data.assignmentsToday, data.rangeKey, data.rangeLabel);
 
             // Hide skeleton
             if (skeleton) skeleton.classList.add("d-none");
@@ -136,11 +142,31 @@
     var rangeFrom = urlObj.searchParams.get("from") || "";
     var rangeTo = urlObj.searchParams.get("to") || "";
 
+    var assignments = Number(totals.assignments) || 0;
+    var studentsTotal = Number(totals.studentsTotal) || 0;
+
+    // Every caption carries a real denominator, so it never reads "N of N".
     var cardData = [
-      { selector: ".stat-blue", value: totals.students },
-      { selector: ".stat-green", value: totals.completed },
-      { selector: ".stat-amber", value: totals.ongoing },
-      { selector: ".stat-purple", value: totals.assignments },
+      {
+        selector: ".stat-blue",
+        value: totals.students,
+        caption: totals.students + " of " + studentsTotal + " students assigned",
+      },
+      {
+        selector: ".stat-green",
+        value: totals.completed,
+        caption: totals.completed + " of " + assignments + " completed",
+      },
+      {
+        selector: ".stat-amber",
+        value: totals.ongoing,
+        caption: totals.ongoing + " of " + assignments + " ongoing",
+      },
+      {
+        selector: ".stat-purple",
+        value: assignments,
+        caption: assignments + " duties in this period",
+      },
     ];
 
     cardData.forEach(function (cd) {
@@ -150,6 +176,9 @@
       var numEl = card.querySelector(".stat-number");
       if (numEl) numEl.textContent = cd.value;
 
+      var captionEl = card.querySelector(".stat-caption");
+      if (captionEl) captionEl.textContent = cd.caption;
+
       // Update href to preserve range
       var newUrl = "/csdl/dashboard?range=" + urlObj.searchParams.get("range");
       if (rangeFrom) newUrl += "&from=" + rangeFrom;
@@ -158,7 +187,7 @@
     });
   }
 
-  function updateTable(assignments, rangeLabel) {
+  function updateTable(assignments, rangeKey, rangeLabel) {
     if (!tableBody) return;
 
     var sectionTitle = document.querySelector(".section-title");
@@ -167,9 +196,9 @@
         today: "Today's Assignment",
         week: "This Week's Assignments",
         month: "This Month's Assignments",
-        custom: "Assignments: " + rangeLabel,
+        custom: "Assignments: " + (rangeLabel || "this period"),
       };
-      sectionTitle.textContent = titles[rangeLabel] || "Today's Assignment";
+      sectionTitle.textContent = titles[rangeKey] || titles.today;
     }
 
     tableBody.innerHTML = "";
@@ -182,11 +211,11 @@
           '<td class="small">' + escapeHtml(a.time) + '</td>' +
           '<td class="small">' + escapeHtml(a.area) + '</td>' +
           '<td class="small">' + escapeHtml(a.tasks) + '</td>' +
-          '<td class="text-end small"><span class="badge badge-bg-' + escapeHtml(a.status.toLowerCase()) + '">' + escapeHtml(a.status) + '</span></td>';
+          '<td class="text-end small"><span class="status-badge status-badge--' + escapeHtml(a.status.toLowerCase()) + '">' + escapeHtml(a.status) + '</span></td>';
         tableBody.appendChild(tr);
       });
     } else {
-      var emptyMsg = (rangeLabel && rangeLabel.toLowerCase().includes("today")) ? "No tasks for today" : "No tasks for this period";
+      var emptyMsg = rangeKey === "today" ? "No tasks for today" : "No tasks for this period";
       var tr = document.createElement("tr");
       tr.innerHTML =
         '<td colspan="5" class="text-center py-5">' +

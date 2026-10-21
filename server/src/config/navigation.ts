@@ -4,6 +4,8 @@ export interface NavItem {
   path: string;
   label: string;
   permission: string;
+  /** Key of the icon rendered in the sidebar (see views/partials/sidebar.ejs). */
+  icon: string;
 }
 
 /**
@@ -12,35 +14,35 @@ export interface NavItem {
  */
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   STUDENT: [
-    { path: "/dashboard", label: "Dashboard", permission: "dashboard.view" },
-    { path: "/my-duties", label: "My Duties", permission: "duties.own.view" },
-    { path: "/upcoming-duties", label: "Upcoming Duties", permission: "duties.upcoming.view" },
-    { path: "/schedule", label: "Schedule", permission: "schedule.own.view" },
-    { path: "/attendance-profile", label: "Attendance Profile", permission: "attendance.own.view" },
-    { path: "/applications", label: "Applications", permission: "applications.own.view" },
-    { path: "/profile", label: "Profile", permission: "profile.own" },
-    { path: "/settings", label: "Settings", permission: "settings.manage" },
+    { path: "/dashboard", label: "Dashboard", permission: "dashboard.view", icon: "home" },
+    { path: "/my-duties", label: "My Duties", permission: "duties.own.view", icon: "calendar" },
+    { path: "/upcoming-duties", label: "Upcoming Duties", permission: "duties.upcoming.view", icon: "schedule" },
+    { path: "/schedule", label: "Schedule", permission: "schedule.own.view", icon: "calendar" },
+    { path: "/attendance-profile", label: "Attendance Profile", permission: "attendance.own.view", icon: "monitor" },
+    { path: "/applications", label: "Applications", permission: "applications.own.view", icon: "file" },
+    { path: "/profile", label: "Profile", permission: "profile.own", icon: "user" },
+    { path: "/settings", label: "Settings", permission: "settings.manage", icon: "settings" },
   ],
   TEACHER: [
-    { path: "/dashboard", label: "Dashboard", permission: "dashboard.view" },
-    { path: "/todays-assignments", label: "Today's Assignments", permission: "assignments.today.view" },
-    { path: "/assignments", label: "Assignments", permission: "assignments.manage" },
-    { path: "/verification", label: "Verification", permission: "duty.verify" },
-    { path: "/approvals", label: "Approvals", permission: "approvals.review" },
-    { path: "/my-schedule", label: "My Schedule", permission: "schedule.own.view" },
-    { path: "/applications", label: "Applications", permission: "applications.own.view" },
-    { path: "/profile", label: "Profile", permission: "profile.own" },
-    { path: "/settings", label: "Settings", permission: "settings.manage" },
+    { path: "/dashboard", label: "Dashboard", permission: "dashboard.view", icon: "home" },
+    { path: "/todays-assignments", label: "Today's Assignments", permission: "assignments.today.view", icon: "calendar" },
+    { path: "/assignments", label: "Assignments", permission: "assignments.manage", icon: "file" },
+    { path: "/verification", label: "Verification", permission: "duty.verify", icon: "check" },
+    { path: "/approvals", label: "Approvals", permission: "approvals.review", icon: "file" },
+    { path: "/my-schedule", label: "My Schedule", permission: "schedule.own.view", icon: "calendar" },
+    { path: "/applications", label: "Applications", permission: "applications.own.view", icon: "file" },
+    { path: "/profile", label: "Profile", permission: "profile.own", icon: "user" },
+    { path: "/settings", label: "Settings", permission: "settings.manage", icon: "settings" },
   ],
   CSDL: [
-    { path: "/dashboard", label: "Dashboard", permission: "dashboard.view" },
-    { path: "/todays-assignments", label: "Today's Assignments", permission: "assignments.today.view" },
-    { path: "/duty-schedules", label: "Duty Schedules", permission: "schedules.view" },
-    { path: "/create-edit-schedule", label: "Create/Edit Schedule", permission: "schedules.manage" },
-    { path: "/assign-students-teachers", label: "Assign Students & Teachers", permission: "assign.students_teachers" },
-    { path: "/monitor-completion", label: "Monitor Completion", permission: "completion.monitor" },
-    { path: "/applications", label: "Applications", permission: "applications.manage" },
-    { path: "/profile-settings", label: "Profile & Settings", permission: "settings.manage" },
+    { path: "/csdl/dashboard", label: "Dashboard", permission: "dashboard.view", icon: "home" },
+    { path: "/todays-assignments", label: "Today's Assignments", permission: "assignments.today.view", icon: "calendar" },
+    { path: "/csdl/schedule", label: "Duty Schedules", permission: "schedules.view", icon: "calendar" },
+    { path: "/csdl/duty-management", label: "Create/Edit Schedule", permission: "schedules.manage", icon: "edit" },
+    { path: "/assign-students-teachers", label: "Assign Students & Teachers", permission: "assign.students_teachers", icon: "users" },
+    { path: "/monitor-completion", label: "Monitor Completion", permission: "completion.monitor", icon: "monitor" },
+    { path: "/csdl/applications", label: "Applications", permission: "applications.manage", icon: "file" },
+    { path: "/csdl/profile", label: "Profile & Settings", permission: "settings.manage", icon: "user" },
   ],
 };
 

@@ -1,23 +1,25 @@
-<%- include("../partials/head", { title, bodyClass }) %>
+<%- include("../partials/head", { title: title, bodyClass: bodyClass, pageStyles: typeof pageStyles !== "undefined" ? pageStyles : undefined }) %>
 <div class="app-wrapper d-flex min-vh-100">
-  <!-- Fixed left sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <%- include("../partials/sidebar", { user, nav, activePath, csrfToken }) %>
-  </aside>
+  <%- include("../partials/sidebar", { user, nav, activePath, csrfToken }) %>
 
-  <!-- Main content area -->
   <div class="main-content flex-grow-1 d-flex flex-column">
-    <nav class="navbar" id="top-navbar">
-      <%- include("../partials/navbar", { user, csrfToken }) %>
-    </nav>
+    <%- include("../partials/navbar", { user, csrfToken }) %>
 
-    <main class="content flex-grow-1 p-0">
+    <main class="content flex-grow-1">
       <%- include(contentPartial, Object.assign({}, contentLocals || {})) %>
     </main>
   </div>
+
+  <div class="sidebar-overlay" id="backdrop"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="/js/shell.js" defer></script>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js?v=<%= typeof assetVersion !== "undefined" ? assetVersion : "0" %>"></script>
+<script src="/js/shell.js?v=<%= typeof assetVersion !== "undefined" ? assetVersion : "0" %>" defer></script>
+<%# Page-specific scripts: one owner per page, loaded after the shared shell. %>
+<% if (typeof pageScripts !== "undefined" && Array.isArray(pageScripts)) { %>
+<% pageScripts.forEach(function (name) { %>
+<script src="/js/<%= name %>.js?v=<%= typeof assetVersion !== "undefined" ? assetVersion : "0" %>" defer></script>
+<% }); %>
+<% } %>
 </body>
 </html>

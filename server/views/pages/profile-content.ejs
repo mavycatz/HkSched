@@ -1,0 +1,183 @@
+<%
+/* The profile sections, in tab order. The server marks the active one so the
+   page reads correctly before the script runs. */
+const TABS = [
+  { id: "details", label: "Profile Details", icon: "bi-person-lines-fill" },
+  { id: "password", label: "Password", icon: "bi-shield-lock" },
+  { id: "notifications", label: "Notifications", icon: "bi-bell" },
+];
+%>
+
+<!-- Page header -->
+<div class="profile-page-head">
+  <div>
+    <h1 class="profile-page-title">Profile &amp; Settings</h1>
+    <p class="profile-page-subtitle">Your account details, password and notification preferences.</p>
+  </div>
+</div>
+
+<div class="profile-layout">
+  <!-- Compact tab navigation -->
+  <nav class="profile-tabs" role="tablist" aria-label="Profile sections">
+    <% TABS.forEach(function (tab) { %>
+    <button type="button"
+            class="profile-tab<%= activeTab === tab.id ? " is-active" : "" %>"
+            id="profile-tab-<%= tab.id %>"
+            role="tab"
+            data-profile-tab="<%= tab.id %>"
+            aria-controls="profile-panel-<%= tab.id %>"
+            aria-selected="<%= activeTab === tab.id ? "true" : "false" %>">
+      <i class="bi <%= tab.icon %>" aria-hidden="true"></i>
+      <span class="profile-tab-label"><%= tab.label %></span>
+    </button>
+    <% }); %>
+  </nav>
+
+  <!-- Content card -->
+  <div class="profile-content">
+    <!-- Profile details -->
+    <section class="profile-panel<%= activeTab === "details" ? " is-active" : "" %>"
+             id="profile-panel-details"
+             role="tabpanel"
+             aria-labelledby="profile-tab-details"
+             data-profile-panel="details">
+      <h2 class="profile-panel-title">Profile Details</h2>
+
+      <!-- Identity header: avatar, name, role and the picture action share one row. -->
+      <div class="profile-identity">
+        <span class="profile-avatar" aria-hidden="true"><%= profile.initials %></span>
+        <span class="profile-identity-text">
+          <span class="profile-identity-name"><%= profile.name %></span>
+          <span class="profile-identity-role"><%= profile.roleLabel %></span>
+        </span>
+        <button type="button" class="btn btn-outline-secondary profile-picture-btn" disabled>
+          <i class="bi bi-camera" aria-hidden="true"></i>
+          Change profile picture
+        </button>
+      </div>
+
+      <form class="profile-form" id="profile-details-form">
+        <div class="profile-form-grid">
+          <div class="profile-field">
+            <label class="form-label" for="profile-identifier">School ID</label>
+            <input type="text" class="form-control profile-readonly" id="profile-identifier"
+                   name="school_id" value="<%= profile.schoolId %>" readonly aria-readonly="true"
+                   aria-describedby="profile-identifier-hint">
+            <p class="profile-field-hint" id="profile-identifier-hint">
+              Your school identifier is issued by the CSDL office and cannot be edited.
+            </p>
+          </div>
+          <div class="profile-field">
+            <label class="form-label" for="profile-role">Role</label>
+            <input type="text" class="form-control" id="profile-role" name="role"
+                   value="<%= profile.roleLabel %>" readonly aria-readonly="true">
+          </div>
+          <div class="profile-field">
+            <label class="form-label" for="profile-name">Full name</label>
+            <input type="text" class="form-control" id="profile-name" name="name"
+                   value="<%= profile.name %>" autocomplete="name">
+          </div>
+          <div class="profile-field">
+            <label class="form-label" for="profile-email">Email</label>
+            <input type="email" class="form-control" id="profile-email" name="email"
+                   value="<%= profile.email %>" autocomplete="email">
+          </div>
+        </div>
+
+        <p class="profile-note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          Saving profile details is not enabled in this release — only your password can be changed here.
+        </p>
+        <div class="profile-form-actions">
+          <button type="submit" class="btn btn-primary" disabled>Save changes</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Password -->
+    <section class="profile-panel<%= activeTab === "password" ? " is-active" : "" %>"
+             id="profile-panel-password"
+             role="tabpanel"
+             aria-labelledby="profile-tab-password"
+             data-profile-panel="password">
+      <h2 class="profile-panel-title">Password</h2>
+      <p class="profile-panel-subtitle">
+        Choose a new password of at least 8 characters. It must be different from your current one.
+      </p>
+
+      <% if (passwordChanged) { %>
+      <div class="profile-alert profile-alert--success" role="status" id="profile-password-status">
+        <i class="bi bi-check-circle" aria-hidden="true"></i>
+        Your password has been changed. Your session is still active.
+      </div>
+      <% } %>
+      <% if (passwordError) { %>
+      <div class="profile-alert profile-alert--error" role="alert" id="profile-password-error">
+        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+        <%= passwordError %>
+      </div>
+      <% } %>
+
+      <form class="profile-form" id="profile-password-form" method="post" action="/profile/password">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="profile-form-grid">
+          <div class="profile-field">
+            <label class="form-label" for="current-password">Current password</label>
+            <input type="password" class="form-control" id="current-password" name="current_password"
+                   required autocomplete="current-password">
+          </div>
+          <div class="profile-field">
+            <label class="form-label" for="new-password">New password</label>
+            <input type="password" class="form-control" id="new-password" name="new_password"
+                   required minlength="8" autocomplete="new-password"
+                   aria-describedby="new-password-hint">
+            <p class="profile-field-hint" id="new-password-hint">
+              At least 8 characters, and different from your current password.
+            </p>
+          </div>
+          <div class="profile-field">
+            <label class="form-label" for="confirm-password">Confirm new password</label>
+            <input type="password" class="form-control" id="confirm-password" name="confirm_password"
+                   required minlength="8" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="profile-form-actions">
+          <button type="submit" class="btn btn-primary">Change password</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Notifications -->
+    <section class="profile-panel<%= activeTab === "notifications" ? " is-active" : "" %>"
+             id="profile-panel-notifications"
+             role="tabpanel"
+             aria-labelledby="profile-tab-notifications"
+             data-profile-panel="notifications">
+      <h2 class="profile-panel-title">Notifications</h2>
+      <p class="profile-panel-subtitle">The notifications this account can receive.</p>
+
+      <div class="profile-notifications">
+        <% profile.notifications.forEach(function (preference) { %>
+        <div class="profile-notification">
+          <span class="profile-notification-text">
+            <label class="profile-notification-label" for="notification-<%= preference.id %>"><%= preference.label %></label>
+            <span class="profile-notification-description" id="notification-<%= preference.id %>-description"><%= preference.description %></span>
+          </span>
+          <span class="form-check form-switch profile-notification-control">
+            <input class="form-check-input" type="checkbox" role="switch"
+                   id="notification-<%= preference.id %>"
+                   data-notification-id="<%= preference.id %>"
+                   aria-describedby="notification-<%= preference.id %>-description"
+                   <%= preference.enabled ? "checked" : "" %>>
+          </span>
+        </div>
+        <% }); %>
+      </div>
+
+      <p class="profile-note">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        Notification preferences are shown for review only — nothing is saved in this release.
+      </p>
+    </section>
+  </div>
+</div>

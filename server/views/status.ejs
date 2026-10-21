@@ -1,11 +1,10 @@
-<%- include("partials/head", { title: typeof title !== "undefined" ? title : "" }) %>
-
-<div class="status-page">
-  <section class="card" role="alert">
-    <p class="status-code"><%= code %></p>
-    <p class="status-text"><%= message %></p>
-    <a class="btn-secondary" href="/dashboard">Back to home</a>
-  </section>
-</div>
-</body>
-</html>
+<%- include("layouts/app-shell", {
+  title: typeof title !== "undefined" ? title : "",
+  bodyClass: typeof bodyClass !== "undefined" ? bodyClass : undefined,
+  user: user,
+  nav: nav,
+  csrfToken: csrfToken,
+  activePath: typeof activePath !== "undefined" ? activePath : "/dashboard",
+  contentPartial: "../pages/status-content",
+  contentLocals: { code: code, message: message },
+}) %>

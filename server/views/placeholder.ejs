@@ -1,24 +1,10 @@
-<%- include("partials/head", { title: title }) %>
-
-<div class="shell">
-  <%- include("partials/sidebar") %>
-  <div class="main">
-    <%- include("partials/topbar") %>
-    <main class="content">
-      <section class="card">
-        <div class="placeholder-page">
-          <h1><%= featureTitle %></h1>
-          <p class="placeholder-note">
-            This feature is coming soon. Everything here is a placeholder while the
-            core login, roles, and deployment are being set up.
-          </p>
-        </div>
-      </section>
-    </main>
-  </div>
-</div>
-<div class="backdrop" id="backdrop"></div>
-
-<script src="/js/shell.js" defer></script>
-</body>
-</html>
+<%- include("layouts/app-shell", {
+  title: title,
+  bodyClass: typeof bodyClass !== "undefined" ? bodyClass : undefined,
+  user: user,
+  nav: nav,
+  csrfToken: csrfToken,
+  activePath: activePath,
+  contentPartial: "../pages/placeholder-content",
+  contentLocals: { featureTitle: featureTitle },
+}) %>

@@ -5,7 +5,10 @@
 import { getPool } from "../db/pool";
 
 export interface DashboardTotals {
+  /** Students assigned to at least one duty in the period. */
   students: number;
+  /** Every student account in the school — the denominator for the caption. */
+  studentsTotal: number;
   completed: number;
   ongoing: number;
   assignments: number;
@@ -177,25 +180,34 @@ export async function getDashboardSummary(
     [range.from, range.to],
   );
 
-  // Total students: DISTINCT students with a duty in the period
-  const students = new Set(
-    rows.filter((r) => r.role === "STUDENT").map((r) => r.assigned_to_id),
-  ).size;
+  // Total students: the distinct students assigned to a duty in the period.
+  // A duty's `assigned_to` is the staff member in charge of it, so the
+  // students come from the assignment rows, not from that column.
+  const { rows: studentRows } = await pool.query(
+    `SELECT count(DISTINCT da.student_id)::int AS assigned
+     FROM duty_assignments da
+     JOIN duties d ON d.id = da.duty_id
+     WHERE d.start_time >= $1 AND d.start_time <= $2`,
+    [range.from, range.to],
+  );
+  const students = Number(studentRows[0]?.assigned ?? 0);
+
+  // The denominator of the "Total Students" caption: every student account.
+  const { rows: studentTotalRows } = await pool.query(
+    `SELECT count(*)::int AS total FROM users WHERE role = 'STUDENT'`,
+  );
+  const studentsTotal = Number(studentTotalRows[0]?.total ?? 0);
 
   // Completed: duties with status 'completed' in the period
   const completed = rows.filter((r) => r.status === "completed").length;
 
-  // Ongoing: duties happening now within the period (start <= now < end, not cancelled)
-  const now = new Date();
-  const ongoing = rows.filter((r) => {
-    if (r.status === "cancelled") return false;
-    const start = new Date(r.start_time);
-    const end = r.end_time ? new Date(r.end_time) : null;
-    return start <= now && (!end || now < end);
-  }).length;
+  // Ongoing: duties with status 'ongoing' in the period. `duties.status` is
+  // constrained to ongoing, completed, pending and missed, so there is no
+  // other status to exclude.
+  const ongoing = rows.filter((r) => r.status === "ongoing").length;
 
-  // Assignment: all non-cancelled duties in the period
-  const assignments = rows.filter((r) => r.status !== "cancelled").length;
+  // Assignment: every duty in the period.
+  const assignments = rows.length;
 
   // Assignments table detail
   const assignmentsToday: AssignmentToday[] = rows.map((r) => ({
@@ -219,6 +231,7 @@ export async function getDashboardSummary(
   return {
     totals: {
       students,
+      studentsTotal,
       completed,
       ongoing,
       assignments,

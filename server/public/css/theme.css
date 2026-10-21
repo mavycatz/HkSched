@@ -33,27 +33,100 @@
 }
 
 :root {
-  /* palette */
+  /* palette — brand */
   --green: #69b15b;
+  --green-bright: #c3cf3f;
   --teal: #0d5974;
   --navy: #0c425f;
   --title-green: #0b4f3a;
+  --nav-icon: #f5e050;
+  --notification: #f5c518;
+
+  /* palette — surfaces */
   --white: #ffffff;
+  --page-bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-sunken: #e9ebef;
+  --surface-skeleton-mid: #f5f5f5;
   --input-fill: #f3f9fc;
   --input-border: #bfd9e3;
-  --placeholder: #9aa5ab;
+  --divider: #dce8ee;
+  --divider-soft: #e5e5e5;
+  --role-chip-bg: #e3eef4;
+
+  /* palette — text */
   --text: #1f2d33;
   --subheading: #8fb3bf;
+  --placeholder: #9aa5ab;
+  --text-muted: #6b7280;
   --error: #d64545;
-  --sidebar-active-bg: rgba(255, 255, 255, 0.08);
+
+  /* palette — translucent layers */
+  --line-on-dark: rgba(255, 255, 255, 0.15);
+  --fill-on-dark: rgba(255, 255, 255, 0.08);
+  --fill-on-dark-strong: rgba(255, 255, 255, 0.12);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  --overlay-soft: rgba(0, 0, 0, 0.35);
+
+  /* duty status palette — foregrounds are chosen so the text clears a 4.5:1
+     contrast ratio against its own background (see tests/theme.test.ts). */
+  --status-ongoing-bg: #ffeba8;
+  --status-ongoing-fg: #8a5a00;
+  --status-completed-bg: #d9ebc7;
+  --status-completed-fg: #1e6b2c;
+  --status-pending-bg: #ffe8d6;
+  --status-pending-fg: #a34a00;
+  --status-missed-bg: #fde2e2;
+  --status-missed-fg: #a82929;
+
+  /* Solid status accents — one colour per status, used wherever a status is
+     shown as a solid mark rather than a badge (card stripes, calendar dots,
+     filter pills). Keeping them here means a status looks the same on every
+     page. Each clears 4.5:1 against the white surface, so it also works as
+     text. */
+  --status-ongoing-solid: #1d4ed8;
+  --status-completed-solid: #15803d;
+  --status-pending-solid: #b45309;
+  --status-missed-solid: #b91c1c;
+
+  /* stat-card accent palette */
+  --accent-blue-bg: #e3eefb;
+  --accent-blue: #3b82f6;
+  --accent-green-bg: #ddf3e8;
+  --accent-green: #2e9e6b;
+  --accent-amber-bg: #fdebb0;
+  --accent-amber: #e8a800;
+  --accent-purple-bg: #eedffb;
+  --accent-purple: #a855f7;
+  --accent-orange-bg: #ffe8d6;
+  --accent-orange: #f97316;
+  --accent-red-bg: #fde2e2;
+  --accent-red: #e24b4b;
+
+  /* elevation */
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   --soft-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --surface-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
+  --surface-shadow-hover: 0 8px 24px rgba(12, 66, 95, 0.18);
+  --menu-shadow: 0 4px 12px rgba(12, 66, 95, 0.12);
+  --nav-shadow: 0 1px 3px rgba(12, 66, 95, 0.08);
+  --nav-active-shadow: 0 2px 8px rgba(12, 66, 95, 0.15);
 
   /* shapes */
   --card-radius: 28px;
+  --panel-radius: 14px;
+  --tile-radius: 10px;
+  --chip-radius: 999px;
   --button-radius: 12px;
   --input-radius: 12px;
   --checkbox-radius: 4px;
+  --badge-radius: 8px;
+
+  /* focus ring */
+  --focus-ring: 0 0 0 3px rgba(13, 89, 116, 0.35);
+  --focus-outline: var(--teal);
+  --focus-outline-strong: #7c3aed;
 
   /* type */
   --font: "Poppins", "Segoe UI", Arial, sans-serif;
@@ -84,6 +157,9 @@ a {
   min-height: 100vh;
   background: url("/img/bg.png") center / cover no-repeat fixed;
 }
+
+/* Mobile/tablet default uses the bg.png image; desktop (>= 900px) swaps it for
+   the wider cdslweb.png crop with a white gradient (see the media query below). */
 
 .login-wrap {
   min-height: 100vh;
@@ -402,73 +478,9 @@ a {
   background: var(--input-fill);
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 260px;
-  background: var(--navy);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  z-index: 20;
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 18px 14px;
-}
-
-.sidebar-brand img {
-  width: 44px;
-  height: 44px;
-}
-
-.sidebar-brand span {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--white);
-}
-
-.side-nav {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 0;
-}
-
-.side-link {
-  display: block;
-  padding: 11px 18px;
-  border-left: 4px solid transparent;
-  color: var(--white);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.side-link:hover {
-  background: var(--sidebar-active-bg);
-}
-
-.side-link.active {
-  border-left-color: var(--green);
-  background: var(--sidebar-active-bg);
-  font-weight: 600;
-}
-
-.side-link:focus-visible {
-  outline: 2px solid var(--green);
-  outline-offset: -2px;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 16px 18px;
-}
+/* NOTE: the fixed sidebar, its brand block and its nav items are styled once in
+   the "App shell (CSDL)" section further down this file. Older duplicate
+   definitions used to live here and silently overrode each other. */
 
 .logout-btn {
   display: inline-flex;
@@ -503,7 +515,7 @@ a {
 }
 
 .main {
-  margin-left: 260px;
+  margin-left: clamp(220px, 16vw, 260px);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -579,11 +591,19 @@ a {
   flex: 1;
 }
 
+/* Generic surface used by the placeholder and status pages. Bootstrap's own
+   `.card` (used by the dashboard) keeps its own padding model, so the legacy
+   padding is applied through the dedicated modifier classes instead. */
 .card {
   background: var(--white);
+  border: none;
   border-radius: var(--card-radius);
-  padding: 24px;
   box-shadow: var(--card-shadow);
+}
+
+.placeholder-card,
+.status-card {
+  padding: 24px;
 }
 
 .dashboard-head {
@@ -741,9 +761,9 @@ a {
 }
 
 /* ==========================================================================
-   Desktop-only login background (cdslweb.png), right-side content position,
-   wider roomier card. Applies only to desktop browsers (>= 900px, fine
-   pointer, hover capable, not installed as a standalone app). Mobile,
+   Desktop-only login background, right-side content position, wider roomier
+   card. Applies only to desktop browsers (>= 900px, fine pointer, hover
+   capable, not installed as a standalone app). Mobile,
    tablets, and the PWA keep the existing centered login unchanged.
    ========================================================================== */
 
@@ -758,7 +778,7 @@ a {
         rgba(255, 255, 255, 0.85) 80%,
         #FFFFFF 90%,
         #FFFFFF 100%),
-      url("/img/cdslweb.png") left center / cover no-repeat;
+      url("/img/bg.png") left center / cover no-repeat;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -848,8 +868,10 @@ a {
 }
 
 /* ==========================================================================
-   HK Duty Dashboard � Bootstrap custom branding
-   All custom colors live here; Bootstrap provides the layout framework.
+   HK Duty Dashboard - Bootstrap custom branding
+   All custom colours live in theme.css as custom properties; Bootstrap
+   provides the layout framework. Page-specific rules live under
+   server/public/css/pages/.
    ========================================================================== */
 
 /* Hidden utility */
@@ -859,15 +881,15 @@ a {
 
 /* Body background */
 body.csdl-page {
-  background: #F0F4F8;
-  font-family: "Poppins", sans-serif;
+  background: var(--page-bg);
+  font-family: var(--font);
 }
 
 /* ---------- Fixed Sidebar ---------- */
 .sidebar {
   width: clamp(220px, 16vw, 260px);
-  background: linear-gradient(180deg, #69B15B 0%, #0D5974 55%, #0C425F 100%);
-  color: #FFFFFF;
+  background: linear-gradient(180deg, var(--green) 0%, var(--teal) 55%, var(--navy) 100%);
+  color: var(--white);
   height: 100dvh;
   position: fixed;
   top: 0;
@@ -884,16 +906,19 @@ body.csdl-page {
     transform: translateX(-100%);
     z-index: 1000;
   }
-  .sidebar.show {
+
+  .sidebar.show,
+  .sidebar.open {
     transform: translateX(0);
   }
 }
+
 
 .sidebar-brand {
   padding: 1.5rem 1rem;
   text-align: center;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid var(--line-on-dark);
 }
 
 .sidebar-logo {
@@ -904,10 +929,10 @@ body.csdl-page {
 }
 
 .sidebar-title {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-weight: 700;
   font-size: 17px;
-  color: #FFFFFF;
+  color: var(--white);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -935,54 +960,54 @@ body.csdl-page {
   height: 48px;
   padding: 0 14px;
   border-radius: 10px;
-  color: #FFFFFF;
+  color: var(--white);
   text-decoration: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
 }
 
 .nav-item-link:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--fill-on-dark-strong);
 }
 
 .nav-item-link.active {
-  background: linear-gradient(90deg, #69B15B, #C3CF3F);
-  color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(12, 66, 95, 0.15);
+  background: linear-gradient(90deg, var(--green), var(--green-bright));
+  color: var(--white);
+  box-shadow: var(--nav-active-shadow);
 }
 
 .nav-item-link.active .nav-icon {
-  stroke: #FFFFFF;
-  fill: #FFFFFF;
+  stroke: var(--white);
+  fill: var(--white);
 }
 
 .nav-item-link .nav-icon {
   width: 22px;
   height: 22px;
   fill: none;
-  stroke: #F5E050;
+  stroke: var(--nav-icon);
   stroke-width: 2;
   flex-shrink: 0;
 }
 
 .nav-item-link:focus-visible {
-  outline: 2px solid #FFFFFF;
+  outline: 2px solid var(--white);
   outline-offset: 2px;
 }
 
 .sidebar-footer {
   margin-top: auto;
   padding: 1rem 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid var(--line-on-dark);
 }
 
 /* ---------- Top Navbar ---------- */
 .navbar {
   height: 72px;
-  background: #FFFFFF;
-  box-shadow: 0 1px 3px rgba(12, 66, 95, 0.08);
+  background: var(--white);
+  box-shadow: var(--nav-shadow);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -1015,8 +1040,8 @@ body.csdl-page {
 }
 
 .search-wrapper .input-group {
-  background: #F0F4F8;
-  border-radius: 999px;
+  background: var(--page-bg);
+  border-radius: var(--chip-radius);
   width: 100%;
 }
 
@@ -1024,9 +1049,9 @@ body.csdl-page {
   background: transparent;
   border: none;
   padding: 0.5rem 1rem;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-size: 0.9rem;
-  color: #1F2D33;
+  color: var(--text);
   width: 100%;
 }
 
@@ -1042,7 +1067,7 @@ body.csdl-page {
 }
 
 .search-wrapper .input-group-text .bi-search {
-  color: #9AA5AB;
+  color: var(--placeholder);
   font-size: 1rem;
 }
 
@@ -1052,7 +1077,7 @@ body.csdl-page {
   right: 0;
   width: 8px;
   height: 8px;
-  background: #F5C518;
+  background: var(--notification);
   border-radius: 50%;
   display: none;
 }
@@ -1060,54 +1085,73 @@ body.csdl-page {
 .user-avatar {
   width: 44px;
   height: 44px;
-  background: #0C425F;
+  background: var(--navy);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
-  font-family: "Poppins", sans-serif;
+  color: var(--white);
+  font-family: var(--font);
   font-weight: 600;
   font-size: 16px;
   flex-shrink: 0;
 }
 
-.user-info .user-name {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  color: #0C425F;
-  margin: 0;
-  text-decoration: none;
+/* Profile block: avatar, name and role sit on one horizontal line. */
+.profile-block {
+  padding: 0;
+  gap: 0;
+  flex-wrap: nowrap;
 }
 
-.user-info .user-role {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-size: 11px;
-  color: #8FB3BF;
+.user-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.user-info .user-name {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--navy);
   margin: 0;
+  text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.user-info .user-role {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: var(--role-chip-bg);
+  border-radius: var(--chip-radius);
+  padding: 3px 10px;
+  margin: 0;
+  white-space: nowrap;
   text-decoration: none;
 }
 
-.user-info .text-truncate {
-  max-width: 140px;
-}
 
 .navbar .dropdown-menu {
   border: none;
-  box-shadow: 0 4px 12px rgba(12, 66, 95, 0.12);
+  box-shadow: var(--menu-shadow);
   border-radius: 12px;
   padding: 0.5rem;
   min-width: 200px;
-  background: #FFFFFF;
+  background: var(--white);
 }
 
 .navbar .dropdown-item {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-size: 0.9rem;
   border-radius: 8px;
   margin: 0.125rem 0;
@@ -1115,259 +1159,55 @@ body.csdl-page {
 }
 
 .navbar .dropdown-item.text-danger {
-  color: #dc3545;
+  color: var(--error);
 }
 
 .navbar .dropdown-item:hover {
-  background: #F0F4F8;
+  background: var(--page-bg);
 }
 
 .navbar .dropdown-divider {
   margin: 0.25rem 0;
-  border-color: #E5E5E5;
+  border-color: var(--divider-soft);
 }
 
 /* ---------- Main Content ---------- */
 .main-content {
-  background: #F0F4F8;
+  background: var(--page-bg);
   flex: 1;
   margin-left: clamp(220px, 16vw, 260px);
 }
 
-.content {
+/* The dashboard content area sits directly under the sticky top bar, so it
+   needs a regular padding only - no extra offset was required. */
+.main-content > .content {
   flex: 1;
   min-height: calc(100dvh - 72px);
   display: flex;
   flex-direction: column;
-  padding: 32px 40px;
-  padding-top: 72px;
+  gap: 20px;
+  padding: 20px 24px 24px;
   box-sizing: border-box;
 }
 
 @media (max-width: 991.98px) {
-  .content {
+  .main-content > .content {
     margin-left: 0;
-    padding: 20px 16px;
-    padding-top: 72px;
+    padding: 16px;
   }
 }
 
-/* ---------- Greeting Row ---------- */
-.greeting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
+/* Utilities used in the navbar and page templates that Bootstrap does not
+   ship out of the box. */
+.text-navy {
+  color: var(--navy);
 }
 
-.greeting {
-  display: flex;
-  flex-direction: column;
-}
-
-.dashboard-greeting {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-size: 1.75rem;
-  color: #0B4F3A;
-  margin: 0 0 4px;
-}
-
-.greeting-subtitle {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  color: #0D5974;
-  margin: 0;
-}
-
-.today-date {
-  font-family: "Poppins", sans-serif;
+.fw-medium {
   font-weight: 500;
-  font-size: 14px;
-  color: #1F2D33;
-  white-space: nowrap;
 }
 
-@media (max-width: 991.98px) {
-  .today-date {
-    white-space: normal;
-    text-align: right;
-  }
-}
-
-/* ---------- Date Filter (segmented control) ---------- */
-.range-filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.range-label {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-size: 13px;
-  color: #1F2D33;
-  white-space: nowrap;
-}
-
-.range-segment {
-  display: inline-flex;
-  border: 1px solid #DCE8EE;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #FFFFFF;
-}
-
-.range-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-size: 13px;
-  color: #1F2D33;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.range-btn:hover {
-  background: #F0F4F8;
-}
-
-.range-btn.active {
-  background: #0D5974;
-  color: #FFFFFF;
-}
-
-.range-custom-form {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.range-date-input {
-  width: 130px;
-  font-size: 0.85rem;
-}
-
-/* ---------- Stat Cards Grid ---------- */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 1199px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 520px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stat-card {
-  background: #FFFFFF;
-  border: none;
-  border-radius: 14px;
-  padding: 24px;
-  min-height: 140px;
-  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-  color: inherit;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(12, 66, 95, 0.18);
-}
-
-.stat-card:focus-visible {
-  outline: 2px solid #7C3AED;
-  outline-offset: 3px;
-}
-
-.stat-icon-tile {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-icon-tile svg,
-.stat-icon-tile i {
-  width: 20px;
-  height: 20px;
-}
-
-.stat-card .stat-label {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  color: #1F2D33;
-  margin: 0;
-}
-
-.stat-card .stat-number {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-size: 2rem;
-  margin: 0;
-}
-
-.stat-card .stat-caption {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  color: #8FB3BF;
-  margin: 0;
-}
-
-.stat-blue .stat-icon-tile { background: #E3EEFB; }
-.stat-blue .stat-icon-tile i,
-.stat-blue .stat-icon-tile svg { color: #3B82F6; }
-.stat-blue .stat-number { color: #3B82F6; }
-
-.stat-green .stat-icon-tile { background: #DDF3E8; }
-.stat-green .stat-icon-tile i,
-.stat-green .stat-icon-tile svg { color: #2E9E6B; }
-.stat-green .stat-number { color: #2E9E6B; }
-
-.stat-amber .stat-icon-tile { background: #FDEBB0; }
-.stat-amber .stat-icon-tile i,
-.stat-amber .stat-icon-tile svg { color: #E8A800; }
-.stat-amber .stat-number { color: #E8A800; }
-
-.stat-purple .stat-icon-tile { background: #EEDFFB; }
-.stat-purple .stat-icon-tile i,
-.stat-purple .stat-icon-tile svg { color: #A855F7; }
-.stat-purple .stat-number { color: #A855F7; }
-
-.stat-orange .stat-icon-tile { background: #FFE8D6; }
-.stat-orange .stat-icon-tile i,
-.stat-orange .stat-icon-tile svg { color: #F97316; }
-.stat-orange .stat-number { color: #F97316; }
-
-.stat-red .stat-icon-tile { background: #FDE2E2; }
-.stat-red .stat-icon-tile i,
-.stat-red .stat-icon-tile svg { color: #E24B4B; }
-.stat-red .stat-number { color: #E24B4B; }
-
-/* ---------- Assignments Table ---------- */
+/* ---------- Section header ---------- */
 .section-header {
   display: flex;
   align-items: center;
@@ -1376,69 +1216,24 @@ body.csdl-page {
 }
 
 .section-title {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-weight: 700;
-  font-size: 28px;
-  color: #0B4F3A;
+  font-size: 18px;
+  color: var(--title-green);
   margin: 0;
 }
 
 .view-all {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-weight: 500;
   font-size: 14px;
-  color: #0D5974;
+  color: var(--teal);
   text-decoration: none;
 }
 
 .view-all:hover {
   text-decoration: underline;
 }
-
-.card.border-0.shadow-sm {
-  border: none;
-  box-shadow: 0 4px 14px rgba(12, 66, 95, 0.12);
-}
-
-.table {
-  font-family: "Poppins", sans-serif;
-  font-size: 0.9rem;
-}
-
-.table thead th {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #0C425F;
-  border-bottom: 1px solid #DCE8EE;
-  padding: 0.75rem 1rem;
-}
-
-.table tbody td {
-  border-bottom: 1px solid #DCE8EE;
-  padding: 0.75rem 1rem;
-  vertical-align: middle;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table-hover tbody tr:hover {
-  background: #F8FAFC;
-}
-
-.badge {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 0.8rem;
-  padding: 0.4em 0.8em;
-  border-radius: 8px;
-}
-
-.badge-bg-ongoing { background: #FFEBA8; color: #D99A00; }
-.badge-bg-completed { background: #D9EBC7; color: #2E8B3E; }
-.badge-bg-pending { background: #FFE8D6; color: #E26A0F; }
-.badge-bg-missed { background: #FDE2E2; color: #C93C3C; }
 
 /* ---------- Empty State ---------- */
 .empty-state {
@@ -1448,14 +1243,14 @@ body.csdl-page {
 
 .empty-state .bi {
   font-size: 3rem;
-  color: #9AA5AB;
+  color: var(--placeholder);
   margin-bottom: 1rem;
 }
 
 .empty-state h3 {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-weight: 600;
-  color: #1F2D33;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
@@ -1463,18 +1258,71 @@ body.csdl-page {
   font-size: 0.95rem;
 }
 
+/* ---------- Badges ---------- */
+.badge {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.4em 0.8em;
+  border-radius: var(--badge-radius);
+}
+
+/* Duty status badges. The base class carries the shared shape and each
+   modifier carries the status colour, so a status is styled from one place. */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 4px 10px;
+  border-radius: var(--badge-radius);
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-badge--ongoing {
+  background: var(--status-ongoing-bg);
+  color: var(--status-ongoing-fg);
+}
+
+.status-badge--completed {
+  background: var(--status-completed-bg);
+  color: var(--status-completed-fg);
+}
+
+.status-badge--pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-fg);
+}
+
+.status-badge--missed {
+  background: var(--status-missed-bg);
+  color: var(--status-missed-fg);
+}
+
 /* ---------- Dropdowns ---------- */
 .dropdown-menu {
   border: none;
-  box-shadow: 0 4px 12px rgba(12, 66, 95, 0.12);
+  box-shadow: var(--menu-shadow);
   border-radius: 12px;
   padding: 0.5rem;
-  background: #FFFFFF;
+  background: var(--white);
   min-width: 200px;
 }
 
 .dropdown-item {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-size: 0.9rem;
   border-radius: 8px;
   margin: 0.125rem 0;
@@ -1482,79 +1330,27 @@ body.csdl-page {
 }
 
 .dropdown-item:hover {
-  background: #F0F4F8;
+  background: var(--page-bg);
 }
 
 .dropdown-divider {
   margin: 0.25rem 0;
-  border-color: #E5E5E5;
+  border-color: var(--divider-soft);
 }
 
 .dropdown-item-text {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font);
   font-size: 0.85rem;
-  color: #6B7280;
+  color: var(--text-muted);
   margin: 0;
   padding: 0.5rem 1rem;
-}
-
-/* ---------- Skeleton Loading ---------- */
-.skeleton-row {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.skeleton-col {
-  flex: 1;
-  height: 140px;
-  background: #E9EBEF;
-  border-radius: 14px;
-  overflow: hidden;
-  position: relative;
-}
-
-.skeleton-col::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #E9EBEF, #F5F5F5, #E9EBEF);
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.skeleton-table {
-  height: 300px;
-  background: #E9EBEF;
-  border-radius: 14px;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 32px;
-}
-
-.skeleton-table::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #E9EBEF, #F5F5F5, #E9EBEF);
-  animation: shimmer 1.5s infinite;
 }
 
 /* ---------- Mobile ---------- */
 .mobile-menu-btn {
   background: none;
   border: none;
-  color: #0C425F;
+  color: var(--navy);
   font-size: 1.25rem;
   padding: 0.25rem 0.5rem;
   display: none;
@@ -1573,11 +1369,16 @@ body.csdl-page {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-dark);
   z-index: 900;
   display: none;
   backdrop-filter: blur(2px);
 }
+
+.sidebar-overlay.is-visible {
+  display: block;
+}
+
 
 .sidebar-overlay.show {
   display: block;

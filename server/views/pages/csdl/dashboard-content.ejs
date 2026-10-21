@@ -29,15 +29,15 @@
   </div>
 </div>
 
-<!-- Summary stat cards (4 only) -->
-<div class="stats-grid mb-4">
+<!-- Summary stat cards (4 only, same structure so the numbers line up) -->
+<div class="stats-grid">
   <a class="stat-card stat-blue" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
     <div class="stat-icon-tile">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </div>
     <p class="stat-label">Total Students</p>
     <p class="stat-number"><%= totals.students %></p>
-    <p class="stat-caption mt-1 mb-0"><%= totals.students %> of <%= totals.students %> total students</p>
+    <p class="stat-caption"><%= totals.students %> of <%= totals.studentsTotal %> students assigned</p>
   </a>
   <a class="stat-card stat-green" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
     <div class="stat-icon-tile">
@@ -45,6 +45,7 @@
     </div>
     <p class="stat-label">Completed</p>
     <p class="stat-number"><%= totals.completed %></p>
+    <p class="stat-caption"><%= totals.completed %> of <%= totals.assignments %> completed</p>
   </a>
   <a class="stat-card stat-amber" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
     <div class="stat-icon-tile">
@@ -52,6 +53,7 @@
     </div>
     <p class="stat-label">Ongoing Duties</p>
     <p class="stat-number"><%= totals.ongoing %></p>
+    <p class="stat-caption"><%= totals.ongoing %> of <%= totals.assignments %> ongoing</p>
   </a>
   <a class="stat-card stat-purple" href="/csdl/dashboard?range=<%= rangeKey %><%= rangeFrom ? "&from=" + rangeFrom : "" %><%= rangeTo ? "&to=" + rangeTo : "" %>">
     <div class="stat-icon-tile">
@@ -59,10 +61,11 @@
     </div>
     <p class="stat-label">Assignment</p>
     <p class="stat-number"><%= totals.assignments %></p>
+    <p class="stat-caption"><%= totals.assignments %> duties in this period</p>
   </a>
 </div>
 
-<!-- Today's Assignment table -->
+<!-- Today's Assignment table (stretches across the content area) -->
 <div class="card border-0 shadow-sm">
   <div class="card-header bg-white border-bottom py-3">
     <div class="d-flex justify-content-between align-items-center">
@@ -90,7 +93,7 @@
               <td class="small"><%= a.area %></td>
               <td class="small"><%= a.tasks %></td>
               <td class="text-end small">
-                <span class="badge badge-bg-<%= a.status.toLowerCase() %>"><%= a.status %></span>
+                <span class="status-badge status-badge--<%= a.status.toLowerCase() %>"><%= a.status %></span>
               </td>
             </tr>
             <% }); %>
@@ -112,11 +115,11 @@
 
 <!-- Skeleton placeholders (shown during JS fetch, hidden on initial server render) -->
 <div id="dashboard-skeleton" class="d-none">
-  <div class="skeleton-row mb-4">
+  <div class="skeleton-row">
     <div class="skeleton-col"></div>
     <div class="skeleton-col"></div>
     <div class="skeleton-col"></div>
     <div class="skeleton-col"></div>
   </div>
-  <div class="skeleton-table mb-4"></div>
+  <div class="skeleton-table"></div>
 </div>

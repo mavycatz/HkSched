@@ -5,6 +5,12 @@ import { requireAuth, requirePermission } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { canViewStudentRecord, sendNotFound } from "../lib/authorization";
 import { getDashboardSummary, computeRange } from "../services/dashboardService";
+import {
+  DUTY_STATUSES,
+  getDutyStatusCounts,
+  listDuties,
+  type DutyStatus,
+} from "../services/dutyService";
 
 interface Placeholder {
   path: string;
@@ -17,8 +23,6 @@ const PLACEHOLDERS: Placeholder[] = [
   { path: "/assignments", title: "Assignments", permission: "assignments.manage" },
   { path: "/verification", title: "Verification", permission: "duty.verify" },
   { path: "/approvals", title: "Approvals", permission: "approvals.review" },
-  { path: "/my-schedule", title: "My Schedule", permission: "schedule.own.view" },
-  { path: "/schedule", title: (role) => (role === "TEACHER" ? "My Schedule" : "Schedule"), permission: "schedule.own.view" },
   { path: "/my-duties", title: "My Duties", permission: "duties.own.view" },
   { path: "/upcoming-duties", title: "Upcoming Duties", permission: "duties.upcoming.view" },
   {
@@ -30,7 +34,6 @@ const PLACEHOLDERS: Placeholder[] = [
       CSDL: "applications.manage",
     },
   },
-  { path: "/profile", title: "Profile", permission: "profile.own" },
   { path: "/settings", title: "Settings", permission: "settings.manage" },
   { path: "/profile-settings", title: "Profile & Settings", permission: "settings.manage" },
   { path: "/duty-schedules", title: "Duty Schedules", permission: "schedules.view" },
@@ -39,13 +42,22 @@ const PLACEHOLDERS: Placeholder[] = [
   { path: "/monitor-completion", title: "Monitor Completion", permission: "completion.monitor" },
 ];
 
-function shellLocals(req: Request, res: Response) {
-  const user = req.user!;
+/** True when the value is a YYYY-MM-DD date. */
+function isIsoDate(value: string | undefined): boolean {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function shellLocals(req: Request, res: Response) {  const user = req.user;
   return {
     user,
-    nav: navFor(user.role),
+    nav: user ? navFor(user.role) : [],
     csrfToken: csrfToken(req, res),
   };
+}
+
+/** Shell locals for error/status pages; safe when nobody is signed in. */
+export function statusLocals(req: Request, res: Response) {
+  return shellLocals(req, res);
 }
 
 export function getDashboard(req: Request, res: Response): void {
@@ -54,10 +66,10 @@ export function getDashboard(req: Request, res: Response): void {
     res.redirect("/csdl/dashboard");
     return;
   }
-  res.status(403).render("status", {
-    code: 403,
-    message: "You don't have access to this page.",
-    title: "Access denied",
+  res.render("dashboard", {
+    ...shellLocals(req, res),
+    title: "Dashboard",
+    activePath: "/dashboard",
   });
 }
 
@@ -173,6 +185,7 @@ export async function getCsdlDashboard(
       title: "Dashboard",
       activePath: "/csdl/dashboard",
       bodyClass: "csdl-page",
+      pageStyles: ["dashboard"],
       greeting,
       displayName,
       todayDate,
@@ -188,22 +201,52 @@ export async function getCsdlDashboard(
   }
 }
 
-export function getCsdlDutyManagement(req: Request, res: Response): void {
-  res.render("pages/csdl/duty-management", {
-    ...shellLocals(req, res),
-    title: "Duty Management",
-    activePath: "/csdl/duty-management",
-    bodyClass: "csdl-page",
-  });
-}
+export async function getCsdlDutyManagement(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const user = req.user!;
+    const query = req.query as Record<string, string>;
 
-export function getCsdlSchedule(req: Request, res: Response): void {
-  res.render("pages/csdl/schedule", {
-    ...shellLocals(req, res),
-    title: "Schedule",
-    activePath: "/csdl/schedule",
-    bodyClass: "csdl-page",
-  });
+    const status = DUTY_STATUSES.includes(query.status as DutyStatus)
+      ? (query.status as DutyStatus)
+      : null;
+    const search = typeof query.q === "string" ? query.q.trim() : null;
+    const from = isIsoDate(query.from) ? query.from : null;
+    const to = isIsoDate(query.to) ? query.to : null;
+    const page = Number.parseInt(query.page ?? "1", 10);
+    const pageSize = 9;
+
+    const result = await listDuties(
+      { id: user.id, role: user.role },
+      { status, search, from, to, page: Number.isFinite(page) ? page : 1, pageSize },
+    );
+
+    // The unfiltered scope total decides between "no duties exist" and
+    // "no duty matches the current filters".
+    const scopeCounts = await getDutyStatusCounts({ id: user.id, role: user.role });
+
+    res.render("pages/csdl/duty-management", {
+      ...shellLocals(req, res),
+      title: "Duty Management",
+      activePath: "/csdl/duty-management",
+      bodyClass: "csdl-page",
+      pageStyles: ["duty-management"],
+      pageScripts: ["duty-management"],
+      duties: result.duties,
+      counts: result.counts,
+      total: result.total,
+      page: result.page,
+      pageCount: result.pageCount,
+      pageSize: result.pageSize,
+      filters: { status, search, from, to },
+      hasAnyDuties: scopeCounts.all > 0,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function getCsdlApplications(req: Request, res: Response): void {
@@ -211,15 +254,6 @@ export function getCsdlApplications(req: Request, res: Response): void {
     ...shellLocals(req, res),
     title: "Applications",
     activePath: "/csdl/applications",
-    bodyClass: "csdl-page",
-  });
-}
-
-export function getCsdlProfile(req: Request, res: Response): void {
-  res.render("pages/csdl/profile", {
-    ...shellLocals(req, res),
-    title: "Profile & Settings",
-    activePath: "/csdl/profile",
     bodyClass: "csdl-page",
   });
 }

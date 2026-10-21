@@ -1,0 +1,490 @@
+/* ==========================================================================
+   CSDL Duty Management page styles.
+   Loaded after theme.css so these rules can override the shared theme.
+   Colours come from the theme's custom properties - no literal colour
+   values are allowed in a page stylesheet.
+   ========================================================================== */
+
+/* ---------- Page header ---------- */
+.duty-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.duty-page-title {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--title-green);
+  margin: 0 0 4px;
+}
+
+.duty-page-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.duty-create-btn {
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: var(--button-radius);
+  white-space: nowrap;
+}
+
+/* ---------- Status filter pills ---------- */
+.filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--divider);
+  border-radius: var(--chip-radius);
+  background: var(--surface);
+  box-shadow: var(--nav-shadow);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-pill:hover {
+  background: var(--surface-muted);
+  border-color: var(--input-border);
+}
+
+.filter-pill:focus-visible {
+  outline: 2px solid var(--focus-outline-strong);
+  outline-offset: 2px;
+}
+
+.filter-pill-label {
+  white-space: nowrap;
+}
+
+.filter-pill-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--chip-radius);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* The active pill is marked by colour AND by a heavier border, so it does
+   not rely on colour alone. */
+.filter-pill.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--white);
+}
+
+.filter-pill.active .filter-pill-count {
+  background: var(--fill-on-dark-strong);
+  color: var(--white);
+}
+
+/* Each status pill carries its own accent dot, matching the status colour
+   used by the card stripes and the calendar dots. */
+.filter-pill--ongoing .filter-pill-label::before,
+.filter-pill--completed .filter-pill-label::before,
+.filter-pill--pending .filter-pill-label::before,
+.filter-pill--missed .filter-pill-label::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.filter-pill--ongoing .filter-pill-label::before { background: var(--status-ongoing-solid); }
+.filter-pill--completed .filter-pill-label::before { background: var(--status-completed-solid); }
+.filter-pill--pending .filter-pill-label::before { background: var(--status-pending-solid); }
+.filter-pill--missed .filter-pill-label::before { background: var(--status-missed-solid); }
+
+/* ---------- Search and date filter row ---------- */
+.duty-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+}
+
+.duty-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.duty-filter-field .form-label {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.duty-filter-search {
+  flex: 1 1 260px;
+  min-width: 200px;
+}
+
+.duty-search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.duty-search-input .bi {
+  position: absolute;
+  left: 12px;
+  color: var(--placeholder);
+  pointer-events: none;
+}
+
+.duty-search-input .form-control {
+  padding-left: 36px;
+}
+
+.duty-filters .form-control {
+  font-family: var(--font);
+  font-size: 0.88rem;
+  background: var(--input-fill);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  color: var(--text);
+}
+
+.duty-filters .form-control:focus {
+  background: var(--surface);
+  border-color: var(--teal);
+  box-shadow: var(--focus-ring);
+}
+
+.duty-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.duty-filter-actions .btn {
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: var(--button-radius);
+}
+
+/* ---------- Duty cards ---------- */
+.duty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.duty-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 18px 18px 22px;
+  background: var(--surface);
+  border: none;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.duty-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--surface-shadow-hover);
+}
+
+/* The leading accent stripe: one solid mark per status, matching the status
+   colours used elsewhere. */
+.duty-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--divider);
+}
+
+.duty-card--ongoing::before { background: var(--status-ongoing-solid); }
+.duty-card--completed::before { background: var(--status-completed-solid); }
+.duty-card--pending::before { background: var(--status-pending-solid); }
+.duty-card--missed::before { background: var(--status-missed-solid); }
+
+.duty-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.duty-card-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.duty-card-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.duty-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.duty-detail-label {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--subheading);
+}
+
+.duty-detail-value {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.duty-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.duty-card-actions .btn {
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: var(--button-radius);
+}
+
+/* ---------- Empty state ---------- */
+.duty-empty-card {
+  border: none;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  background: var(--surface);
+}
+
+.duty-empty-card .empty-state {
+  padding: 48px 24px;
+}
+
+/* ---------- Pagination ---------- */
+.duty-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.duty-pagination .pagination {
+  gap: 4px;
+  margin: 0;
+}
+
+.duty-pagination .page-link {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--teal);
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  padding: 6px 12px;
+}
+
+.duty-pagination .page-item.active .page-link {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--white);
+}
+
+.duty-pagination .page-item.disabled .page-link {
+  color: var(--placeholder);
+  background: var(--surface-muted);
+}
+
+/* ---------- Duty modals ---------- */
+.duty-form {
+  margin: 0;
+}
+
+.duty-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.duty-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.duty-form-field .form-label {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+/* Required fields are marked with an asterisk and the attribute, so the
+   marker is not the only signal. */
+.duty-required {
+  color: var(--error);
+  font-weight: 700;
+}
+
+.duty-form .form-control,
+.duty-form .form-select {
+  font-family: var(--font);
+  font-size: 0.88rem;
+  height: 42px;
+  background: var(--input-fill);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  color: var(--text);
+}
+
+.duty-form .form-control:focus,
+.duty-form .form-select:focus {
+  background: var(--surface);
+  border-color: var(--teal);
+  box-shadow: var(--focus-ring);
+}
+
+.duty-form-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--tile-radius);
+  background: var(--accent-amber-bg);
+  color: var(--accent-amber);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.duty-form-note .bi {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.modal-content {
+  border: none;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--divider);
+  padding: 16px 20px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.modal-footer .btn {
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: var(--button-radius);
+  min-width: 104px;
+}
+
+/* ---------- Narrow viewports ---------- */
+@media (max-width: 767.98px) {
+  .duty-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .duty-card-details {
+    grid-template-columns: 1fr;
+  }
+
+  .duty-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .duty-filter-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .duty-filter-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .duty-page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .duty-create-btn {
+    width: 100%;
+  }
+}

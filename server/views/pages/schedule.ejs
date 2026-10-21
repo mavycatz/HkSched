@@ -1,0 +1,25 @@
+<%- include("../layouts/app-shell", {
+  title: title,
+  bodyClass: bodyClass,
+  pageStyles: ["schedule"],
+  contentPartial: "../pages/schedule-content",
+  contentLocals: {
+    user: user,
+    nav: nav,
+    activePath: activePath,
+    csrfToken: csrfToken,
+    title: title,
+    subtitle: subtitle,
+    monthLabel: monthLabel,
+    selectedDayLabel: selectedDayLabel,
+    selectedDayShort: selectedDayShort,
+    previousUrl: previousUrl,
+    nextUrl: nextUrl,
+    currentUrl: currentUrl,
+    weekdayLabels: weekdayLabels,
+    weeks: weeks,
+    legend: legend,
+    duties: duties,
+    dutyCount: dutyCount
+  }
+}) %>

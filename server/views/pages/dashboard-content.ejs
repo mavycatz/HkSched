@@ -1,0 +1,15 @@
+<section class="card">
+  <div class="dashboard-head">
+    <h2><%= user.full_name %></h2>
+  </div>
+  <p class="dashboard-role">Signed in as <%= user.role %> &ndash; <%= user.school_id %></p>
+  <p class="placeholder-note">
+    Welcome to HK Duty. Your dashboard is a placeholder for now &mdash; duty scheduling
+    features are coming soon.
+  </p>
+  <ul class="nav-preview">
+    <% nav.forEach(function (item) { %>
+      <li><%= item.label %></li>
+    <% }); %>
+  </ul>
+</section>

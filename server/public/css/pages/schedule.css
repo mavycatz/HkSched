@@ -1,0 +1,370 @@
+/* ==========================================================================
+   Schedule page styles (calendar + selected-day panel).
+   Loaded after theme.css so these rules can override the shared theme.
+   Colours come from the theme's custom properties - no literal colour
+   values are allowed in a page stylesheet.
+   ========================================================================== */
+
+/* ---------- Page header ---------- */
+.schedule-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.schedule-page-title {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--title-green);
+  margin: 0 0 4px;
+}
+
+.schedule-page-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ---------- Two-column layout ---------- */
+.schedule-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.schedule-calendar,
+.schedule-panel {
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  padding: 20px;
+  min-width: 0;
+}
+
+/* ---------- Calendar header and month navigation ---------- */
+.schedule-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.schedule-calendar-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.schedule-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.schedule-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--button-radius);
+  background: var(--surface);
+  color: var(--teal);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.schedule-nav-btn:hover {
+  background: var(--surface-muted);
+  border-color: var(--input-border);
+}
+
+.schedule-nav-btn:focus-visible {
+  outline: 2px solid var(--focus-outline-strong);
+  outline-offset: 2px;
+}
+
+.schedule-nav-btn--current {
+  padding: 0 14px;
+}
+
+/* ---------- Weekday headings ---------- */
+.schedule-weekdays,
+.schedule-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.schedule-weekdays {
+  margin-bottom: 6px;
+}
+
+.schedule-weekday {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--subheading);
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* ---------- Day cells ---------- */
+.schedule-days {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.schedule-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  min-height: 62px;
+  padding: 6px 2px;
+  border-radius: var(--tile-radius);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.2s ease;
+}
+
+.schedule-day:hover {
+  background: var(--surface-muted);
+}
+
+.schedule-day:focus-visible {
+  outline: 2px solid var(--focus-outline-strong);
+  outline-offset: 2px;
+}
+
+.schedule-day--empty {
+  background: none;
+}
+
+/* The date number sits in a circle, so it reads as a calendar. */
+.schedule-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+/* Today is marked with a ring; the selected day with a filled circle. The
+   two are deliberately different so they can be told apart at a glance. */
+.schedule-day.is-today .schedule-day-number {
+  border-color: var(--teal);
+  font-weight: 700;
+}
+
+.schedule-day.is-selected .schedule-day-number {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.schedule-day.is-selected:hover .schedule-day-number {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+/* ---------- Duty dots ---------- */
+.schedule-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 8px;
+}
+
+.schedule-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--divider);
+}
+
+.schedule-dot--ongoing { background: var(--status-ongoing-solid); }
+.schedule-dot--completed { background: var(--status-completed-solid); }
+.schedule-dot--pending { background: var(--status-pending-solid); }
+.schedule-dot--missed { background: var(--status-missed-solid); }
+
+/* ---------- Legend ---------- */
+.schedule-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--divider);
+}
+
+.schedule-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Selected-day panel ---------- */
+.schedule-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-panel-head {
+  margin-bottom: 14px;
+}
+
+.schedule-panel-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.schedule-panel-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.schedule-duty-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.schedule-duty-card {
+  position: relative;
+  padding: 12px 14px 12px 18px;
+  border-radius: var(--tile-radius);
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+/* The leading stripe repeats the status colour used by the calendar dots. */
+.schedule-duty-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--divider);
+}
+
+.schedule-duty-card--ongoing::before { background: var(--status-ongoing-solid); }
+.schedule-duty-card--completed::before { background: var(--status-completed-solid); }
+.schedule-duty-card--pending::before { background: var(--status-pending-solid); }
+.schedule-duty-card--missed::before { background: var(--status-missed-solid); }
+
+.schedule-duty-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.schedule-duty-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.schedule-duty-time,
+.schedule-duty-area,
+.schedule-duty-students {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.schedule-duty-time {
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.schedule-duty-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.schedule-empty {
+  padding: 40px 20px;
+}
+
+/* ---------- Narrow viewports: the calendar stacks above the panel ---------- */
+@media (max-width: 991.98px) {
+  .schedule-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .schedule-calendar,
+  .schedule-panel {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .schedule-day {
+    min-height: 54px;
+  }
+
+  .schedule-day-number {
+    width: 30px;
+    height: 30px;
+    font-size: 0.82rem;
+  }
+
+  .schedule-weekday {
+    font-size: 0.62rem;
+  }
+}

@@ -112,7 +112,7 @@ describe("POST /login", () => {
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("/dashboard");
 
-    const dash = await agent.get("/dashboard");
+    const dash = await agent.get("/csdl/dashboard");
     expect(dash.status).toBe(200);
     expect(dash.text).toContain("Ana Reyes");
     expect(dash.text).toContain("CSDL");

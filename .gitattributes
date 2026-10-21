@@ -1,0 +1,12 @@
+# Vendored third-party assets are byte-for-byte upstream files: never let Git
+# translate their line endings or otherwise rewrite them.
+server/public/vendor/** -text
+
+# Keep the project's own source files with LF endings in the repository.
+*.ts text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.ejs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.sql text eol=lf

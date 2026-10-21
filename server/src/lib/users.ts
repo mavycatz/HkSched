@@ -29,3 +29,12 @@ export async function findUserById(id: number): Promise<UserRecord | null> {
   );
   return rows[0] ?? null;
 }
+
+/** Replace a user's stored credential. The caller supplies an argon2id hash. */
+export async function updatePasswordHash(userId: number, hash: string): Promise<boolean> {
+  const { rowCount } = await getPool().query(
+    `UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1`,
+    [userId, hash],
+  );
+  return (rowCount ?? 0) > 0;
+}

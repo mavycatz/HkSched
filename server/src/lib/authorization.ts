@@ -1,4 +1,5 @@
 import type { AuthUser } from "../middleware/auth";
+import { statusLocals } from "../middleware/auth";
 
 /**
  * Record-level (row-level) authorization skeleton.
@@ -38,6 +39,7 @@ export async function canViewStudentRecord(
 
 export function sendNotFound(res: import("express").Response): void {
   res.status(404).render("status", {
+    ...statusLocals(res.req, res),
     code: 404,
     message: "This page could not be found.",
     title: "Page not found",

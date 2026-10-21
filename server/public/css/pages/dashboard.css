@@ -1,0 +1,330 @@
+/* ==========================================================================
+   CSDL Dashboard page styles.
+   Loaded after theme.css so these rules can override the shared theme.
+   Colours come from the theme's custom properties - no literal colour
+   values are allowed in a page stylesheet.
+   ========================================================================== */
+
+/* ---------- Greeting Row ---------- */
+.greeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-greeting {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--title-green);
+  margin: 0 0 4px;
+}
+
+.greeting-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--teal);
+  margin: 0;
+}
+
+.today-date {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+  .today-date {
+    white-space: normal;
+    text-align: right;
+  }
+}
+
+/* ---------- Date Filter (segmented control) ---------- */
+.range-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-label {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.range-segment {
+  display: inline-flex;
+  border: 1px solid var(--divider);
+  border-radius: var(--chip-radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.range-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.range-btn:hover {
+  background: var(--page-bg);
+}
+
+.range-btn.active {
+  background: var(--teal);
+  color: var(--white);
+}
+
+.range-custom-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range-date-input {
+  width: 130px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Stat Cards Grid ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 0;
+  /* Every card is as tall as the tallest one in the row. */
+  align-items: stretch;
+}
+
+@media (max-width: 1199px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: var(--surface);
+  border: none;
+  border-radius: var(--panel-radius);
+  padding: 18px 20px;
+  min-height: 132px;
+  height: 100%;
+  box-shadow: var(--surface-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--surface-shadow-hover);
+}
+
+.stat-card:focus-visible {
+  outline: 2px solid var(--focus-outline-strong);
+  outline-offset: 3px;
+}
+
+.stat-icon-tile {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--tile-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-tile svg,
+.stat-icon-tile i {
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card .stat-label {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+  /* One line of label in every card, so the numbers below them share a
+     baseline across the row. */
+  min-height: 21px;
+}
+
+.stat-card .stat-number {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  margin: 0;
+  /* The same number line in every card. */
+  min-height: 31px;
+}
+
+/* Every card carries the same icon / label / number / caption structure so
+   the numbers line up on the same baseline across the row. */
+.stat-card .stat-caption {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--subheading);
+  margin: auto 0 0;
+  line-height: 1.3;
+}
+
+
+.stat-blue .stat-icon-tile { background: var(--accent-blue-bg); }
+.stat-blue .stat-icon-tile i,
+.stat-blue .stat-icon-tile svg { color: var(--accent-blue); }
+.stat-blue .stat-number { color: var(--accent-blue); }
+
+.stat-green .stat-icon-tile { background: var(--accent-green-bg); }
+.stat-green .stat-icon-tile i,
+.stat-green .stat-icon-tile svg { color: var(--accent-green); }
+.stat-green .stat-number { color: var(--accent-green); }
+
+.stat-amber .stat-icon-tile { background: var(--accent-amber-bg); }
+.stat-amber .stat-icon-tile i,
+.stat-amber .stat-icon-tile svg { color: var(--accent-amber); }
+.stat-amber .stat-number { color: var(--accent-amber); }
+
+.stat-purple .stat-icon-tile { background: var(--accent-purple-bg); }
+.stat-purple .stat-icon-tile i,
+.stat-purple .stat-icon-tile svg { color: var(--accent-purple); }
+.stat-purple .stat-number { color: var(--accent-purple); }
+
+.stat-orange .stat-icon-tile { background: var(--accent-orange-bg); }
+.stat-orange .stat-icon-tile i,
+.stat-orange .stat-icon-tile svg { color: var(--accent-orange); }
+.stat-orange .stat-number { color: var(--accent-orange); }
+
+.stat-red .stat-icon-tile { background: var(--accent-red-bg); }
+.stat-red .stat-icon-tile i,
+.stat-red .stat-icon-tile svg { color: var(--accent-red); }
+.stat-red .stat-number { color: var(--accent-red); }
+
+/* ---------- Assignments Table ---------- */
+.card.border-0.shadow-sm {
+  border: none;
+  box-shadow: var(--surface-shadow);
+}
+
+/* The table fills the width of the card it sits in. */
+.card-body > .table-responsive {
+  width: 100%;
+}
+
+.table {
+  font-family: var(--font);
+  font-size: 0.9rem;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+
+.table thead th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--navy);
+  border-bottom: 1px solid var(--divider);
+  padding: 0.75rem 1rem;
+}
+
+.table tbody td {
+  border-bottom: 1px solid var(--divider);
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-hover tbody tr:hover {
+  background: var(--surface-muted);
+}
+
+/* ---------- Skeleton Loading ---------- */
+.skeleton-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.skeleton-col {
+  flex: 1;
+  height: 140px;
+  background: var(--surface-sunken);
+  border-radius: var(--panel-radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-col::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--surface-sunken), var(--surface-skeleton-mid), var(--surface-sunken));
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.skeleton-table {
+  height: 300px;
+  background: var(--surface-sunken);
+  border-radius: var(--panel-radius);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.skeleton-table::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--surface-sunken), var(--surface-skeleton-mid), var(--surface-sunken));
+  animation: shimmer 1.5s infinite;
+}

@@ -1,4 +1,7 @@
 <%- include("partials/head", { title: "Sign in" }) %>
+<%# Preload the hero background so the login screen paints without a flash. %>
+<link rel="preload" as="image" href="/img/bg.png">
+<link rel="preload" as="image" href="/img/cdslweb.png">
 
 <div class="login-page">
   <div class="login-wrap">
@@ -82,6 +85,6 @@
   </div>
 </div>
 
-<script src="/js/login.js" defer></script>
+<script src="/js/login.js?v=<%= typeof assetVersion !== "undefined" ? assetVersion : "0" %>" defer></script>
 </body>
 </html>

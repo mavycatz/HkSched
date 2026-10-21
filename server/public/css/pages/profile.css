@@ -1,0 +1,412 @@
+/* ==========================================================================
+   Profile page styles (tab navigation, identity header, form grids).
+   Loaded after theme.css so these rules can override the shared theme.
+   Colours come from the theme's custom properties - no literal colour
+   values are allowed in a page stylesheet.
+   ========================================================================== */
+
+/* ---------- Page header ---------- */
+.profile-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.profile-page-title {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--title-green);
+  margin: 0 0 4px;
+}
+
+.profile-page-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ---------- Two-column layout ---------- */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* ---------- Compact tab navigation ---------- */
+.profile-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  padding: 10px;
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: var(--tile-radius);
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.profile-tab:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.profile-tab:focus-visible {
+  outline: 2px solid var(--focus-outline-strong);
+  outline-offset: 2px;
+}
+
+/* The active tab is marked by colour AND by a filled background, so it does
+   not rely on colour alone. */
+.profile-tab.is-active {
+  background: var(--teal);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.profile-tab-label {
+  white-space: nowrap;
+}
+
+/* ---------- Content card ---------- */
+.profile-content {
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  padding: 28px;
+  min-width: 0;
+}
+
+.profile-panel-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+
+.profile-panel-subtitle {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 18px;
+}
+
+/* ---------- Identity header: one horizontal row ---------- */
+.profile-identity {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  padding: 16px 0 20px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.profile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--role-chip-bg);
+  color: var(--navy);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.profile-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.profile-identity-name {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.profile-identity-role {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.profile-picture-btn {
+  flex: 0 0 auto;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.82rem;
+  border-radius: var(--button-radius);
+  white-space: nowrap;
+}
+
+/* ---------- Form grids ---------- */
+.profile-form {
+  margin-top: 18px;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-field .form-label {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+/* Every input in a row shares one height, so the grid lines up. */
+.profile-field .form-control {
+  font-family: var(--font);
+  font-size: 0.88rem;
+  height: 42px;
+  background: var(--input-fill);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  color: var(--text);
+}
+
+.profile-field .form-control:focus {
+  background: var(--surface);
+  border-color: var(--teal);
+  box-shadow: var(--focus-ring);
+}
+
+/* The read-only identifier looks different from the editable fields. */
+.profile-field .profile-readonly {
+  background: var(--surface-sunken);
+  border-color: var(--divider);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.profile-field .profile-readonly:focus {
+  background: var(--surface-sunken);
+  border-color: var(--divider);
+  box-shadow: none;
+}
+
+.profile-field-hint {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.profile-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--tile-radius);
+  background: var(--accent-amber-bg);
+  color: var(--accent-amber);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.profile-note .bi {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.profile-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.profile-form-actions .btn {
+  font-family: var(--font);
+  font-weight: 600;
+  border-radius: var(--button-radius);
+  min-width: 148px;
+}
+
+/* ---------- Alerts ---------- */
+.profile-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: var(--tile-radius);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.profile-alert--success {
+  background: var(--status-completed-bg);
+  color: var(--status-completed-fg);
+}
+
+.profile-alert--error {
+  background: var(--status-missed-bg);
+  color: var(--status-missed-fg);
+}
+
+.profile-alert .bi {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ---------- Notification preferences ---------- */
+.profile-notifications {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  overflow: hidden;
+}
+
+.profile-notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+}
+
+.profile-notification + .profile-notification {
+  border-top: 1px solid var(--divider);
+}
+
+.profile-notification-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-notification-label {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.profile-notification-description {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.profile-notification-control {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-left: 2.5em;
+  min-height: 24px;
+}
+
+.profile-notification-control .form-check-input {
+  width: 2.1em;
+  height: 1.15em;
+  margin-top: 0;
+  cursor: pointer;
+}
+
+.profile-notification-control .form-check-input:focus {
+  border-color: var(--teal);
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------- Narrow viewports: the tabs stay one scrollable row above the
+   content, and the content stacks underneath ---------- */
+@media (max-width: 991.98px) {
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profile-tab {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .profile-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .profile-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The identity row never stacks: it only gets tighter. */
+  .profile-identity {
+    gap: 12px;
+    padding: 12px 0 16px;
+  }
+
+  .profile-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: 1rem;
+  }
+
+  .profile-picture-btn {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+}

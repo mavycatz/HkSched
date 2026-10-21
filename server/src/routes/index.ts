@@ -7,13 +7,13 @@ import {
   getCsdlDashboard,
   getCsdlDashboardJson,
   getCsdlDutyManagement,
-  getCsdlProfile,
-  getCsdlSchedule,
   getDashboard,
   getForgotPassword,
   registerPlaceholderRoutes,
 } from "../controllers/pageController";
-import { requireAuth, requirePermission, requireRole } from "../middleware/auth";
+import { getSchedule } from "../controllers/scheduleController";
+import { getProfile, postProfilePassword } from "../controllers/profileController";
+import { requireAuth, requirePermission, requireRole, statusLocals } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { audit } from "../lib/audit";
 
@@ -43,6 +43,31 @@ export const loginLimiter = rateLimit({
 });
 
 const router = Router();
+
+/**
+ * Password changes are rate limited per signed-in user: 10 attempts per
+ * quarter of an hour. The login limiter cannot be reused because it is keyed
+ * on the identifier, not on the session.
+ */
+export const passwordChangeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const user = req.user as { id?: number } | undefined;
+    return user && typeof user.id === "number" ? `user:${user.id}` : `ip:${req.ip}`;
+  },
+  handler: (req, res) => {
+    void audit("password_change_rate_limited", req, req.user?.id ?? null, {});
+    res.status(429).render("status", {
+      ...statusLocals(req, res),
+      code: 429,
+      message: "Too many password change attempts. Please try again later.",
+      title: "Too many attempts",
+    });
+  },
+});
 
 router.get("/", (_req, res) => res.redirect("/login"));
 
@@ -88,7 +113,7 @@ router.get(
   requireAuth,
   requireRole("CSDL"),
   requirePermission("schedules.view"),
-  getCsdlSchedule,
+  getSchedule,
 );
 router.get(
   "/csdl/applications",
@@ -102,7 +127,35 @@ router.get(
   requireAuth,
   requireRole("CSDL"),
   requirePermission("profile.own"),
-  getCsdlProfile,
+  getProfile,
+);
+
+// Schedule and profile pages. They are registered explicitly rather than
+// through the placeholder registry, because they render real pages.
+router.get(
+  "/my-schedule",
+  requireAuth,
+  requirePermission("schedule.own.view"),
+  getSchedule,
+);
+router.get(
+  "/schedule",
+  requireAuth,
+  requirePermission("schedule.own.view"),
+  getSchedule,
+);
+router.get(
+  "/profile",
+  requireAuth,
+  requirePermission("profile.own"),
+  getProfile,
+);
+router.post(
+  "/profile/password",
+  requireAuth,
+  requirePermission("profile.own"),
+  passwordChangeLimiter,
+  postProfilePassword,
 );
 
 export default router;

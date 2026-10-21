@@ -1,0 +1,17 @@
+<%- include("../layouts/app-shell", {
+  title: title,
+  bodyClass: bodyClass,
+  pageStyles: ["profile"],
+  pageScripts: ["profile"],
+  contentPartial: "../pages/profile-content",
+  contentLocals: {
+    user: user,
+    nav: nav,
+    activePath: activePath,
+    csrfToken: csrfToken,
+    profile: profile,
+    activeTab: activeTab,
+    passwordChanged: passwordChanged,
+    passwordError: passwordError
+  }
+}) %>
