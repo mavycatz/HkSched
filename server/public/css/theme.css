@@ -1099,15 +1099,24 @@ body.csdl-page {
 }
 
 /* ---------- Main Content ---------- */
+.main-content {
+  background: #FFFFFF;
+}
+
 .content {
   flex: 1;
   margin-left: clamp(220px, 16vw, 260px);
   min-height: calc(100dvh - 72px);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 991.98px) {
   .content {
     margin-left: 0;
+    padding: 20px 16px;
   }
 }
 

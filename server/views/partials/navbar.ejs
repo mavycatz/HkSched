@@ -45,16 +45,9 @@ function initialsOf(name) {
             <div class="user-role text-truncate" style="max-width: 140px;">CSDL Staff</div>
           </div>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-          <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li>
-            <form method="post" action="/logout" class="m-0">
-              <input type="hidden" name="_csrf" value="<%- csrfToken %>">
-              <button class="dropdown-item text-danger" type="submit">Logout</button>
-            </form>
-          </li>
-        </ul>
+<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+  <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
+</ul>
       </div>
     </div>
   </div>

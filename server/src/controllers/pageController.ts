@@ -49,10 +49,15 @@ function shellLocals(req: Request, res: Response) {
 }
 
 export function getDashboard(req: Request, res: Response): void {
-  res.render("dashboard", {
-    ...shellLocals(req, res),
-    title: "Dashboard",
-    activePath: "/dashboard",
+  const user = req.user!;
+  if (user.role === "CSDL") {
+    res.redirect("/csdl/dashboard");
+    return;
+  }
+  res.status(403).render("status", {
+    code: 403,
+    message: "You don't have access to this page.",
+    title: "Access denied",
   });
 }
 
@@ -167,6 +172,7 @@ export async function getCsdlDashboard(
       ...shellLocals(req, res),
       title: "Dashboard",
       activePath: "/csdl/dashboard",
+      bodyClass: "csdl-page",
       greeting,
       displayName,
       todayDate,
@@ -183,6 +189,7 @@ export function getCsdlDutyManagement(req: Request, res: Response): void {
     ...shellLocals(req, res),
     title: "Duty Management",
     activePath: "/csdl/duty-management",
+    bodyClass: "csdl-page",
   });
 }
 
@@ -191,6 +198,7 @@ export function getCsdlSchedule(req: Request, res: Response): void {
     ...shellLocals(req, res),
     title: "Schedule",
     activePath: "/csdl/schedule",
+    bodyClass: "csdl-page",
   });
 }
 
@@ -199,6 +207,7 @@ export function getCsdlApplications(req: Request, res: Response): void {
     ...shellLocals(req, res),
     title: "Applications",
     activePath: "/csdl/applications",
+    bodyClass: "csdl-page",
   });
 }
 
@@ -207,5 +216,6 @@ export function getCsdlProfile(req: Request, res: Response): void {
     ...shellLocals(req, res),
     title: "Profile & Settings",
     activePath: "/csdl/profile",
+    bodyClass: "csdl-page",
   });
 }
