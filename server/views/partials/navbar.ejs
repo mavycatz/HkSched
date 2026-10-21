@@ -29,7 +29,7 @@ function initialsOf(name) {
           <i class="bi bi-bell fs-5 text-navy"></i>
           <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="bellDropdown">
+        <ul class="dropdown-menu dropdown-menu-end p-2 hidden" id="bellDropdown-menu" aria-labelledby="bellDropdown">
           <li><p class="dropdown-item-text text-muted small m-0">No notifications</p></li>
         </ul>
       </div>
@@ -45,7 +45,7 @@ function initialsOf(name) {
             <div class="user-role text-truncate" style="max-width: 140px;">CSDL Staff</div>
           </div>
         </a>
-<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+<ul class="dropdown-menu dropdown-menu-end hidden" id="userDropdown-menu" aria-labelledby="userDropdown">
   <li><a class="dropdown-item" href="/csdl/profile">Profile &amp; Settings</a></li>
 </ul>
       </div>

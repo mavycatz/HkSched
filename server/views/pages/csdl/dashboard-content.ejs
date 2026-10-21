@@ -1,84 +1,58 @@
 <!-- Dashboard greeting -->
-<div class="row mb-4">
-  <div class="col-lg-8">
+<div class="greeting-row">
+  <div class="greeting">
     <h1 class="dashboard-greeting fw-bold"><%= greeting %>, <%= displayName %>!</h1>
-    <p class="text-muted mb-0">Here's your duty summary for today</p>
+    <p class="greeting-subtitle mb-0">Here's your duty summary for today</p>
   </div>
-  <div class="col-lg-4 text-end">
+  <div class="text-end">
     <p class="today-date fw-medium mb-0"><%= todayDate %></p>
   </div>
 </div>
 
 <!-- Summary stat cards -->
-<div class="row mb-4">
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card h-100 border-0 shadow-sm">
-      <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="card-title text-muted small fw-medium">Total Students</h6>
-            <h2 class="display-6 fw-bold mb-0"><%= totals.students %></h2>
-          </div>
-          <div class="stat-icon bg-blue">
-            <i class="bi bi-people"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card h-100 border-0 shadow-sm">
-      <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="card-title text-muted small fw-medium">Completed Duties</h6>
-            <h2 class="display-6 fw-bold mb-0"><%= totals.completed %></h2>
-          </div>
-          <div class="stat-icon bg-green">
-            <i class="bi bi-check-circle"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card h-100 border-0 shadow-sm">
-      <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="card-title text-muted small fw-medium">Ongoing Duties</h6>
-            <h2 class="display-6 fw-bold mb-0"><%= totals.ongoing %></h2>
-          </div>
-          <div class="stat-icon bg-amber">
-            <i class="bi bi-clock"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card h-100 border-0 shadow-sm">
-      <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="card-title text-muted small fw-medium">Total Assignments</h6>
-            <h2 class="display-6 fw-bold mb-0"><%= totals.assignments %></h2>
-          </div>
-          <div class="stat-icon bg-purple">
-            <i class="bi bi-card-text"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="stats-grid mb-4">
+  <a class="stat-card stat-blue" href="/csdl/duty-management">
+    <div class="stat-icon-tile"><i class="bi bi-people"></i></div>
+    <p class="stat-label">Total Students</p>
+    <p class="stat-number"><%= totals.students %></p>
+  </a>
+  <a class="stat-card stat-green" href="/csdl/duty-management">
+    <div class="stat-icon-tile"><i class="bi bi-check-circle"></i></div>
+    <p class="stat-label">Completed Duties</p>
+    <p class="stat-number"><%= totals.completed %></p>
+  </a>
+  <a class="stat-card stat-amber" href="/csdl/duty-management">
+    <div class="stat-icon-tile"><i class="bi bi-clock"></i></div>
+    <p class="stat-label">Ongoing Duties</p>
+    <p class="stat-number"><%= totals.ongoing %></p>
+  </a>
+  <a class="stat-card stat-purple" href="/csdl/schedule">
+    <div class="stat-icon-tile"><i class="bi bi-card-text"></i></div>
+    <p class="stat-label">Total Assignments</p>
+    <p class="stat-number"><%= totals.assignments %></p>
+  </a>
+</div>
+
+<!-- Needs attention row -->
+<div class="stats-grid mb-4">
+  <a class="stat-card stat-orange" href="/csdl/applications">
+    <div class="stat-icon-tile"><i class="bi bi-file-earmark-person"></i></div>
+    <p class="stat-label">Pending Applications</p>
+    <p class="stat-number"><%= totals.pendingApplications %></p>
+  </a>
+  <a class="stat-card stat-red" href="/csdl/duty-management">
+    <div class="stat-icon-tile"><i class="bi bi-exclamation-triangle"></i></div>
+    <p class="stat-label">Missed Duties</p>
+    <p class="stat-number"><%= totals.missed %></p>
+  </a>
 </div>
 
 <!-- Today's Assignments -->
 <div class="card border-0 shadow-sm">
   <div class="card-header bg-white border-bottom py-3">
     <div class="d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 fw-semibold">Today's Assignments</h5>
-      <a href="/csdl/duty-management" class="btn btn-sm btn-outline-primary">View all</a>
+      <h5 class="section-title mb-0">Today's Assignment</h5>
+      <a href="/csdl/duty-management" class="view-all">View all</a>
     </div>
   </div>
   <div class="card-body p-0">
@@ -102,7 +76,7 @@
               <td class="small"><%= a.area %></td>
               <td class="small"><%= a.tasks %></td>
               <td class="text-end small">
-                <span class="badge badge-<%= a.status.toLowerCase() %>"><%= a.status %></span>
+                <span class="badge badge-bg-<%= a.status.toLowerCase() %>"><%= a.status %></span>
               </td>
             </tr>
             <% }); %>
