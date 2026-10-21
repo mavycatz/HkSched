@@ -2,6 +2,7 @@ services:
   - type: web
     name: HkSched-app
     env: node
+    plan: free
     rootDir: server
     buildCommand: npm ci && npm run build
     startCommand: npm run db:migrate && npm start
@@ -12,5 +13,6 @@ services:
         generateValue: true
       - key: APP_BASE_URL
         sync: false
-    # DATABASE_URL: set manually in Render dashboard after creating the HkSched-db Postgres instance.
+    # DATABASE_URL: set manually in Render dashboard after creating the HkSched-db Postgres instance
+    # (Render free Postgres is not available; Starter plan ~$7/mo, or use a free external Postgres).
     # Health check path /health: set in Render dashboard after creation.
