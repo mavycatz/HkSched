@@ -48,17 +48,18 @@ export async function getDutySchedules(req: Request, res: Response, next: NextFu
     const v = viewer(req);
     const q = req.query as any;
     const slots = await listDutySlots(v, { date: q.date, class_group: q.class, person: q.person, from: q.from, to: q.to, q: q.q });
-    res.render("pages/duty-schedules", {
+    res.render("pages/duty-management", {
       ...shellLocals(req, res),
-      title: "Duty Schedules",
-      activePath: "/duty-schedules",
+      title: "Duty Schedule Management",
+      activePath: req.path === "/duty-management" ? "/duty-management" : "/duty-schedules",
       bodyClass: "app-page",
-      pageStyles: ["pages"],
-      pageScripts: ["duty-schedules"],
+      pageStyles: ["pages", "duty-management"],
+      pageScripts: ["duty-management"],
       slots, filters: q
     });
   } catch (e) { next(e); }
 }
+
 
 export async function getDutyDetail(req: Request, res: Response, next: NextFunction) {
   try {

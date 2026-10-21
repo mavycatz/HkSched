@@ -81,7 +81,9 @@ router.get("/todays-assignments", requireAuth, requirePermission("assignments.to
 router.post("/api/assignments/:id/done", requireAuth, app.postMarkDone);
 
 router.get("/duty-schedules", requireAuth, requirePermission("schedules.view"), app.getDutySchedules);
+router.get("/duty-management", requireAuth, requirePermission("schedules.view"), app.getDutySchedules);
 router.get("/api/duties/:id", requireAuth, app.getDutyDetail);
+
 
 router.get("/create-edit-schedule", requireAuth, requirePermission("schedules.manage"), app.getCreateEditSchedule);
 router.post("/api/duties", requireAuth, requirePermission("schedules.manage"), app.postCreateSchedule);

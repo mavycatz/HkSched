@@ -1,0 +1,133 @@
+<section class="page-header d-flex flex-wrap align-items-start justify-content-between gap-2">
+  <div>
+    <h1 class="page-title">Duty Schedule Management</h1>
+    <p class="page-subtitle">View and manage student’s duty</p>
+  </div>
+  <% if (user && user.role === 'CSDL') { %>
+  <button class="btn btn-create" id="dm-create-btn" type="button"><i class="bi bi-plus-lg me-1"></i> Create schedule</button>
+  <% } %>
+</section>
+
+<section class="card mb-3">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-lg-4">
+        <label class="form-label">Search</label>
+        <input type="text" class="form-control" id="dm-search" placeholder="Search by name, location, or task">
+      </div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="dm-status">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="missed">Missed</option>
+        </select>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-control" id="dm-date">
+      </div>
+      <div class="col-12 col-lg-2">
+        <label class="form-label">Sort</label>
+        <select class="form-select" id="dm-sort">
+          <option value="newest" selected>Date, newest first</option>
+          <option value="oldest">Date, oldest first</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-body">
+    <h5 class="mb-3">Duty Schedules</h5>
+    <div id="dm-skel" class="dm-list">
+      <div class="dm-card-skel"></div>
+      <div class="dm-card-skel"></div>
+      <div class="dm-card-skel"></div>
+    </div>
+    <div id="dm-empty" class="state-block d-none">
+      <div class="state-icon"><i class="bi bi-calendar-x"></i></div>
+      <div class="state-title">No duties scheduled</div>
+      <div class="state-text">Try adjusting filters or create a new schedule.</div>
+    </div>
+    <div id="dm-error" class="state-block d-none">
+      <div class="state-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="state-title">Something went wrong</div>
+      <div class="state-text">We couldn't load duties. Please try again.</div>
+    </div>
+    <div id="dm-list" class="dm-list" style="display:none"></div>
+    <div class="d-flex flex-wrap align-items-center justify-content-between mt-3 gap-2">
+      <div class="text-muted small" id="dm-count">Showing 0 of 0 duties</div>
+      <div class="dm-pager">
+        <button class="dm-pager-btn" id="dm-prev"><i class="bi bi-chevron-left"></i></button>
+        <div id="dm-pages" class="dm-pages"></div>
+        <button class="dm-pager-btn" id="dm-next"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="dmModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dmModalTitle">Create schedule</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dm-form">
+          <input type="hidden" name="id" id="dm-id">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label">Title/Task *</label>
+              <input class="form-control" name="title" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location/Area *</label>
+              <input class="form-control" name="area" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Start Time *</label>
+              <input type="datetime-local" class="form-control" name="start_time" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">End Time</label>
+              <input type="datetime-local" class="form-control" name="end_time">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="missed">Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Class/Group</label>
+              <input class="form-control" name="class_group">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+          </div>
+          <div id="dm-form-msg" class="mt-2 small"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__DM__ = {
+    slots: <%- JSON.stringify(slots || []) %>,
+    isStaff: <%- JSON.stringify(user && user.role === 'CSDL') %>
+  };
+</script>

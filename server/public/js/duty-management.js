@@ -1,153 +1,183 @@
-(function () {
-  "use strict";
-
-  /* ==========================================================================
-     CSDL Duty Management page behaviour.
-
-     Everything on this page is server-rendered, so the page works with
-     JavaScript disabled. This file only adds the conveniences that need a
-     script: submitting the filters without a click, keeping the pagination
-     links in step with the filter form, and filling the edit modal.
-
-     The duty forms are presentational - saving is not enabled in this
-     release - so nothing here ever submits a duty.
-     ========================================================================== */
-
-  var form = document.getElementById("duty-filter-form");
-  var search = document.getElementById("duty-search");
-  var fromInput = document.getElementById("duty-from");
-  var toInput = document.getElementById("duty-to");
-
-  /* ---------- Filters ---------- */
-
-  function applyFilters() {
-    if (!form) return;
-    form.submit();
-  }
-
-  /* The search box submits after a short pause, so a visitor is not sent to
-     the server on every keystroke. */
-  var searchTimer = null;
-  if (search && form) {
-    search.addEventListener("input", function () {
-      if (searchTimer) window.clearTimeout(searchTimer);
-      searchTimer = window.setTimeout(applyFilters, 450);
-    });
-
-    /* Enter applies the search straight away instead of waiting for the
-       debounce to elapse. */
-    search.addEventListener("keydown", function (event) {
-      if (event.key !== "Enter") return;
-      event.preventDefault();
-      if (searchTimer) window.clearTimeout(searchTimer);
-      applyFilters();
-    });
-  }
-
-  /* A date is applied as soon as it is chosen. */
-  [fromInput, toInput].forEach(function (input) {
-    if (!input || !form) return;
-    input.addEventListener("change", applyFilters);
+(function(){
+  const data = window.__DM__ || {};
+  let all = (data.slots || []).map(s => {
+    const d = s.start_time ? new Date(s.start_time) : null;
+    const status = (s.status || 'pending').toLowerCase();
+    const norm = status === 'missed' ? 'cancelled' : status;
+    return {
+      id: s.id,
+      title: s.title || 'Duty',
+      area: s.area || '-',
+      description: s.description || s.title || '-',
+      start_time: s.start_time,
+      end_time: s.end_time,
+      date: d,
+      month: d ? d.toLocaleString('en-US', { month: 'short' }) : '-',
+      day: d ? d.getDate() : '-',
+      weekday: d ? d.toLocaleString('en-US', { weekday: 'short' }) : '-',
+      person: s.assignee_name || 'Unassigned',
+      teacher: s.class_group || s.assignee_name || '-',
+      status: norm,
+      raw: s
+    };
   });
+  all.sort((a,b)=> (b.date?b.date.getTime():0) - (a.date?a.date.getTime():0));
 
-  /* ---------- Pagination ----------
-     The pagination links are rendered by the server, so they work without a
-     script. Before the browser follows one, the filter values currently in
-     the form are written into it, so the link always matches what is on
-     screen. */
-  var pageLinks = document.querySelectorAll(".duty-pagination .page-link");
-  var FILTER_KEYS = ["status", "q", "from", "to"];
+  const skel = document.getElementById('dm-skel');
+  const list = document.getElementById('dm-list');
+  const empty = document.getElementById('dm-empty');
+  const error = document.getElementById('dm-error');
+  const search = document.getElementById('dm-search');
+  const statusF = document.getElementById('dm-status');
+  const dateF = document.getElementById('dm-date');
+  const sortF = document.getElementById('dm-sort');
+  const count = document.getElementById('dm-count');
+  const prev = document.getElementById('dm-prev');
+  const next = document.getElementById('dm-next');
+  const pagesEl = document.getElementById('dm-pages');
+  const createBtn = document.getElementById('dm-create-btn');
+  const modalEl = document.getElementById('dmModal');
+  const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
+  const form = document.getElementById('dm-form');
+  const formMsg = document.getElementById('dm-form-msg');
+  const modalTitle = document.getElementById('dmModalTitle');
 
-  pageLinks.forEach(function (link) {
-    link.addEventListener("click", function () {
-      if (!form) return;
-      var href = link.getAttribute("href");
-      if (!href) return;
+  let page = 1;
+  const pageSize = 5;
 
-      var parts = href.split("?");
-      var path = parts[0];
-      var params = new URLSearchParams(parts[1] || "");
+  function apply(){
+    let items = all.slice();
+    const q = (search.value||'').toLowerCase();
+    if(q){
+      items = items.filter(it => (it.person.toLowerCase().includes(q) || it.area.toLowerCase().includes(q) || it.title.toLowerCase().includes(q) || it.description.toLowerCase().includes(q)));
+    }
+    const sf = statusF.value;
+    if(sf && sf !== 'all'){ items = items.filter(it => it.status === sf); }
+    if(dateF.value){
+      items = items.filter(it => it.date && it.date.toISOString().slice(0,10) === dateF.value);
+    }
+    if(sortF.value === 'oldest'){
+      items.sort((a,b)=>(a.date?a.date.getTime():0)-(b.date?b.date.getTime():0));
+    }else{
+      items.sort((a,b)=>(b.date?b.date.getTime():0)-(a.date?a.date.getTime():0));
+    }
+    render(items);
+  }
 
-      FILTER_KEYS.forEach(function (key) {
-        params.delete(key);
+  function render(items){
+    skel.style.display = 'none';
+    if(!items.length){ list.style.display='none'; empty.classList.remove('d-none'); count.textContent='Showing 0 of 0 duties'; pagesEl.innerHTML=''; prev.disabled=true; next.disabled=true; return; }
+    empty.classList.add('d-none');
+    list.style.display='flex';
+    const total = items.length;
+    const pages = Math.max(1, Math.ceil(total/pageSize));
+    if(page > pages) page = pages;
+    const start = (page-1)*pageSize;
+    const view = items.slice(start, start+pageSize);
+    count.textContent = `Showing ${start+1}-${Math.min(start+pageSize,total)} of ${total} duties`;
+    list.innerHTML = view.map(it=>{
+      const initials = it.person.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+      const time = it.date ? it.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+      const end = it.raw.end_time ? new Date(it.raw.end_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+      const timeStr = end ? time + ' - ' + end : time;
+      return `<article class="dm-card status-${it.status}">
+        <div class="dm-date">
+          <div class="dm-date-month">${it.month}</div>
+          <div class="dm-date-day">${it.day}</div>
+          <div class="dm-date-week">${it.weekday}</div>
+        </div>
+        <div class="dm-main">
+          <div class="dm-top">
+            <div class="dm-person">
+              <div class="dm-avatar">${initials}</div>
+              <div class="dm-name">${it.person}</div>
+            </div>
+            <span class="dm-badge ${it.status}">${it.status === 'cancelled' ? 'Cancelled' : it.status === 'completed' ? 'Completed' : 'Pending'}</span>
+          </div>
+          <div class="dm-meta">
+            <div class="dm-meta-item"><i class="bi bi-book"></i><span>${it.area}</span></div>
+            <div class="dm-meta-item"><i class="bi bi-broom"></i><span>${it.title}</span></div>
+            <div class="dm-meta-item"><i class="bi bi-clock"></i><span>${timeStr || '-'}</span></div>
+            <div class="dm-meta-item"><i class="bi bi-person-badge"></i><span>${it.teacher}</span></div>
+          </div>
+        </div>
+        ${data.isStaff ? `<div class="dm-actions">
+          <button class="dm-icon-btn edit" data-edit="${it.id}" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="dm-icon-btn del" data-del="${it.id}" title="Delete"><i class="bi bi-trash"></i></button>
+        </div>` : ''}
+      </article>`;
+    }).join('');
+    list.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = Number(btn.getAttribute('data-edit'));
+        const s = all.find(x=>x.id===id);
+        if(!s) return;
+        modalTitle.textContent = 'Edit schedule';
+        form.id.value = s.id;
+        form.title.value = s.raw.title || '';
+        form.area.value = s.raw.area || '';
+        form.description.value = s.raw.description || '';
+        if(s.raw.start_time){ form.start_time.value = new Date(s.raw.start_time).toISOString().slice(0,16); }
+        if(s.raw.end_time){ form.end_time.value = new Date(s.raw.end_time).toISOString().slice(0,16); }
+        form.status.value = s.raw.status === 'missed' ? 'missed' : s.raw.status || 'pending';
+        form.class_group.value = s.raw.class_group || '';
+        formMsg.textContent = '';
+        if(modal) modal.show();
       });
-
-      var data = new FormData(form);
-      FILTER_KEYS.forEach(function (key) {
-        var value = data.get(key);
-        if (value !== null && value !== "") params.set(key, value);
+    });
+    list.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const id = btn.getAttribute('data-del');
+        if(!confirm('Delete this duty?')) return;
+        const res = await fetch('/api/duties/'+id,{method:'DELETE'});
+        if(res.ok){ location.reload(); } else alert('Failed to delete');
       });
-
-      var query = params.toString();
-      link.setAttribute("href", path + (query ? "?" + query : ""));
     });
-  });
 
-  /* ---------- Modals ---------- */
-
-  function setField(id, value) {
-    var field = document.getElementById(id);
-    if (field) field.value = value === null || value === undefined ? "" : value;
+    pagesEl.innerHTML = '';
+    for(let p=1;p<=pages;p++){
+      const b = document.createElement('button');
+      b.className = 'dm-page' + (p===page?' active':'');
+      b.textContent = p;
+      b.addEventListener('click', ()=>{ page=p; apply(); });
+      pagesEl.appendChild(b);
+    }
+    prev.disabled = page<=1;
+    next.disabled = page>=pages;
+    prev.onclick = ()=>{ if(page>1){ page--; apply(); }};
+    next.onclick = ()=>{ if(page<pages){ page++; apply(); }};
   }
 
-  function resetForm(id) {
-    var element = document.getElementById(id);
-    if (element) element.reset();
-  }
-
-  /* The edit modal is filled from the button that opened it, so the form
-     always shows the duty that was chosen. */
-  var editButtons = document.querySelectorAll(".duty-edit-btn");
-  editButtons.forEach(function (button) {
-    button.addEventListener("click", function () {
-      var data = button.dataset || {};
-      setField("edit-duty-title", data.dutyTitle);
-      setField("edit-duty-area", data.dutyArea);
-      setField("edit-duty-assignee", data.dutyAssignee);
-      setField("edit-duty-status", data.dutyStatus);
-      setField("edit-duty-start", data.dutyStart);
-      setField("edit-duty-end", data.dutyEnd);
-    });
-  });
-
-  /* The create modal always opens on an empty form. */
-  var createModal = document.getElementById("create-duty-modal");
-  if (createModal) {
-    createModal.addEventListener("show.bs.modal", function () {
-      resetForm("create-duty-form");
-    });
-    createModal.addEventListener("hidden.bs.modal", function () {
-      resetForm("create-duty-form");
+  if(createBtn){
+    createBtn.addEventListener('click', ()=>{
+      modalTitle.textContent = 'Create schedule';
+      form.reset(); form.id.value='';
+      form.status.value = 'pending';
+      formMsg.textContent = '';
+      if(modal) modal.show();
     });
   }
 
-  /* Closing the edit modal discards whatever was typed into it. */
-  var editModal = document.getElementById("edit-duty-modal");
-  if (editModal) {
-    editModal.addEventListener("hidden.bs.modal", function () {
-      resetForm("edit-duty-form");
+  if(form){
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(form);
+      const body = Object.fromEntries(fd.entries());
+      const id = body.id;
+      delete body.id;
+      if(body.status === 'missed') body.status = 'pending';
+      formMsg.textContent = 'Saving...';
+      try {
+        let res;
+        if(id){ res = await fetch('/api/duties/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); }
+        else { res = await fetch('/api/duties',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); }
+        const j = await res.json();
+        if(res.ok){ formMsg.textContent='Saved'; setTimeout(()=>location.reload(), 600); }
+        else formMsg.textContent = j.error || 'Error saving';
+      } catch(ex){ formMsg.textContent = 'Error'; }
     });
   }
 
-  /* The duty forms never submit: there is no endpoint that writes duties in
-     this release, and the form would otherwise reload the page with the
-     filters stripped. */
-  ["create-duty-form", "edit-duty-form"].forEach(function (id) {
-    var element = document.getElementById(id);
-    if (!element) return;
-    element.addEventListener("submit", function (event) {
-      event.preventDefault();
-    });
-  });
-
-  /* The primary action is present but disabled; the note next to the form
-     says why. */
-  ["create-duty-save", "edit-duty-save"].forEach(function (id) {
-    var button = document.getElementById(id);
-    if (!button) return;
-    button.setAttribute("aria-disabled", "true");
-    button.addEventListener("click", function (event) {
-      event.preventDefault();
-    });
-  });
+  [search,statusF,dateF,sortF].forEach(el=>{ if(el) el.addEventListener('input', ()=>{ page=1; apply(); }); if(el && el.tagName==='SELECT') el.addEventListener('change', ()=>{ page=1; apply(); }); });
+  setTimeout(apply, 150);
 })();

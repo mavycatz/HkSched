@@ -37,13 +37,14 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   CSDL: [
     { path: "/csdl/dashboard", label: "Dashboard", permission: "dashboard.view", icon: "home" },
     { path: "/todays-assignments", label: "Today's Assignments", permission: "assignments.today.view", icon: "calendar" },
-    { path: "/csdl/schedule", label: "Duty Schedules", permission: "schedules.view", icon: "calendar" },
-    { path: "/csdl/duty-management", label: "Create/Edit Schedule", permission: "schedules.manage", icon: "edit" },
+    { path: "/duty-management", label: "Duty Management", permission: "schedules.view", icon: "calendar" },
+    { path: "/create-edit-schedule", label: "Create/Edit Schedule", permission: "schedules.manage", icon: "edit" },
     { path: "/assign-students-teachers", label: "Assign Students/Teachers", permission: "assign.students_teachers", icon: "users" },
     { path: "/monitor-completion", label: "Monitor Completion", permission: "completion.monitor", icon: "monitor" },
     { path: "/csdl/applications", label: "Applications", permission: "applications.manage", icon: "file" },
     { path: "/csdl/profile", label: "Profile & Settings", permission: "settings.manage", icon: "user" },
   ],
+
 };
 
 export function navFor(role: Role): NavItem[] {
