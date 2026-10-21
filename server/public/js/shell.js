@@ -86,14 +86,19 @@
 
         e.preventDefault();
 
-        var url = btn.getAttribute("href");
-        if (!url) return;
+        var href = btn.getAttribute("href");
+        if (!href) return;
+
+        // Build JSON API URL: /csdl/dashboard.json?range=today
+        var urlObj = new URL(href, window.location.origin);
+        urlObj.pathname = "/csdl/dashboard.json";
+        var apiUrl = urlObj.toString();
 
         // Show skeleton
         if (skeleton) skeleton.classList.remove("d-none");
         if (tableBody) tableBody.innerHTML = "";
 
-        fetch(url + "&_format=json", {
+        fetch(apiUrl, {
           headers: { Accept: "application/json" },
           credentials: "same-origin",
         })

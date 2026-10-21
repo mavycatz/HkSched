@@ -848,7 +848,7 @@ a {
 }
 
 /* ==========================================================================
-   HK Duty Dashboard — Bootstrap custom branding
+   HK Duty Dashboard ï¿½ Bootstrap custom branding
    All custom colors live here; Bootstrap provides the layout framework.
    ========================================================================== */
 
@@ -987,7 +987,7 @@ body.csdl-page {
   top: 0;
   z-index: 50;
   padding: 0 1rem !important;
-  margin-left: clamp(220px, 16vw, 260px);
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -996,6 +996,7 @@ body.csdl-page {
   .navbar {
     margin-left: 0;
     padding: 0 0.75rem !important;
+    width: 100%;
   }
 }
 
@@ -1130,15 +1131,16 @@ body.csdl-page {
 .main-content {
   background: #F0F4F8;
   flex: 1;
+  margin-left: clamp(220px, 16vw, 260px);
 }
 
 .content {
   flex: 1;
-  margin-left: clamp(220px, 16vw, 260px);
   min-height: calc(100dvh - 72px);
   display: flex;
   flex-direction: column;
   padding: 32px 40px;
+  padding-top: 72px;
   box-sizing: border-box;
 }
 
@@ -1146,6 +1148,7 @@ body.csdl-page {
   .content {
     margin-left: 0;
     padding: 20px 16px;
+    padding-top: 72px;
   }
 }
 
