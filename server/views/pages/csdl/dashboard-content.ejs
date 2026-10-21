@@ -1,0 +1,123 @@
+<!-- Dashboard greeting -->
+<div class="row mb-4">
+  <div class="col-lg-8">
+    <h1 class="dashboard-greeting fw-bold"><%= greeting %>, <%= displayName %>!</h1>
+    <p class="text-muted mb-0">Here's your duty summary for today</p>
+  </div>
+  <div class="col-lg-4 text-end">
+    <p class="today-date fw-medium mb-0"><%= todayDate %></p>
+  </div>
+</div>
+
+<!-- Summary stat cards -->
+<div class="row mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card h-100 border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="card-title text-muted small fw-medium">Total Students</h6>
+            <h2 class="display-6 fw-bold mb-0"><%= totals.students %></h2>
+          </div>
+          <div class="stat-icon bg-blue">
+            <i class="bi bi-people"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card h-100 border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="card-title text-muted small fw-medium">Completed Duties</h6>
+            <h2 class="display-6 fw-bold mb-0"><%= totals.completed %></h2>
+          </div>
+          <div class="stat-icon bg-green">
+            <i class="bi bi-check-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card h-100 border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="card-title text-muted small fw-medium">Ongoing Duties</h6>
+            <h2 class="display-6 fw-bold mb-0"><%= totals.ongoing %></h2>
+          </div>
+          <div class="stat-icon bg-amber">
+            <i class="bi bi-clock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card h-100 border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="card-title text-muted small fw-medium">Total Assignments</h6>
+            <h2 class="display-6 fw-bold mb-0"><%= totals.assignments %></h2>
+          </div>
+          <div class="stat-icon bg-purple">
+            <i class="bi bi-card-text"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Today's Assignments -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-bottom py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-semibold">Today's Assignments</h5>
+      <a href="/csdl/duty-management" class="btn btn-sm btn-outline-primary">View all</a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="border-0 fw-medium small text-navy">Date</th>
+            <th class="border-0 fw-medium small text-navy">Time</th>
+            <th class="border-0 fw-medium small text-navy">Area</th>
+            <th class="border-0 fw-medium small text-navy">Tasks</th>
+            <th class="border-0 fw-medium small text-navy text-end">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (assignmentsToday && assignmentsToday.length > 0) { %>
+            <% assignmentsToday.forEach(function (a) { %>
+            <tr>
+              <td class="small"><%= a.date %></td>
+              <td class="small"><%= a.time %></td>
+              <td class="small"><%= a.area %></td>
+              <td class="small"><%= a.tasks %></td>
+              <td class="text-end small">
+                <span class="badge badge-<%= a.status.toLowerCase() %>"><%= a.status %></span>
+              </td>
+            </tr>
+            <% }); %>
+          <% } else { %>
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <div class="empty-state">
+                <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">No tasks for today</p>
+              </div>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

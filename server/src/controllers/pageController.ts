@@ -138,9 +138,9 @@ export async function getAttendanceProfile(
 }
 
 /** CSDL Dashboard — greeting computed in Asia/Manila timezone, data from stub service. */
-export function getCsdlDashboard(req: Request, res: Response): void {
+export async function getCsdlDashboard(req: Request, res: Response): Promise<void> {
   const user = req.user!;
-  const data = getDashboardData();
+  const data = await getDashboardData();
 
   // Greeting by time of day in Asia/Manila (UTC+8).
   const manilaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));

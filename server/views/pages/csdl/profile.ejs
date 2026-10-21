@@ -1,26 +1,11 @@
-<%- include("../partials/head", { title: "Profile", bodyClass: "csdl-page" }) %>
-<div class="app-shell">
-  <aside class="csdl-sidebar">
-    <%- include("../partials/sidebar", { user: user, nav: nav, activePath: "/csdl/profile", csrfToken: csrfToken }) %>
-  </aside>
-  <div class="csdl-main">
-    <header class="csdl-navbar">
-      <%- include("../partials/navbar", { user: user, csrfToken: csrfToken }) %>
-    </header>
-    <main class="csdl-content">
-      <div class="csdl-greeting-row">
-        <div class="csdl-greeting">
-          <h1 class="csdl-greeting-title">Profile &amp; Settings</h1>
-          <p class="csdl-greeting-subtitle">Manage your account settings.</p>
-        </div>
-      </div>
-      <div class="csdl-empty-state" style="margin-top: 32px;">
-        <svg class="csdl-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <p class="csdl-empty-text">Coming soon</p>
-      </div>
-    </main>
-  </div>
-</div>
-<script src="/js/shell.js" defer></script>
-</body>
-</html>
+<%- include("../layouts/app-shell", {
+  title: "Profile & Settings",
+  bodyClass: "csdl-page",
+  contentPartial: "../pages/csdl/profile-content",
+  contentLocals: {
+    user: user,
+    nav: nav,
+    activePath: "/csdl/profile",
+    csrfToken: csrfToken
+  }
+}) %>
