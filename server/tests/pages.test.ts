@@ -3,7 +3,7 @@ import { getPool } from "../src/db/pool";
 import { hashPassword } from "../src/lib/password";
 import { loginAs, csrfFrom, PASSWORD } from "./helpers";
 import request from "supertest";
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import path from "path";
 
 jest.setTimeout(30000);
@@ -156,6 +156,201 @@ describe("placeholder pages render per role (6.3-6.5)", () => {
     expect(dash.text).toContain("CSDL Staff");
     expect(dash.text).toContain("Monitor Completion");
     expect(dash.text).toContain("Logout");
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   The page header is the same everywhere
+   --------------------------------------------------------------------------- */
+
+describe("every page header reads the same (6.1)", () => {
+  const cssDir = path.join(__dirname, "..", "public", "css", "pages");
+  const pagesCss = readFileSync(path.join(cssDir, "pages.css"), "utf8");
+  const dashboardCss = readFileSync(path.join(cssDir, "dashboard.css"), "utf8");
+  const scheduleCss = readFileSync(path.join(cssDir, "schedule.css"), "utf8");
+  const profileCss = readFileSync(path.join(cssDir, "profile.css"), "utf8");
+
+  /** The value of one property inside one rule. */
+  function declaration(css: string, selector: string, property: string): string {
+    const block = cssBlock(css, css.indexOf(selector));
+    const match = block.match(new RegExp(`(?:^|[\\s;{])${property}\\s*:\\s*([^;]+);`));
+    return match ? match[1].trim() : "";
+  }
+
+  test("the shared page title is the dashboard's title", () => {
+    for (const property of ["font-family", "font-size", "font-weight", "color"]) {
+      expect(declaration(pagesCss, ".page-title", property)).toBe(
+        declaration(dashboardCss, ".dashboard-greeting", property),
+      );
+    }
+  });
+
+  test("the shared page subtitle is the dashboard's subtitle", () => {
+    for (const property of ["font-family", "font-size", "font-weight", "color"]) {
+      expect(declaration(pagesCss, ".page-subtitle", property)).toBe(
+        declaration(dashboardCss, ".greeting-subtitle", property),
+      );
+    }
+  });
+
+  test("the schedule and profile titles match the shared one", () => {
+    for (const [css, selector] of [
+      [scheduleCss, ".schedule-page-title"],
+      [profileCss, ".profile-page-title"],
+    ] as const) {
+      for (const property of ["font-size", "font-weight", "color"]) {
+        expect(declaration(css, selector, property)).toBe(
+          declaration(pagesCss, ".page-title", property),
+        );
+      }
+    }
+  });
+
+  test("the pages render the shared header classes", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    for (const path of [
+      "/todays-assignments",
+      "/monitor-completion",
+      "/csdl/applications",
+      "/csdl/profile",
+    ]) {
+      const res = await agent.get(path);
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('class="page-title"');
+      expect(res.text).toContain('class="page-subtitle"');
+    }
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   Every page is built from the same components
+   --------------------------------------------------------------------------- */
+
+describe("every page is built from the shared components (6.1)", () => {
+  /** The pages of the app, and the account that can open them. */
+  const PAGES: [string, string][] = [
+    ["/todays-assignments", "CSDL-001"],
+    ["/monitor-completion", "CSDL-001"],
+    ["/csdl/applications", "CSDL-001"],
+    ["/csdl/profile", "CSDL-001"],
+    ["/csdl/duty-management", "CSDL-001"],
+  ];
+
+  for (const [page, account] of PAGES) {
+    test(`${page} uses the shared panel, the shared buttons and no plain Bootstrap card`, async () => {
+      const agent = await loginAs(app, account);
+      const res = await agent.get(page);
+      expect(res.status).toBe(200);
+
+      // The shared page body and the shared header.
+      expect(res.text).toContain('class="app-stack"');
+      expect(res.text).toContain('class="page-title"');
+      expect(res.text).toContain('class="page-subtitle"');
+
+      // The shared panel, not a plain Bootstrap card.
+      expect(res.text).toContain('class="app-panel"');
+      expect(res.text).not.toContain('class="card-body"');
+      expect(res.text).not.toContain('class="card mb-3"');
+
+      // The shared buttons, not the plain Bootstrap ones.
+      expect(res.text).not.toContain("btn btn-primary");
+      expect(res.text).not.toContain("btn btn-outline-secondary");
+      expect(res.text).not.toContain("btn btn-success");
+      expect(res.text).not.toContain("btn btn-danger");
+    });
+  }
+
+  test("the pages that list something use the shared table and the shared empty state", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    for (const page of [
+      "/todays-assignments",
+      "/monitor-completion",
+      "/csdl/applications",
+    ]) {
+      const res = await agent.get(page);
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('class="app-table"');
+      expect(res.text).toContain('class="app-empty');
+      expect(res.text).not.toContain('class="table align-middle"');
+    }
+  });
+
+  test("the monitor page counts with the shared stat tiles", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    const res = await agent.get("/monitor-completion");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('class="app-stats"');
+    expect(res.text).toContain("app-stat__value");
+    expect(res.text).not.toContain("text-muted\">Total");
+  });
+
+  test("the applications page uses the shared tab control and a themed modal", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    const res = await agent.get("/csdl/applications");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('class="app-segment"');
+    expect(res.text).toContain("app-segment__btn");
+    expect(res.text).toContain('class="modal fade app-modal"');
+    expect(res.text).toContain("app-modal__note");
+  });
+
+  test("the shared stylesheet defines every component the pages use", () => {
+    const css = readFileSync(
+      path.join(__dirname, "..", "public", "css", "pages", "pages.css"),
+      "utf8",
+    );
+    for (const selector of [
+      ".app-stack",
+      ".app-panel",
+      ".app-panel__head",
+      ".app-panel__title",
+      ".app-panel__body",
+      ".app-toolbar",
+      ".app-field",
+      ".app-label",
+      ".app-input",
+      ".app-btn",
+      ".app-btn--primary",
+      ".app-btn--navy",
+      ".app-btn--ghost",
+      ".app-segment",
+      ".app-stats",
+      ".app-stat",
+      ".app-table",
+      ".app-empty",
+      ".app-form-grid",
+      ".app-check",
+      ".app-modal",
+    ]) {
+      expect(`${selector} in the shared stylesheet`).toBe(`${selector} in the shared stylesheet`);
+      expect(css).toMatch(new RegExp(selector.replace(/[.]/g, "\\.") + "(\\s|\\{)"));
+    }
+  });
+
+  test("no page ships an inline script, because the CSP does not allow one", async () => {
+    const viewsDir = path.join(__dirname, "..", "views");
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name.endsWith(".ejs")) files.push(full);
+      }
+    };
+    walk(viewsDir);
+    expect(files.length).toBeGreaterThan(0);
+
+    for (const file of files) {
+      const content = readFileSync(file, "utf8");
+      // A script tag either points at a file, or carries data as a JSON block.
+      for (const match of content.matchAll(/<script\b([^>]*)>/g)) {
+        const attributes = match[1];
+        expect(`${file} inline script`).toBe(`${file} inline script`);
+        expect(
+          attributes.includes("src=") || attributes.includes('type="application/json"'),
+        ).toBe(true);
+      }
+    }
   });
 });
 

@@ -1,68 +1,91 @@
-<section class="page-header">
-  <h1 class="page-title">Applications</h1>
-  <p class="page-subtitle">Manage duty applications with status tabs, approvals, rejections, and notifications.</p>
-</section>
+<div class="app-stack">
 
-<section class="card mb-3">
-  <div class="card-body d-flex gap-2 flex-wrap">
-    <a class="btn <%= tab==='pending' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=pending">Pending</a>
-    <a class="btn <%= tab==='approved' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=approved">Approved</a>
-    <a class="btn <%= tab==='rejected' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=rejected">Rejected</a>
-    <a class="btn <%= tab==='all' ? 'btn-primary' : 'btn-outline-primary' %>" href="?tab=all">All</a>
-  </div>
-</section>
+  <header class="page-header">
+    <h1 class="page-title">Applications</h1>
+    <p class="page-subtitle">Manage duty applications with status tabs, approvals, rejections, and notifications.</p>
+  </header>
 
-<section class="card">
-  <div class="card-body">
-    <div id="app-loading" class="state-block">
-      <div class="spinner-border text-primary" role="status"></div>
-      <div class="state-text">Loading applications...</div>
-    </div>
-    <div id="app-empty" class="state-block d-none">
-      <div class="state-icon"><i class="bi bi-inbox"></i></div>
-      <div class="state-title">No applications</div>
-      <div class="state-text">There are no applications in this tab.</div>
-    </div>
-    <div class="table-responsive" id="app-table-wrap" style="display:none">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>Applicant</th>
-            <th>Duty</th>
-            <th>Date</th>
-            <th>Message</th>
-            <th>Status</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="app-tbody"></tbody>
-      </table>
+  <!-- The status tabs, the same segmented control the dashboard's date filter uses. -->
+  <div class="app-panel">
+    <div class="app-panel__body">
+      <div class="app-segment" role="tablist" aria-label="Application status">
+        <a class="app-segment__btn<%= tab === 'pending' ? ' app-segment__btn--active' : '' %>"
+           href="?tab=pending" role="tab" aria-selected="<%= tab === 'pending' ? 'true' : 'false' %>">Pending</a>
+        <a class="app-segment__btn<%= tab === 'approved' ? ' app-segment__btn--active' : '' %>"
+           href="?tab=approved" role="tab" aria-selected="<%= tab === 'approved' ? 'true' : 'false' %>">Approved</a>
+        <a class="app-segment__btn<%= tab === 'rejected' ? ' app-segment__btn--active' : '' %>"
+           href="?tab=rejected" role="tab" aria-selected="<%= tab === 'rejected' ? 'true' : 'false' %>">Rejected</a>
+        <a class="app-segment__btn<%= tab === 'all' ? ' app-segment__btn--active' : '' %>"
+           href="?tab=all" role="tab" aria-selected="<%= tab === 'all' ? 'true' : 'false' %>">All</a>
+      </div>
     </div>
   </div>
-</section>
 
-<div class="modal fade" id="reviewModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="app-panel">
+    <div class="app-panel__head">
+      <div class="app-panel__titles">
+        <h2 class="app-panel__title">Duty applications</h2>
+        <p class="app-panel__note">Students and teachers applying for a duty, and what was decided.</p>
+      </div>
+    </div>
+    <div class="app-panel__body app-panel__body--flush">
+      <div id="app-loading" class="app-empty">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-arrow-repeat"></i></span>
+        <p class="app-empty__text">Loading applications...</p>
+      </div>
+      <div id="app-empty" class="app-empty d-none">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-inbox"></i></span>
+        <div class="app-empty__title">No applications</div>
+        <p class="app-empty__text">There are no applications in this tab.</p>
+      </div>
+      <div class="app-table-wrap" id="app-table-wrap">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Duty</th>
+              <th>Date</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th class="app-table__actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="app-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Reviewing an application -->
+<div class="modal fade app-modal" id="reviewModal" tabindex="-1" aria-labelledby="review-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Review Application</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <span class="app-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-check"></i></span>
+        <div class="app-modal__heading">
+          <h2 class="modal-title" id="review-modal-label">Review application</h2>
+          <p class="app-modal__note">Approve the application to assign the duty, or reject it with a note.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="review-app-id">
-        <div class="mb-2">
-          <label class="form-label">Note (optional)</label>
-          <textarea class="form-control" id="review-note" rows="3"></textarea>
+        <div class="app-form-field">
+          <label class="app-label" for="review-note">Note (optional)</label>
+          <textarea class="app-input" id="review-note" rows="3"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-success" id="btn-approve">Approve</button>
-        <button class="btn btn-danger" id="btn-reject">Reject</button>
+        <button type="button" class="app-btn app-btn--ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="app-btn app-btn--danger" id="btn-reject">Reject</button>
+        <button type="button" class="app-btn app-btn--success" id="btn-approve">Approve</button>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-  window.__APP__ = { apps: <%- JSON.stringify(apps || []) %>, tab: <%- JSON.stringify(tab) %>, role: <%- JSON.stringify(user.role) %> };
-</script>
+<%# The page's data travels as a JSON block: it is read by the page's own
+    script, and the strict CSP only allows scripts from this origin. %>
+<script type="application/json" id="app-data"><%- jsonForScript({ apps: apps || [], tab: tab, role: user.role }) %></script>

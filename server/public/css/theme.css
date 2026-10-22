@@ -126,7 +126,6 @@
   --badge-radius: 8px;
 
   /* page furniture */
-  --page-title-color: #0f3d4e;
   --button-create-gradient: linear-gradient(90deg, #22c55e 0%, #0c425f 100%);
 
   /* focus ring */
@@ -597,14 +596,15 @@ a {
   flex: 1;
 }
 
-/* Generic surface used by the placeholder and status pages. Bootstrap's own
-   `.card` (used by the dashboard) keeps its own padding model, so the legacy
-   padding is applied through the dedicated modifier classes instead. */
+/* Generic surface used by the dashboard, the placeholder and the status pages.
+   It carries the app's own panel shape, so every surface of the app reads the
+   same; Bootstrap's own `.card` padding model is handled by the dedicated
+   modifier classes instead. */
 .card {
   background: var(--white);
   border: none;
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
 }
 
 .placeholder-card,

@@ -181,15 +181,6 @@ export async function getCsdlDashboard(
   }
 }
 
-export function getCsdlApplications(req: Request, res: Response): void {
-  res.render("pages/csdl/applications", {
-    ...shellLocals(req, res),
-    title: "Applications",
-    activePath: "/csdl/applications",
-    bodyClass: "csdl-page",
-  });
-}
-
 /** JSON endpoint for the dashboard summary — used by the range filter without full reload. */
 export async function getCsdlDashboardJson(
   req: Request,

@@ -8,7 +8,7 @@
     const res = await fetch('/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d = await res.json();
     msg.textContent = d.ok ? 'Profile updated' : (d.error||'Error');
-    msg.className = d.ok ? 'mt-2 small text-success' : 'mt-2 small text-danger';
+    msg.className = d.ok ? 'app-msg app-msg--ok' : 'app-msg app-msg--error';
   });
   const np = document.getElementById('np-form');
   const npm = document.getElementById('np-msg');
@@ -18,7 +18,7 @@
     const res = await fetch('/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({notification_preferences: prefs})});
     const d = await res.json();
     npm.textContent = d.ok ? 'Preferences updated' : 'Error';
-    npm.className = d.ok ? 'mt-2 small text-success' : 'mt-2 small text-danger';
+    npm.className = d.ok ? 'app-msg app-msg--ok' : 'app-msg app-msg--error';
   });
   const cp = document.getElementById('cp-form');
   const cpm = document.getElementById('cp-msg');
@@ -29,7 +29,7 @@
     const res = await fetch('/api/profile/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d = await res.json();
     cpm.textContent = d.ok ? 'Password changed' : (d.error||'Error');
-    cpm.className = d.ok ? 'mt-2 small text-success' : 'mt-2 small text-danger';
+    cpm.className = d.ok ? 'app-msg app-msg--ok' : 'app-msg app-msg--error';
     if(d.ok) cp.reset();
   });
 })();

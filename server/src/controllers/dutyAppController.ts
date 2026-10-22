@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { navFor } from "../config/navigation";
 import { csrfToken } from "../lib/csrf";
+import { jsonForScript } from "../lib/json";
 import {
   listDutySlots, getDutySlot, getAssignmentsForDuty, getMyAssignments,
   markAssignmentDone, markDutyComplete,
@@ -36,7 +37,7 @@ export async function getTodaysAssignments(req: Request, res: Response, next: Ne
       bodyClass: "app-page",
       pageStyles: ["pages"],
       pageScripts: ["todays-assignments"],
-      slots, assignments, today
+      slots, assignments, today, jsonForScript
     });
   } catch (e) { next(e); }
 }
@@ -63,7 +64,7 @@ export async function getMonitorCompletion(req: Request, res: Response, next: Ne
       bodyClass: "app-page",
       pageStyles: ["pages"],
       pageScripts: ["monitor-completion"],
-      slots, stats, filters: q
+      slots, stats, filters: q, jsonForScript
     });
   } catch (e) { next(e); }
 }
@@ -102,7 +103,7 @@ export async function getApplications(req: Request, res: Response, next: NextFun
       bodyClass: "app-page",
       pageStyles: ["pages"],
       pageScripts: ["applications"],
-      apps, tab
+      apps, tab, jsonForScript
     });
   } catch (e) { next(e); }
 }

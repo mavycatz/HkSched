@@ -3,7 +3,6 @@ import { rateLimit } from "express-rate-limit";
 import { getLogin, postLogin, postLogout, readRememberedId } from "../controllers/authController";
 import {
   getAttendanceProfile,
-  getCsdlApplications,
   getCsdlDashboard,
   getCsdlDashboardJson,
   getDashboard,

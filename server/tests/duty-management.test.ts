@@ -136,7 +136,7 @@ describe("duty management page", () => {
     expect(statuses.length).toBeGreaterThan(0);
     for (const status of statuses) {
       expect(["ongoing", "completed", "pending", "missed"]).toContain(status);
-      expect(res.text).toContain(`dm-status dm-status--${status}`);
+      expect(res.text).toContain(`status-badge status-badge--${status}`);
     }
   });
 
@@ -148,6 +148,34 @@ describe("duty management page", () => {
     expect(res.text).not.toContain("/css/pages/dashboard.css");
     expect(res.text).not.toContain("/css/pages/profile.css");
     expect(res.text).not.toContain("/css/pages/schedule.css");
+  });
+
+  test("the page header is the shared one, the same as the dashboard's", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    const res = await agent.get("/csdl/duty-management");
+    expect(res.status).toBe(200);
+
+    // The shared header classes, so the title reads like every other page.
+    expect(res.text).toContain('class="page-header page-header--row"');
+    expect(res.text).toContain('class="page-title"');
+    expect(res.text).toContain('class="page-subtitle"');
+    expect(res.text).not.toContain("dm-title");
+    expect(res.text).not.toContain("dm-subtitle");
+  });
+
+  test("the modals carry the app's own look", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    const res = await agent.get("/csdl/duty-management");
+
+    // Every modal is the themed one, with a title, a note and a themed pair
+    // of actions.
+    expect((res.text.match(/class="modal fade app-modal/g) ?? []).length).toBe(3);
+    expect(res.text).toContain("app-modal__icon");
+    expect(res.text).toContain("app-modal__note");
+    expect((res.text.match(/class="app-btn app-btn--ghost"/g) ?? []).length).toBe(3);
+    for (const id of ["dm-create-save", "dm-edit-save", "dm-assign-save"]) {
+      expect(res.text).toMatch(new RegExp(`class="app-btn app-btn--primary" id="${id}"`));
+    }
   });
 
   test("a status filter returns only that status and stays in the form", async () => {

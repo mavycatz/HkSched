@@ -1,68 +1,110 @@
-<section class="page-header">
-  <h1 class="page-title">Monitor Completion</h1>
-  <p class="page-subtitle">Track duty status, assignees, completion time. Filter by date/status/person and highlight overdue.</p>
-</section>
+<div class="app-stack">
 
-<section class="card mb-3">
-  <div class="card-body">
-    <div class="row g-2">
-      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold"><%= stats.total %></div><div class="small text-muted">Total</div></div></div>
-      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-success"><%= stats.completed %></div><div class="small text-muted">Completed</div></div></div>
-      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-warning"><%= stats.pending %></div><div class="small text-muted">Pending</div></div></div>
-      <div class="col-6 col-md-3"><div class="p-2 border rounded text-center"><div class="fw-bold text-danger"><%= stats.overdue %></div><div class="small text-muted">Overdue</div></div></div>
+  <header class="page-header">
+    <h1 class="page-title">Monitor Completion</h1>
+    <p class="page-subtitle">Track duty status, assignees, completion time. Filter by date or person and highlight overdue.</p>
+  </header>
+
+  <!-- The four counts, as the same stat tiles the dashboard uses. -->
+  <div class="app-stats">
+    <div class="app-stat app-stat--blue">
+      <span class="app-stat__icon" aria-hidden="true"><i class="bi bi-list-check"></i></span>
+      <div>
+        <p class="app-stat__value"><%= stats.total %></p>
+        <p class="app-stat__label">Total duties</p>
+      </div>
     </div>
-    <div class="mt-2 small text-muted">Completion rate: <strong><%= stats.rate %>%</strong></div>
-  </div>
-</section>
-
-<section class="card mb-3">
-  <div class="card-body">
-    <form class="row g-2 align-items-end" id="mc-filter-form" method="get" action="/monitor-completion">
-      <div class="col-12 col-md-3">
-        <label class="form-label">From</label>
-        <input type="date" class="form-control" name="from" value="<%= filters.from || '' %>">
+    <div class="app-stat app-stat--green">
+      <span class="app-stat__icon" aria-hidden="true"><i class="bi bi-check-circle"></i></span>
+      <div>
+        <p class="app-stat__value"><%= stats.completed %></p>
+        <p class="app-stat__label">Completed</p>
       </div>
-      <div class="col-12 col-md-3">
-        <label class="form-label">To</label>
-        <input type="date" class="form-control" name="to" value="<%= filters.to || '' %>">
-      </div>
-      <div class="col-12 col-md-3">
-        <label class="form-label">Person</label>
-        <input type="text" class="form-control" name="person" placeholder="Name or ID" value="<%= filters.person || '' %>">
-      </div>
-      <div class="col-12 col-md-3 d-flex gap-2">
-        <button class="btn btn-primary" type="submit">Apply</button>
-        <a class="btn btn-outline-secondary" href="/monitor-completion">Clear</a>
-      </div>
-    </form>
-  </div>
-</section>
-
-<section class="card">
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>Duty</th>
-            <th>Area</th>
-            <th>Date/Time</th>
-            <th>Assignee</th>
-            <th>Status</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="mc-tbody"></tbody>
-      </table>
     </div>
-    <div id="mc-empty" class="state-block d-none">
-      <div class="state-icon"><i class="bi bi-clipboard-check"></i></div>
-      <div class="state-title">No duties to monitor</div>
-      <div class="state-text">Try adjusting filters.</div>
+    <div class="app-stat app-stat--amber">
+      <span class="app-stat__icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+      <div>
+        <p class="app-stat__value"><%= stats.pending %></p>
+        <p class="app-stat__label">Pending</p>
+      </div>
+    </div>
+    <div class="app-stat app-stat--red">
+      <span class="app-stat__icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+      <div>
+        <p class="app-stat__value"><%= stats.overdue %></p>
+        <p class="app-stat__label">Overdue</p>
+      </div>
     </div>
   </div>
-</section>
 
-<script>
-  window.__MC__ = { slots: <%- JSON.stringify(slots || []) %> };
-</script>
+  <!-- Filters -->
+  <div class="app-panel">
+    <div class="app-panel__head">
+      <div class="app-panel__titles">
+        <h2 class="app-panel__title">Filters</h2>
+        <p class="app-panel__note">Narrow the duties down by date or by person.</p>
+      </div>
+    </div>
+    <div class="app-panel__body">
+      <form class="app-toolbar" id="mc-filter-form" method="get" action="/monitor-completion">
+        <div class="app-field">
+          <label class="app-label" for="mc-from">From</label>
+          <input class="app-input" type="date" id="mc-from" name="from" value="<%= filters.from || '' %>">
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="mc-to">To</label>
+          <input class="app-input" type="date" id="mc-to" name="to" value="<%= filters.to || '' %>">
+        </div>
+        <div class="app-field app-field--grow">
+          <label class="app-label" for="mc-person">Person</label>
+          <div class="app-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input class="app-input" type="search" id="mc-person" name="person"
+                   placeholder="Name or ID" value="<%= filters.person || '' %>">
+          </div>
+        </div>
+        <div class="app-toolbar__actions">
+          <button class="app-btn app-btn--navy" type="submit">Apply</button>
+          <a class="app-btn app-btn--quiet" href="/monitor-completion">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- The duties being monitored -->
+  <div class="app-panel">
+    <div class="app-panel__head">
+      <div class="app-panel__titles">
+        <h2 class="app-panel__title">Duties</h2>
+        <p class="app-panel__note">Completion rate: <strong><%= stats.rate %>%</strong></p>
+      </div>
+    </div>
+    <div class="app-panel__body app-panel__body--flush">
+      <div class="app-table-wrap">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Duty</th>
+              <th>Area</th>
+              <th>Date/Time</th>
+              <th>Assignee</th>
+              <th>Status</th>
+              <th class="app-table__actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="mc-tbody"></tbody>
+        </table>
+      </div>
+      <div id="mc-empty" class="app-empty d-none">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-clipboard-check"></i></span>
+        <div class="app-empty__title">No duties to monitor</div>
+        <p class="app-empty__text">Try adjusting the filters.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%# The page's data travels as a JSON block: it is read by the page's own
+    script, and the strict CSP only allows scripts from this origin. %>
+<script type="application/json" id="mc-data"><%- jsonForScript({ slots: slots || [] }) %></script>

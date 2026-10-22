@@ -1,45 +1,51 @@
-<section class="page-header">
-  <h1 class="page-title">Today's Assignments</h1>
-  <p class="page-subtitle">Duties due today — view details, locations, times, and mark complete.</p>
-</section>
+<div class="app-stack">
 
-<section class="card">
-  <div class="card-body">
-    <div id="ta-loading" class="state-block">
-      <div class="spinner-border text-primary" role="status"></div>
-      <div class="state-text">Loading assignments...</div>
+  <header class="page-header">
+    <h1 class="page-title">Today's Assignments</h1>
+    <p class="page-subtitle">Duties due today — view details, locations, times, and mark complete.</p>
+  </header>
+
+  <div class="app-panel">
+    <div class="app-panel__head">
+      <div class="app-panel__titles">
+        <h2 class="app-panel__title">Your duties today</h2>
+        <p class="app-panel__note">Everything that is due today, with the place and the time.</p>
+      </div>
     </div>
-    <div id="ta-empty" class="state-block d-none">
-      <div class="state-icon"><i class="bi bi-calendar-check"></i></div>
-      <div class="state-title">No assignments for today</div>
-      <div class="state-text">You're all caught up for today.</div>
-    </div>
-    <div id="ta-error" class="state-block d-none">
-      <div class="state-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
-      <div class="state-title">Something went wrong</div>
-      <div class="state-text">We couldn't load your assignments. Please try again.</div>
-    </div>
-    <div class="table-responsive" id="ta-table-wrap" style="display:none">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>Duty</th>
-            <th>Location/Area</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th class="text-end">Action</th>
-          </tr>
-        </thead>
-        <tbody id="ta-tbody"></tbody>
-      </table>
+    <div class="app-panel__body app-panel__body--flush">
+      <div id="ta-loading" class="app-empty">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-arrow-repeat"></i></span>
+        <p class="app-empty__text">Loading assignments...</p>
+      </div>
+      <div id="ta-empty" class="app-empty d-none">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-calendar-check"></i></span>
+        <div class="app-empty__title">No assignments for today</div>
+        <p class="app-empty__text">You're all caught up for today.</p>
+      </div>
+      <div id="ta-error" class="app-empty d-none">
+        <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+        <div class="app-empty__title">Something went wrong</div>
+        <p class="app-empty__text">We couldn't load your assignments. Please try again.</p>
+      </div>
+      <div class="app-table-wrap" id="ta-table-wrap">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Duty</th>
+              <th>Location/Area</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th class="app-table__actions">Action</th>
+            </tr>
+          </thead>
+          <tbody id="ta-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-</section>
 
-<script>
-  window.__TA__ = {
-    slots: <%- JSON.stringify(slots || []) %>,
-    assignments: <%- JSON.stringify(assignments || []) %>,
-    today: <%- JSON.stringify(today) %>
-  };
-</script>
+</div>
+
+<%# The page's data travels as a JSON block: it is read by the page's own
+    script, and the strict CSP only allows scripts from this origin. %>
+<script type="application/json" id="ta-data"><%- jsonForScript({ slots: slots || [], assignments: assignments || [], today: today }) %></script>

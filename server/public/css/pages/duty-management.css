@@ -1,191 +1,11 @@
 /* Duty Schedule Management — the CSDL list page.
    Colours come from the theme tokens only, so the page follows the app's
-   palette and the duty status colours stay in one place. */
+   palette and the duty status colours stay in one place.
 
-.dm-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* ------------------------------------------------------------------ notice */
-.dm-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--panel-radius);
-  background: var(--status-completed-bg);
-  color: var(--status-completed-fg);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-/* ------------------------------------------------------------------ header */
-.dm-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.dm-title {
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--page-title-color);
-}
-
-.dm-subtitle {
-  margin: 0.25rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-.dm-create {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.35rem;
-  border: none;
-  border-radius: var(--button-radius);
-  background: var(--button-create-gradient);
-  color: var(--white);
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  box-shadow: var(--surface-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-
-.dm-create:hover,
-.dm-create:focus-visible {
-  color: var(--white);
-  transform: translateY(-1px);
-  box-shadow: var(--surface-shadow-hover);
-  filter: brightness(1.05);
-}
-
-/* ----------------------------------------------------------------- filters */
-.dm-filters {
-  background: var(--surface);
-  border-radius: var(--panel-radius);
-  box-shadow: var(--surface-shadow);
-  padding: 1rem 1.25rem;
-}
-
-.dm-filter-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.9rem;
-  flex-wrap: wrap;
-}
-
-.dm-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  min-width: 9.5rem;
-}
-
-.dm-field-search {
-  flex: 1 1 16rem;
-}
-
-.dm-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.dm-required {
-  color: var(--error);
-}
-
-.dm-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.dm-search .bi {
-  position: absolute;
-  left: 0.75rem;
-  color: var(--placeholder);
-  pointer-events: none;
-}
-
-.dm-input {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--input-border);
-  border-radius: var(--input-radius);
-  background: var(--input-fill);
-  color: var(--text);
-  font-size: 0.95rem;
-  font-family: inherit;
-}
-
-.dm-input:focus-visible {
-  outline: none;
-  border-color: var(--focus-outline);
-  box-shadow: var(--focus-ring);
-}
-
-.dm-search .dm-input {
-  padding-left: 2.25rem;
-}
-
-.dm-select {
-  appearance: none;
-  padding-right: 2rem;
-  background-image: none;
-}
-
-.dm-filter-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-left: auto;
-}
-
-.dm-apply {
-  padding: 0.6rem 1.4rem;
-  border: none;
-  border-radius: var(--button-radius);
-  background: var(--navy);
-  color: var(--white);
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.dm-apply:hover,
-.dm-apply:focus-visible {
-  background: var(--teal);
-  color: var(--white);
-}
-
-.dm-clear {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 0.6rem 0.25rem;
-}
-
-.dm-clear:hover,
-.dm-clear:focus-visible {
-  color: var(--navy);
-  text-decoration: underline;
-}
+   The page is built from the shared components in pages/pages.css (the panel,
+   the toolbar, the fields, the buttons, the empty state and the modal), so it
+   looks exactly like the other pages of the app. Only what is specific to a
+   duty card is styled here. */
 
 /* ------------------------------------------------------------------- cards */
 .dm-cards {
@@ -248,7 +68,7 @@
   font-size: 1.6rem;
   font-weight: 700;
   line-height: 1.1;
-  color: var(--page-title-color);
+  color: var(--title-green);
 }
 
 .dm-date-week {
@@ -313,20 +133,6 @@
   color: var(--text-muted);
 }
 
-.dm-status {
-  flex: 0 0 auto;
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--chip-radius);
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.dm-status--ongoing { background: var(--status-ongoing-bg); color: var(--status-ongoing-fg); }
-.dm-status--completed { background: var(--status-completed-bg); color: var(--status-completed-fg); }
-.dm-status--pending { background: var(--status-pending-bg); color: var(--status-pending-fg); }
-.dm-status--missed { background: var(--status-missed-bg); color: var(--status-missed-fg); }
-
 .dm-meta {
   display: flex;
   flex-wrap: wrap;
@@ -385,36 +191,6 @@
 .dm-delete {
   display: inline-flex;
   margin: 0;
-}
-
-/* ------------------------------------------------------------------- empty */
-.dm-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 3rem 1.5rem;
-  background: var(--surface);
-  border-radius: var(--panel-radius);
-  box-shadow: var(--surface-shadow);
-  text-align: center;
-}
-
-.dm-empty .bi {
-  font-size: 2.5rem;
-  color: var(--placeholder);
-}
-
-.dm-empty-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--page-title-color);
-}
-
-.dm-empty-text {
-  margin: 0;
-  color: var(--text-muted);
 }
 
 /* ------------------------------------------------------------------ footer */
@@ -479,23 +255,7 @@
   color: var(--text-muted);
 }
 
-/* ------------------------------------------------------------------- forms */
-.dm-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem 1.1rem;
-}
-
-.dm-form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.dm-form-field-wide {
-  grid-column: 1 / -1;
-}
-
+/* ----------------------------------------------------------------- students */
 .dm-checklist {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
@@ -505,61 +265,10 @@
   padding: 0.5rem;
   border: 1px solid var(--divider);
   border-radius: var(--tile-radius);
-  background: var(--surface-muted);
-}
-
-.dm-check {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: var(--checkbox-radius);
   background: var(--surface);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.dm-check:hover {
-  background: var(--input-fill);
 }
 
 .dm-check-id {
   color: var(--text-muted);
   font-size: 0.8rem;
-}
-
-.dm-btn-secondary {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid var(--divider);
-  border-radius: var(--button-radius);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-}
-
-.dm-btn-secondary:hover,
-.dm-btn-secondary:focus-visible {
-  border-color: var(--navy);
-  color: var(--navy);
-}
-
-@media (max-width: 768px) {
-  .dm-card {
-    flex-wrap: wrap;
-  }
-
-  .dm-card-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .dm-form-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .dm-filter-actions {
-    margin-left: 0;
-  }
 }

@@ -1,22 +1,40 @@
 /* Shared page styles for all duty schedule app pages */
+
+/* The page header is the same on every page: the title, a one-line note under
+   it, and the app's title colour. The type matches the dashboard greeting, so
+   the pages read as one app. */
 .page-header {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
+
+/* A header that also carries the page's own action on the right. */
+.page-header--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .page-title {
+  font-family: var(--font);
   font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--page-title-color);
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--title-green);
 }
 .page-subtitle {
-  color: var(--text-muted);
-  margin: 0.25rem 0 0 0;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--teal);
+  margin: 0;
 }
 .card {
   border: none;
-  border-radius: 12px;
-  box-shadow: var(--soft-shadow);
-  background: var(--white);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  background: var(--surface);
 }
 .card-body {
   padding: 20px 24px;
@@ -52,3 +70,616 @@
 .badge-ongoing, .badge-assigned { background: var(--status-ongoing-bg); color: var(--status-ongoing-fg); }
 .list-group-item { cursor: pointer; }
 .table th { font-weight: 600; color: var(--text-muted); }
+
+/* ==========================================================================
+   The shared app components.
+
+   Every page of the app is built from these: the same panel, the same
+   toolbar, the same fields, the same buttons, the same table, the same
+   empty state and the same modal. A page is not allowed to invent its own
+   version of them, so the whole app reads as one thing.
+   ========================================================================== */
+
+/* ------------------------------------------------------------- page body */
+.app-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* The notice a page shows after something was done. */
+.app-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--panel-radius);
+  background: var(--status-completed-bg);
+  color: var(--status-completed-fg);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.app-required {
+  color: var(--error);
+}
+
+/* ---------------------------------------------------------------- panel */
+.app-panel {
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+  overflow: hidden;
+}
+
+.app-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.1rem 1.35rem;
+  border-bottom: 1px solid var(--divider);
+}
+
+.app-panel__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.app-panel__title {
+  font-family: var(--font);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--title-green);
+  margin: 0;
+}
+
+.app-panel__note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.app-panel__body {
+  padding: 1.15rem 1.35rem;
+}
+
+.app-panel__body--flush {
+  padding: 0;
+}
+
+/* -------------------------------------------------------------- toolbar */
+.app-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.app-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 9.5rem;
+}
+
+.app-field--grow {
+  flex: 1 1 16rem;
+}
+
+.app-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.app-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  background: var(--input-fill);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.app-input:focus-visible {
+  outline: none;
+  border-color: var(--focus-outline);
+  box-shadow: var(--focus-ring);
+}
+
+.app-input::placeholder {
+  color: var(--placeholder);
+}
+
+.app-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.app-search .bi {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--placeholder);
+  pointer-events: none;
+}
+
+.app-search .app-input {
+  padding-left: 2.25rem;
+}
+
+.app-select {
+  appearance: none;
+  padding-right: 2rem;
+  background-image: none;
+}
+
+.app-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+/* -------------------------------------------------------------- buttons */
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.3rem;
+  border: none;
+  border-radius: var(--button-radius);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, background 0.15s ease, transform 0.15s ease,
+    box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.app-btn:focus-visible {
+  outline: 2px solid var(--focus-outline);
+  outline-offset: 2px;
+}
+
+.app-btn--primary {
+  background: var(--button-create-gradient);
+  color: var(--white);
+  box-shadow: var(--surface-shadow);
+}
+
+.app-btn--primary:hover,
+.app-btn--primary:focus-visible {
+  color: var(--white);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: var(--surface-shadow-hover);
+}
+
+.app-btn--navy {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.app-btn--navy:hover,
+.app-btn--navy:focus-visible {
+  background: var(--teal);
+  color: var(--white);
+}
+
+.app-btn--ghost {
+  background: var(--surface);
+  color: var(--navy);
+  border: 1px solid var(--divider);
+}
+
+.app-btn--ghost:hover,
+.app-btn--ghost:focus-visible {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.app-btn--quiet {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.6rem 0.25rem;
+}
+
+.app-btn--quiet:hover,
+.app-btn--quiet:focus-visible {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.app-btn--success {
+  background: var(--status-completed-solid);
+  color: var(--white);
+}
+
+.app-btn--success:hover,
+.app-btn--success:focus-visible {
+  filter: brightness(1.05);
+  color: var(--white);
+}
+
+.app-btn--danger {
+  background: var(--status-missed-bg);
+  color: var(--status-missed-fg);
+}
+
+.app-btn--danger:hover,
+.app-btn--danger:focus-visible {
+  color: var(--status-missed-fg);
+  filter: brightness(0.97);
+}
+
+.app-btn--sm {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  border-radius: var(--tile-radius);
+}
+
+/* -------------------------------------------------- segmented tab control */
+.app-segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--surface-muted);
+  border: 1px solid var(--divider);
+  border-radius: var(--chip-radius);
+}
+
+.app-segment__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1.05rem;
+  border: none;
+  border-radius: var(--chip-radius);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-segment__btn:hover {
+  color: var(--navy);
+}
+
+.app-segment__btn--active {
+  background: var(--teal);
+  color: var(--white);
+  box-shadow: var(--nav-shadow);
+}
+
+.app-segment__btn--active:hover {
+  color: var(--white);
+}
+
+/* ------------------------------------------------------------ stat tiles */
+.app-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+@media (max-width: 991px) {
+  .app-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .app-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.15rem;
+  background: var(--surface);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+}
+
+.app-stat__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--tile-radius);
+  font-size: 1.05rem;
+}
+
+.app-stat__value {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.app-stat__label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.app-stat--blue .app-stat__icon { background: var(--accent-blue-bg); color: var(--accent-blue); }
+.app-stat--blue .app-stat__value { color: var(--accent-blue); }
+.app-stat--green .app-stat__icon { background: var(--accent-green-bg); color: var(--accent-green); }
+.app-stat--green .app-stat__value { color: var(--accent-green); }
+.app-stat--amber .app-stat__icon { background: var(--accent-amber-bg); color: var(--accent-amber); }
+.app-stat--amber .app-stat__value { color: var(--accent-amber); }
+.app-stat--red .app-stat__icon { background: var(--accent-red-bg); color: var(--accent-red); }
+.app-stat--red .app-stat__value { color: var(--accent-red); }
+
+/* ---------------------------------------------------------------- table */
+.app-table-wrap {
+  overflow-x: auto;
+}
+
+.app-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+
+.app-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--divider);
+  white-space: nowrap;
+}
+
+.app-table tbody td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--divider);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.app-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.app-table tbody tr:hover {
+  background: var(--surface-muted);
+}
+
+.app-table__title {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.app-table__meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.app-table__actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------- empty state */
+.app-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.app-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.35rem;
+  border-radius: var(--tile-radius);
+  background: var(--role-chip-bg);
+  color: var(--teal);
+  font-size: 1.35rem;
+}
+
+.app-empty__title {
+  font-family: var(--font);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--title-green);
+}
+
+.app-empty__text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------- forms */
+.app-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+}
+
+.app-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.app-form-field--wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.app-check input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--teal);
+  flex: 0 0 auto;
+}
+
+.app-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.app-msg {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.app-msg--ok {
+  color: var(--status-completed-fg);
+}
+
+.app-msg--error {
+  color: var(--error);
+}
+
+/* ---------------------------------------------------------------- modal */
+.app-modal .modal-dialog {
+  max-width: 44rem;
+}
+
+.app-modal .modal-content {
+  border: none;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--card-shadow);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.app-modal .modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.15rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--divider);
+}
+
+.app-modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: 0 0 auto;
+  border-radius: var(--tile-radius);
+  background: var(--role-chip-bg);
+  color: var(--navy);
+  font-size: 1.15rem;
+}
+
+.app-modal__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.app-modal .modal-title {
+  font-family: var(--font);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--title-green);
+  margin: 0;
+}
+
+.app-modal__note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.app-modal .btn-close {
+  margin: 0 0 0 auto;
+  opacity: 0.45;
+}
+
+.app-modal .btn-close:hover,
+.app-modal .btn-close:focus-visible {
+  opacity: 0.85;
+}
+
+.app-modal .modal-body {
+  padding: 1.4rem 1.5rem;
+  background: var(--surface-muted);
+}
+
+.app-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-top: 1px solid var(--divider);
+}
+
+.app-modal .modal-footer > * {
+  margin: 0;
+}
+
+/* The fields sit on the soft body, so they are white to stand out from it. */
+.app-modal .app-input {
+  background: var(--surface);
+}
+
+/* A modal rendered by the server (the ?create=1 fallback) has no backdrop of
+   its own, so the page behind it is dimmed here. */
+body:not(:has(.modal-backdrop)) .app-modal.show::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-dark);
+  z-index: -1;
+}
