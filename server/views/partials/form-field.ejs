@@ -1,0 +1,44 @@
+<%
+  /* One field of a form: the label, the control, and the reason a write was
+     refused beside it. Every form in the app is built from this, so the
+     fields all look and behave the same way. */
+  const controlId = typeof fieldId !== "undefined" ? fieldId : "";
+  const controlName = typeof fieldName !== "undefined" ? fieldName : controlId;
+  const controlLabel = typeof fieldLabel !== "undefined" ? fieldLabel : "";
+  const controlType = typeof fieldType !== "undefined" ? fieldType : "text";
+  const controlValue = typeof fieldValue !== "undefined" && fieldValue !== null ? fieldValue : "";
+  const controlRequired = typeof fieldRequired !== "undefined" ? fieldRequired : false;
+  const controlError = typeof fieldError !== "undefined" && fieldError ? fieldError : null;
+  const controlWide = typeof fieldWide !== "undefined" ? fieldWide : false;
+  const controlHint = typeof fieldHint !== "undefined" ? fieldHint : null;
+  const controlPlaceholder = typeof fieldPlaceholder !== "undefined" ? fieldPlaceholder : "";
+  const controlOptions = typeof fieldOptions !== "undefined" ? fieldOptions : [];
+  const controlExtra = typeof fieldExtra !== "undefined" ? fieldExtra : "";
+%>
+<div class="app-form-field <%= controlWide ? "app-form-field--wide" : "" %> <%= controlError ? "app-form-field--invalid" : "" %>">
+  <label class="app-label" for="<%= controlId %>"><%= controlLabel %><% if (controlRequired) { %> <span class="app-required" aria-hidden="true">*</span><% } %></label>
+  <% if (controlType === "select") { %>
+  <select class="app-input app-select" id="<%= controlId %>" name="<%= controlName %>" <%= controlRequired ? 'required aria-required="true"' : "" %>>
+    <% controlOptions.forEach(function (option) { %>
+    <option value="<%= option.value %>" <%= String(option.value) === String(controlValue) ? "selected" : "" %>><%= option.label %></option>
+    <% }); %>
+  </select>
+  <% } else if (controlType === "textarea") { %>
+  <textarea class="app-input" id="<%= controlId %>" name="<%= controlName %>" rows="2" <%= controlRequired ? 'required aria-required="true"' : "" %>><%= controlValue %></textarea>
+  <% } else if (controlType === "checkbox") { %>
+  <label class="app-check">
+    <input type="checkbox" id="<%= controlId %>" name="<%= controlName %>" value="1" <%= controlValue ? "checked" : "" %>>
+    <span><%= controlHint || controlLabel %></span>
+  </label>
+  <% } else { %>
+  <input class="app-input" type="<%= controlType %>" id="<%= controlId %>" name="<%= controlName %>"
+         value="<%= controlValue %>" placeholder="<%= controlPlaceholder %>" autocomplete="off"
+         <%= controlRequired ? 'required aria-required="true"' : "" %>>
+  <% } %>
+  <%- controlExtra %>
+  <% if (controlError) { %>
+  <p class="app-field-error" id="<%= controlId %>-error"><%= controlError %></p>
+  <% } else if (controlHint && controlType !== "checkbox") { %>
+  <p class="app-hint"><%= controlHint %></p>
+  <% } %>
+</div>

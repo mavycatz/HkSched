@@ -204,7 +204,7 @@ describe("dashboard status badges (7.2)", () => {
     const res = await agent.get("/csdl/dashboard?range=month");
     expect(res.status).toBe(200);
     for (const badge of tableBadgeClasses(res.text)) {
-      expect(badge).toMatch(/^status-badge status-badge--(ongoing|completed|pending|missed)$/);
+      expect(badge).toMatch(/^status-badge status-badge--(ongoing|completed|pending|missed|cancelled)$/);
     }
   });
 

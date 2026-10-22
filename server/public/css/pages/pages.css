@@ -66,7 +66,7 @@
 }
 .badge-pending { background: var(--status-pending-bg); color: var(--status-pending-fg); }
 .badge-done, .badge-completed { background: var(--status-completed-bg); color: var(--status-completed-fg); }
-.badge-overdue, .badge-missed { background: var(--status-missed-bg); color: var(--status-missed-fg); }
+.badge-overdue, .badge-cancelled { background: var(--status-cancelled-bg); color: var(--status-cancelled-fg); }
 .badge-ongoing, .badge-assigned { background: var(--status-ongoing-bg); color: var(--status-ongoing-fg); }
 .list-group-item { cursor: pointer; }
 .table th { font-weight: 600; color: var(--text-muted); }
@@ -314,13 +314,13 @@
 }
 
 .app-btn--danger {
-  background: var(--status-missed-bg);
-  color: var(--status-missed-fg);
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
 }
 
 .app-btn--danger:hover,
 .app-btn--danger:focus-visible {
-  color: var(--status-missed-fg);
+  color: var(--status-cancelled-fg);
   filter: brightness(0.97);
 }
 

@@ -79,27 +79,46 @@
           <tr>
             <th class="border-0 fw-medium small text-navy">Date</th>
             <th class="border-0 fw-medium small text-navy">Time</th>
-            <th class="border-0 fw-medium small text-navy">Area</th>
+            <th class="border-0 fw-medium small text-navy">Location</th>
             <th class="border-0 fw-medium small text-navy">Tasks</th>
+            <th class="border-0 fw-medium small text-navy">Students</th>
+            <th class="border-0 fw-medium small text-navy">Teacher</th>
             <th class="border-0 fw-medium small text-navy text-end">Status</th>
+            <th class="border-0 fw-medium small text-navy text-end">Completion</th>
           </tr>
         </thead>
-        <tbody id="assignments-table-body">
+        <tbody id="assignments-table-body" data-can-record-completion="<%= canRecordCompletion ? "true" : "false" %>">
           <% if (assignmentsToday && assignmentsToday.length > 0) { %>
             <% assignmentsToday.forEach(function (a) { %>
-            <tr>
+            <tr data-duty-id="<%= a.id %>">
               <td class="small"><%= a.date %></td>
               <td class="small"><%= a.time %></td>
-              <td class="small"><%= a.area %></td>
+              <td class="small"><%= a.area || "—" %></td>
               <td class="small"><%= a.tasks %></td>
+              <td class="small">
+                <% if (!a.studentCount) { %>
+                <span class="text-muted">No students</span>
+                <% } else { %>
+                <%= a.students.map(function (student) { return student.name; }).join(", ") %>
+                <span class="text-muted">(<%= a.studentCount %>)</span>
+                <% } %>
+              </td>
+              <td class="small"><%= a.teacher || "Unassigned" %></td>
               <td class="text-end small">
                 <span class="status-badge status-badge--<%= a.status.toLowerCase() %>"><%= a.status %></span>
+              </td>
+              <td class="text-end small">
+                <span class="small"><%= a.completedCount %> of <%= a.studentCount %></span>
+                <% if (canRecordCompletion && a.studentCount > 0 && a.status !== "Completed" && a.status !== "Cancelled") { %>
+                <button class="btn btn-sm btn-outline-success" type="button"
+                        data-complete-duty="<%= a.id %>">Mark complete</button>
+                <% } %>
               </td>
             </tr>
             <% }); %>
           <% } else { %>
           <tr>
-            <td colspan="5" class="text-center py-5">
+            <td colspan="8" class="text-center py-5">
               <div class="empty-state">
                 <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
                 <p class="text-muted mb-0"><%= emptyMessage %></p>

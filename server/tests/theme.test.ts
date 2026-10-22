@@ -56,8 +56,8 @@ describe("design tokens", () => {
       "status-completed-fg",
       "status-pending-bg",
       "status-pending-fg",
-      "status-missed-bg",
-      "status-missed-fg",
+      "status-cancelled-bg",
+      "status-cancelled-fg",
       "input-fill",
       "surface",
     ];
@@ -85,13 +85,18 @@ describe("design tokens", () => {
 });
 
 describe("duty status badges", () => {
-  const statuses = ["ongoing", "completed", "pending", "missed"] as const;
+  const statuses = ["ongoing", "completed", "pending", "cancelled"] as const;
 
   test("the base class and one modifier per status are defined", () => {
     expect(themeCss).toContain(".status-badge {");
     for (const status of statuses) {
       expect(themeCss).toContain(`.status-badge--${status} {`);
     }
+  });
+
+  test("the old wording is gone", () => {
+    expect(themeCss).not.toContain("--status-missed");
+    expect(themeCss).not.toContain(".status-badge--missed");
   });
 
   test("each status has its own colour, distinct from the other three", () => {

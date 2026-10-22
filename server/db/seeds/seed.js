@@ -73,6 +73,23 @@ const USERS = [
 ];
 
 /**
+ * The locations the school uses. The catalogue lives in `duty_locations`
+ * (migration 006); the seed only makes sure it is there and that the seeded
+ * duties point at one.
+ */
+const LOCATIONS = [
+  { name: "Library", kind: "area", building: "Main Building" },
+  { name: "Cafeteria", kind: "area", building: "Main Building" },
+  { name: "Main Hallway", kind: "area", building: "Main Building" },
+  { name: "Science Laboratory", kind: "laboratory", building: "Main Building" },
+  { name: "Computer Laboratory", kind: "laboratory", building: "Main Building" },
+  { name: "Gymnasium", kind: "facility", building: "Sports Building" },
+  { name: "Clinic", kind: "office", building: "Main Building" },
+  { name: "Guidance Office", kind: "office", building: "Main Building" },
+  { name: "Principal's Office", kind: "office", building: "Main Building" },
+];
+
+/**
  * The duty templates. Two of them are placed on each seeded day, rotating
  * so the calendar shows a different mix every day.
  */
@@ -163,9 +180,28 @@ function manilaInstant(base, offsetDays, hour, minute) {
 
 /** The status a seeded duty should carry, so all four statuses appear. */
 function statusFor(offset, slot) {
-  if (offset < 0) return (offset + slot) % 5 === 0 ? "missed" : "completed";
+  if (offset < 0) return (offset + slot) % 5 === 0 ? "cancelled" : "completed";
   if (offset === 0) return slot === 0 ? "ongoing" : "pending";
   return (offset + slot) % 3 === 0 ? "ongoing" : "pending";
+}
+
+/**
+ * Make sure the location catalogue is there, and hand back the id of each
+ * location by name.
+ */
+async function seedLocations(pool) {
+  const ids = new Map();
+  for (const location of LOCATIONS) {
+    const { rows } = await pool.query(
+      `INSERT INTO duty_locations (name, kind, building)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (name) DO UPDATE SET is_active = TRUE
+       RETURNING id`,
+      [location.name, location.kind, location.building]
+    );
+    ids.set(location.name, rows[0].id);
+  }
+  return ids;
 }
 
 async function seedUsers(pool) {
@@ -201,6 +237,7 @@ async function seedDuties(pool) {
   }
 
   const base = manilaToday();
+  const locations = await seedLocations(pool);
   let duties = 0;
   let assignments = 0;
 
@@ -212,10 +249,11 @@ async function seedDuties(pool) {
       const end = new Date(start.getTime() + template.durationMin * 60 * 1000);
       const status = statusFor(offset, slot);
       const teacherId = ids.get(template.teacher) ?? null;
+      const locationId = locations.get(template.area) ?? null;
 
       const { rows } = await pool.query(
-        `INSERT INTO duties (title, description, area, status, assigned_to, assigned_by, start_time, end_time)
-         SELECT $1, $2, $3, $4, $5, $6, $7, $8
+        `INSERT INTO duties (title, description, area, status, assigned_to, assigned_by, start_time, end_time, location_id)
+         SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9
          WHERE NOT EXISTS (
            SELECT 1 FROM duties WHERE title = $1 AND start_time = $7
          )
@@ -229,27 +267,44 @@ async function seedDuties(pool) {
           csdlId,
           start,
           end,
+          locationId,
         ]
       );
       if (rows.length === 0) continue;
       duties += 1;
 
       const dutyId = rows[0].id;
+      // A duty that is already behind us reads as completed, so its students
+      // carry the completion that makes it complete.
+      const done = offset < 0 && status !== "cancelled";
       for (const schoolId of template.students) {
         const studentId = ids.get(schoolId);
         if (!studentId) continue;
         const { rowCount } = await pool.query(
-          `INSERT INTO duty_assignments (duty_id, student_id)
-           SELECT $1, $2
+          `INSERT INTO duty_assignments (duty_id, student_id, status, completed_at)
+           SELECT $1, $2, $3, $4
            WHERE NOT EXISTS (
              SELECT 1 FROM duty_assignments WHERE duty_id = $1 AND student_id = $2
            )`,
-          [dutyId, studentId]
+          [dutyId, studentId, done ? "completed" : "assigned", done ? end : null]
         );
         assignments += rowCount;
       }
     }
   }
+
+  // A duty that is already behind us reads as completed, so its students
+  // carry the completion that makes it complete. The same repair is applied
+  // to the duties an earlier run left behind.
+  await pool.query(
+    `UPDATE duty_assignments da
+     SET status = 'completed', completed_at = COALESCE(da.completed_at, d.end_time)
+     FROM duties d
+     WHERE da.duty_id = d.id
+       AND d.status = 'completed'
+       AND d.start_time < now()
+       AND da.status <> 'completed'`
+  );
 
   return { duties, assignments };
 }

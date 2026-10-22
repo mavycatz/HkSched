@@ -1,0 +1,116 @@
+<%
+  /* The body of the create and edit schedule modal.
+     The prefix keeps the field ids of the create and the edit modal apart,
+     so both can sit on the same page. */
+  const form = typeof dutyForm !== "undefined" && dutyForm ? dutyForm : {};
+  const errors = typeof dutyFormErrors !== "undefined" && dutyFormErrors ? dutyFormErrors : {};
+  const catalogue = typeof locations !== "undefined" ? locations : [];
+  const conflicts = typeof dutyConflicts !== "undefined" && dutyConflicts ? dutyConflicts : [];
+  const teacherList = typeof teachers !== "undefined" ? teachers : [];
+  const prefix = typeof dutyFormPrefix !== "undefined" ? dutyFormPrefix : "create";
+  const errorFor = function (name) { return errors[name] || null; };
+  const title = form.title || "";
+  const startValue = form.start_time || "";
+  const endValue = form.end_time || "";
+  const locationId = form.location_id === null || form.location_id === undefined ? "" : String(form.location_id);
+  const locationName = typeof form.location_name !== "undefined" ? form.location_name : "";
+%>
+<form method="post" action="<%= typeof dutyFormAction !== "undefined" ? dutyFormAction : "/csdl/duty-management/duties" %>"
+      id="<%= prefix %>-duty-form" data-duty-form="<%= prefix %>"
+      <%= form.id ? 'data-duty-id="' + form.id + '"' : "" %>>
+  <div class="modal-body">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="return_to" value="<%= typeof returnTo !== "undefined" ? returnTo : "/csdl/duty-management" %>">
+    <div class="app-form-grid">
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-title",
+        fieldName: "title",
+        fieldLabel: "Title/Task",
+        fieldType: "text",
+        fieldValue: title,
+        fieldRequired: true,
+        fieldError: errorFor("title"),
+      }) %>
+
+      <%- include("./location-field", {
+        fieldId: prefix + "-location",
+        fieldName: "location_id",
+        fieldLabel: "Location",
+        fieldValue: locationId,
+        fieldNameSearch: prefix + "-location-search",
+        fieldPlaceholder: "Search the catalogue",
+        fieldError: errorFor("location"),
+        locations: catalogue,
+        locationName: locationName,
+      }) %>
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-start",
+        fieldName: "start_time",
+        fieldLabel: "Starts",
+        fieldType: "datetime-local",
+        fieldValue: startValue,
+        fieldRequired: true,
+        fieldError: errorFor("start_time"),
+      }) %>
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-end",
+        fieldName: "end_time",
+        fieldLabel: "Ends",
+        fieldType: "datetime-local",
+        fieldValue: endValue,
+        fieldRequired: true,
+        fieldError: errorFor("end_time"),
+      }) %>
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-class",
+        fieldName: "class_group",
+        fieldLabel: "Class/Group",
+        fieldType: "text",
+        fieldValue: form.class_group || "",
+        fieldError: errorFor("class_group"),
+      }) %>
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-teacher",
+        fieldName: "assigned_to",
+        fieldLabel: "Supervising teacher",
+        fieldType: "select",
+        fieldValue: form.assigned_to === null || form.assigned_to === undefined ? "" : String(form.assigned_to),
+        fieldOptions: [{ value: "", label: "Unassigned" }].concat(teacherList.map(function (teacher) {
+          return { value: String(teacher.id), label: teacher.name + " (" + teacher.school_id + ")" };
+        })),
+        fieldError: errorFor("assigned_to"),
+      }) %>
+
+      <%- include("../../partials/form-field", {
+        fieldId: prefix + "-description",
+        fieldName: "description",
+        fieldLabel: "Description",
+        fieldType: "textarea",
+        fieldValue: form.description || "",
+        fieldWide: true,
+      }) %>
+
+      <div class="app-form-field app-form-field--wide">
+        <label class="app-check">
+          <input type="checkbox" id="<%= prefix %>-exclusive" name="requires_exclusive_location" value="1"
+                 <%= form.requires_exclusive_location ? "checked" : "" %>>
+          <span>The location cannot be held by two duties at the same time</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="app-conflicts" id="<%= prefix %>-conflicts" data-duty-conflicts <%= conflicts.length ? "" : "hidden" %>>
+      <p class="app-conflicts__title"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> This schedule clashes with an existing one</p>
+      <ul class="app-conflicts__list">
+        <% conflicts.forEach(function (conflict) { %>
+        <li><%= conflict.message %></li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+</form>

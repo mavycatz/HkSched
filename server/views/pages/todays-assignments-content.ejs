@@ -32,8 +32,9 @@
           <thead>
             <tr>
               <th>Duty</th>
-              <th>Location/Area</th>
+              <th>Location</th>
               <th>Time</th>
+              <th>Students</th>
               <th>Status</th>
               <th class="app-table__actions">Action</th>
             </tr>
@@ -48,4 +49,9 @@
 
 <%# The page's data travels as a JSON block: it is read by the page's own
     script, and the strict CSP only allows scripts from this origin. %>
-<script type="application/json" id="ta-data"><%- jsonForScript({ slots: slots || [], assignments: assignments || [], today: today }) %></script>
+<script type="application/json" id="ta-data"><%- jsonForScript({
+  duties: duties || [],
+  studentsByDuty: studentsByDuty || {},
+  today: today,
+  canRecord: Boolean(canRecord)
+}) %></script>

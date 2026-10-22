@@ -104,6 +104,50 @@
   var skeleton = document.getElementById("dashboard-skeleton");
   var tableBody = document.getElementById("assignments-table-body");
 
+  /* The CSRF token the server puts in the page head. */
+  function csrfToken() {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute("content") || "" : "";
+  }
+
+  /* Fetch the summary for a range and paint it over the page. */
+  function refreshDashboard(pageUrl) {
+    var urlObj = new URL(pageUrl, window.location.origin);
+    urlObj.pathname = "/csdl/dashboard.json";
+    var apiUrl = urlObj.toString();
+
+    if (skeleton) skeleton.classList.remove("d-none");
+    if (tableBody) tableBody.innerHTML = "";
+
+    return fetch(apiUrl, {
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(function (data) {
+        // Update URL without reload
+        history.replaceState(null, "", pageUrl);
+
+        // Update stat cards
+        updateStatCards(data.totals, pageUrl);
+
+        // Update table. The range key ("today", "week", "month",
+        // "custom") decides the wording; the label is only the human
+        // date range, so it cannot be used as a key.
+        updateTable(data.assignmentsToday, data.rangeKey, data.rangeLabel);
+
+        // Hide skeleton
+        if (skeleton) skeleton.classList.add("d-none");
+      })
+      .catch(function (err) {
+        console.error("Dashboard fetch failed:", err);
+        if (skeleton) skeleton.classList.add("d-none");
+      });
+  }
+
   if (rangeButtons.length) {
     rangeButtons.forEach(function (btn) {
       btn.addEventListener("click", function (e) {
@@ -115,45 +159,44 @@
         var href = btn.getAttribute("href");
         if (!href) return;
 
-        // Build JSON API URL: /csdl/dashboard.json?range=today
-        var urlObj = new URL(href, window.location.origin);
-        urlObj.pathname = "/csdl/dashboard.json";
-        var apiUrl = urlObj.toString();
-
-        // Show skeleton
-        if (skeleton) skeleton.classList.remove("d-none");
-        if (tableBody) tableBody.innerHTML = "";
-
-        fetch(apiUrl, {
-          headers: { Accept: "application/json" },
-          credentials: "same-origin",
-        })
-          .then(function (response) {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-          })
-          .then(function (data) {
-            // Update URL without reload
-            history.replaceState(null, "", url);
-
-            // Update stat cards
-            updateStatCards(data.totals, url);
-
-            // Update table. The range key ("today", "week", "month",
-            // "custom") decides the wording; the label is only the human
-            // date range, so it cannot be used as a key.
-            updateTable(data.assignmentsToday, data.rangeKey, data.rangeLabel);
-
-            // Hide skeleton
-            if (skeleton) skeleton.classList.add("d-none");
-          })
-          .catch(function (err) {
-            console.error("Dashboard fetch failed:", err);
-            if (skeleton) skeleton.classList.add("d-none");
-          });
+        refreshDashboard(href);
       });
     });
   }
+
+  /* ---------- Recording a completion from the dashboard table ---------- */
+  document.addEventListener("click", function (event) {
+    var target = event.target;
+    if (!target || !target.closest) return;
+    var button = target.closest("[data-complete-duty]");
+    if (!button) return;
+
+    event.preventDefault();
+
+    var dutyId = button.getAttribute("data-complete-duty");
+    if (!dutyId) return;
+
+    button.disabled = true;
+
+    fetch("/api/duties/" + encodeURIComponent(dutyId) + "/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ _csrf: csrfToken() }),
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Completion was refused");
+        return response.json();
+      })
+      .then(function () {
+        // The row and the counts come back from the summary endpoint.
+        refreshDashboard(window.location.href);
+      })
+      .catch(function (err) {
+        console.error("Completion failed:", err);
+        button.disabled = false;
+      });
+  });
 
   function updateStatCards(totals, url) {
     var cards = document.querySelectorAll(".stat-card");
@@ -225,22 +268,54 @@
 
     tableBody.innerHTML = "";
 
+    var canRecord = tableBody.getAttribute("data-can-record-completion") === "true";
+
     if (assignments && assignments.length > 0) {
       assignments.forEach(function (a) {
+        var students = "";
+        if (!a.studentCount) {
+          students = '<span class="text-muted">No students</span>';
+        } else {
+          var names = (a.students || []).map(function (student) {
+            return student.name;
+          });
+          students =
+            escapeHtml(names.join(", ")) +
+            ' <span class="text-muted">(' + escapeHtml(String(a.studentCount)) + ")</span>";
+        }
+
+        var completion =
+          '<span class="small">' +
+          escapeHtml(String(a.completedCount)) +
+          " of " +
+          escapeHtml(String(a.studentCount)) +
+          "</span>";
+
+        if (canRecord && a.studentCount > 0 && a.status !== "Completed" && a.status !== "Cancelled") {
+          completion +=
+            ' <button class="btn btn-sm btn-outline-success" type="button" data-complete-duty="' +
+            escapeHtml(String(a.id)) +
+            '">Mark complete</button>';
+        }
+
         var tr = document.createElement("tr");
+        tr.setAttribute("data-duty-id", String(a.id));
         tr.innerHTML =
           '<td class="small">' + escapeHtml(a.date) + '</td>' +
           '<td class="small">' + escapeHtml(a.time) + '</td>' +
-          '<td class="small">' + escapeHtml(a.area) + '</td>' +
+          '<td class="small">' + escapeHtml(a.area || "—") + '</td>' +
           '<td class="small">' + escapeHtml(a.tasks) + '</td>' +
-          '<td class="text-end small"><span class="status-badge status-badge--' + escapeHtml(a.status.toLowerCase()) + '">' + escapeHtml(a.status) + '</span></td>';
+          '<td class="small">' + students + '</td>' +
+          '<td class="small">' + escapeHtml(a.teacher || "Unassigned") + '</td>' +
+          '<td class="text-end small"><span class="status-badge status-badge--' + escapeHtml(a.status.toLowerCase()) + '">' + escapeHtml(a.status) + '</span></td>' +
+          '<td class="text-end small">' + completion + '</td>';
         tableBody.appendChild(tr);
       });
     } else {
       var emptyMsg = rangeKey === "today" ? "No tasks for today" : "No tasks for this period";
       var tr = document.createElement("tr");
       tr.innerHTML =
-        '<td colspan="5" class="text-center py-5">' +
+        '<td colspan="8" class="text-center py-5">' +
         '<div class="empty-state">' +
         '<i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>' +
         '<p class="text-muted mb-0">' + escapeHtml(emptyMsg) + '</p>' +

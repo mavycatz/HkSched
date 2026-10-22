@@ -49,11 +49,16 @@ Every duty records `assigned_by = CSDL-001`.
 The status of a duty follows its position relative to today, so all four
 statuses appear:
 
-| Position            | Status                                   |
-| ------------------- | ---------------------------------------- |
-| before today        | `completed`, with every 5th one `missed` |
-| today               | `ongoing` (first duty) / `pending`       |
-| after today         | `pending`, with every 3rd one `ongoing`  |
+| Position            | Status                                        |
+| ------------------- | --------------------------------------------- |
+| before today        | `completed`, with every 5th one `cancelled`   |
+| today               | `ongoing` (first duty) / `pending`            |
+| after today         | `pending`, with every 3rd one `ongoing`       |
+
+A duty from before today carries the completion on each of its assignment
+rows, which is what makes it read as `completed`. The stored status is only
+an explicit cancellation; everything else is derived from the duty's own
+times and from its recorded completions.
 
 Times are stored as `TIMESTAMPTZ` and interpreted in the `Asia/Manila`
 calendar, which is the calendar the application displays.
@@ -71,9 +76,35 @@ psql "$DATABASE_URL" -c "DELETE FROM duty_assignments; DELETE FROM duties;"
 This deletes **every** duty and assignment in the database, including any
 created by hand — do not run it against a database that holds real data.
 
+## Duty locations
+
+The seed also fills the `duty_locations` catalogue (migration
+`006_duty_locations_and_status.sql`), the list of places a duty can be held
+at:
+
+| Location            | Kind        | Building      |
+| ------------------- | ----------- | ------------- |
+| Library             | area        | Main Building |
+| Cafeteria           | area        | Main Building |
+| Main Hallway        | area        | Main Building |
+| Science Laboratory  | laboratory  | Main Building |
+| Computer Laboratory | laboratory  | Main Building |
+| Gymnasium           | facility    | Sports Building |
+| Clinic              | office      | Main Building |
+| Guidance Office     | office      | Main Building |
+| Principal's Office  | office      | Main Building |
+
+Every seeded duty points at the location named by its area, so the location
+filter and the location picker have something to show. A location is only
+offered while it is active; a duty that already points at a deactivated
+location still shows it.
+
 ## Running
 
 ```bash
+# apply the migrations first — the catalogue and the new duty columns live there
+npm run db:migrate
+
 # against a test database (the database name must contain "test")
 DATABASE_URL=postgresql://user:pass@localhost:5432/hkduty_test npm run db:seed
 

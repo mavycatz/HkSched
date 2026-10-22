@@ -216,7 +216,7 @@
 .schedule-dot--ongoing { background: var(--status-ongoing-solid); }
 .schedule-dot--completed { background: var(--status-completed-solid); }
 .schedule-dot--pending { background: var(--status-pending-solid); }
-.schedule-dot--missed { background: var(--status-missed-solid); }
+.schedule-dot--cancelled { background: var(--status-cancelled-solid); }
 
 /* ---------- Legend ---------- */
 .schedule-legend {
@@ -295,7 +295,7 @@
 .schedule-duty-card--ongoing::before { background: var(--status-ongoing-solid); }
 .schedule-duty-card--completed::before { background: var(--status-completed-solid); }
 .schedule-duty-card--pending::before { background: var(--status-pending-solid); }
-.schedule-duty-card--missed::before { background: var(--status-missed-solid); }
+.schedule-duty-card--cancelled::before { background: var(--status-cancelled-solid); }
 
 .schedule-duty-top {
   display: flex;
@@ -367,4 +367,58 @@
   .schedule-weekday {
     font-size: 0.62rem;
   }
+}
+
+/* =============================================================================
+   The Duty Schedules browser — the list at /csdl/schedule.
+
+   The row shows what each schedule is: when it runs, where it is held, who is
+   on it, who supervises it and how far the completion has gone.
+   ============================================================================= */
+.sb-row td {
+  vertical-align: top;
+}
+
+.sb-date {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sb-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.sb-students {
+  display: block;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-none {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.sb-completion {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.sb-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sb-inline {
+  display: inline-flex;
+  margin: 0;
 }

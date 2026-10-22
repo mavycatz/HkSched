@@ -1,103 +1,9 @@
 <%
   /* ---------------------------------------------------------------------------
-     Helpers for this page. Everything is rendered on the server from the query
-     string, so the page works without JavaScript and survives a reload.
+     The Duty Management page: where schedules are written and where the
+     location catalogue is kept. The list of every schedule lives on the Duty
+     Schedules page, which is linked from here.
      --------------------------------------------------------------------------- */
-  const MANILA = "Asia/Manila";
-  const STATUS_ORDER = ["ongoing", "pending", "completed", "missed"];
-
-  function fmtDate(value) {
-    if (!value) return "—";
-    return new Date(value).toLocaleDateString("en-PH", {
-      timeZone: MANILA, month: "short", day: "numeric", year: "numeric",
-    });
-  }
-
-  function fmtTime(value) {
-    if (!value) return "—";
-    return new Date(value).toLocaleTimeString("en-PH", {
-      timeZone: MANILA, hour: "2-digit", minute: "2-digit", hour12: true,
-    });
-  }
-
-  function fmtTimeRange(start, end) {
-    if (!start) return "—";
-    const from = fmtTime(start);
-    return end ? from + " – " + fmtTime(end) : from;
-  }
-
-  /* A "YYYY-MM-DD" value for a day in the Manila calendar. */
-  function toDateValue(value) {
-    if (!value) return "";
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: MANILA, year: "numeric", month: "2-digit", day: "2-digit",
-    }).formatToParts(new Date(value));
-    const get = (type) => (parts.find(function (p) { return p.type === type; }) || {}).value || "";
-    return get("year") + "-" + get("month") + "-" + get("day");
-  }
-
-  /* A "YYYY-MM-DDTHH:mm" value for a datetime-local input, in Manila time. */
-  function toInputValue(value) {
-    if (!value) return "";
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: MANILA, year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-    }).formatToParts(new Date(value));
-    const get = (type) => (parts.find(function (p) { return p.type === type; }) || {}).value || "";
-    return get("year") + "-" + get("month") + "-" + get("day") + "T" + get("hour") + ":" + get("minute");
-  }
-
-  function initials(name) {
-    const text = String(name || "").trim();
-    if (!text) return "?";
-    return text.split(/\s+/).map(function (part) { return part.charAt(0); })
-      .slice(0, 2).join("").toUpperCase();
-  }
-
-  /* The address of this page with the current filters and the given overrides. */
-  function pageUrl(overrides) {
-    const params = new URLSearchParams();
-    if (filters.search) params.set("q", filters.search);
-    if (filters.status) params.set("status", filters.status);
-    if (filters.date) params.set("date", filters.date);
-    if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
-    const options = overrides || {};
-    if (options.page) params.set("page", String(options.page));
-    for (const key of Object.keys(options)) {
-      if (key === "page") continue;
-      const value = options[key];
-      if (value === null || value === undefined || value === "") params.delete(key);
-      else params.set(key, String(value));
-    }
-    const query = params.toString();
-    return "/csdl/duty-management" + (query ? "?" + query : "");
-  }
-
-  /* The page numbers the pager shows, with gaps marked. */
-  function pagerPages(current, total) {
-    const wanted = [1, current - 1, current, current + 1, total];
-    const pages = wanted.filter(function (n) { return n >= 1 && n <= total; })
-      .filter(function (n, index, all) { return all.indexOf(n) === index; })
-      .sort(function (a, b) { return a - b; });
-    const out = [];
-    pages.forEach(function (n, index) {
-      if (index > 0 && n - pages[index - 1] > 1) out.push("gap");
-      out.push(n);
-    });
-    return out;
-  }
-
-  const firstRow = (page - 1) * pageSize;
-  const lastRow = Math.min(firstRow + duties.length, total);
-
-  /* The hidden fields that carry the current filters through a form post. */
-  function filterFields() { %>
-    <input type="hidden" name="f_q" value="<%= filters.search || "" %>">
-    <input type="hidden" name="f_status" value="<%= filters.status || "" %>">
-    <input type="hidden" name="f_date" value="<%= filters.date || "" %>">
-    <input type="hidden" name="f_sort" value="<%= filters.sort || "newest" %>">
-    <input type="hidden" name="f_page" value="<%= page %>">
-  <% } %>
 %>
 
 <div class="app-stack">
@@ -105,418 +11,96 @@
   <% if (message) { %>
   <div class="app-alert" role="status">
     <i class="bi bi-check-circle" aria-hidden="true"></i>
-    <% if (message === "created") { %>The schedule was created and is listed below.
+    <% if (message === "created") { %>The schedule was created.
     <% } else if (message === "updated") { %>The schedule was updated.
     <% } else if (message === "deleted") { %>The schedule was deleted.
+    <% } else if (message === "cancelled") { %>The schedule was cancelled.
     <% } else if (message === "assigned") { %>The assignments were saved.
+    <% } else if (message === "location-added") { %>The location was added to the catalogue.
     <% } else { %>Done.
     <% } %>
   </div>
   <% } %>
 
-  <!-- Page header: the shared header, with the create action on the right. -->
   <header class="page-header page-header--row">
     <div>
-      <h1 class="page-title">Duty Schedule Management</h1>
-      <p class="page-subtitle">View and manage student duty schedules.</p>
+      <h1 class="page-title">Duty Management</h1>
+      <p class="page-subtitle">Write the schedules and keep the places they are held in order.</p>
     </div>
-    <a class="app-btn app-btn--primary" href="<%= pageUrl({ create: 1 }) %>#dm-create" data-bs-toggle="modal"
-       data-bs-target="#dm-create-modal" id="dm-create-btn">
-      <i class="bi bi-plus-lg" aria-hidden="true"></i>
-      <span>Create schedule</span>
-    </a>
-  </header>
-
-  <!-- Filters: search, status, date and sort on one row. -->
-  <form class="app-panel" method="get" action="/csdl/duty-management" id="dm-filter-form">
-    <div class="app-panel__body">
-      <div class="app-toolbar">
-        <div class="app-field app-field--grow">
-          <label class="app-label" for="dm-q">Search</label>
-          <div class="app-search">
-            <i class="bi bi-search" aria-hidden="true"></i>
-            <input class="app-input" type="search" id="dm-q" name="q"
-                   value="<%= filters.search || "" %>" placeholder="Search by name, location, or task">
-          </div>
-        </div>
-        <div class="app-field">
-          <label class="app-label" for="dm-status">Status</label>
-          <select class="app-input app-select" id="dm-status" name="status">
-            <option value="">All statuses</option>
-            <% STATUS_ORDER.forEach(function (status) { %>
-            <option value="<%= status %>" <%= filters.status === status ? "selected" : "" %>><%= statusView(status).label %></option>
-            <% }); %>
-        </select>
-      </div>
-      <div class="app-field">
-        <label class="app-label" for="dm-date">Date</label>
-        <input class="app-input" type="date" id="dm-date" name="date" value="<%= filters.date || "" %>">
-      </div>
-      <div class="app-field">
-        <label class="app-label" for="dm-sort">Sort</label>
-        <select class="app-input app-select" id="dm-sort" name="sort">
-          <option value="newest" <%= filters.sort === "newest" ? "selected" : "" %>>Date, newest first</option>
-          <option value="oldest" <%= filters.sort === "oldest" ? "selected" : "" %>>Date, oldest first</option>
-        </select>
-      </div>
-      <div class="app-toolbar__actions">
-        <button class="app-btn app-btn--navy" type="submit">Apply</button>
-        <a class="app-btn app-btn--quiet" href="/csdl/duty-management">Clear</a>
-      </div>
-      </div>
-    </div>
-  </form>
-
-  <!-- Duty cards -->
-  <% if (duties.length > 0) { %>
-  <div class="dm-cards" id="dm-list">
-    <% duties.forEach(function (duty) {
-         const view = statusView(duty.status);
-         const assigned = (dutyStudents && dutyStudents[duty.id]) || [];
-         const teacher = duty.assignee_name || "Unassigned";
-    %>
-    <article class="dm-card dm-card--<%= view.status %>" data-duty-id="<%= duty.id %>">
-      <div class="dm-card-date">
-        <span class="dm-date-month"><%= duty.start_time ? new Date(duty.start_time).toLocaleDateString("en-PH", { timeZone: MANILA, month: "short" }) : "—" %></span>
-        <span class="dm-date-day"><%= duty.start_time ? new Date(duty.start_time).toLocaleDateString("en-PH", { timeZone: MANILA, day: "numeric" }) : "—" %></span>
-        <span class="dm-date-week"><%= duty.start_time ? new Date(duty.start_time).toLocaleDateString("en-PH", { timeZone: MANILA, weekday: "short" }) : "" %></span>
-      </div>
-
-      <div class="dm-card-main">
-        <div class="dm-card-top">
-          <div class="dm-person">
-            <span class="dm-avatar" aria-hidden="true"><%= initials(duty.assignee_name) %></span>
-            <span class="dm-person-text">
-              <span class="dm-name"><%= teacher %></span>
-              <span class="dm-role">Teacher</span>
-            </span>
-          </div>
-          <span class="status-badge status-badge--<%= view.status %>"><%= view.label %></span>
-        </div>
-        <div class="dm-meta">
-          <span class="dm-meta-item"><i class="bi bi-geo-alt" aria-hidden="true"></i><span><%= duty.area %></span></span>
-          <span class="dm-meta-item"><i class="bi bi-journal-text" aria-hidden="true"></i><span><%= duty.title %></span></span>
-          <span class="dm-meta-item"><i class="bi bi-clock" aria-hidden="true"></i><span><%= fmtTimeRange(duty.start_time, duty.end_time) %></span></span>
-          <span class="dm-meta-item"><i class="bi bi-people" aria-hidden="true"></i><span><%= duty.student_count %> student<%= duty.student_count === 1 ? "" : "s" %></span></span>
-        </div>
-      </div>
-
-      <div class="dm-card-actions">
-        <a class="dm-icon-btn" href="<%= pageUrl({ edit: duty.id }) %>#dm-edit" data-bs-toggle="modal"
-           data-bs-target="#dm-edit-modal" data-duty-id="<%= duty.id %>"
-           data-duty-title="<%= duty.title %>" data-duty-area="<%= duty.area %>"
-           data-duty-description="<%= duty.description || "" %>" data-duty-status="<%= duty.status %>"
-           data-duty-class="<%= duty.class_group || "" %>"
-           data-duty-start="<%= toInputValue(duty.start_time) %>" data-duty-end="<%= toInputValue(duty.end_time) %>"
-           data-duty-teacher="<%= duty.assignee_id || "" %>" data-duty-students="<%= assigned.join(",") %>"
-           aria-label="Edit <%= duty.title %>">
-          <i class="bi bi-pencil" aria-hidden="true"></i>
-        </a>
-        <a class="dm-icon-btn" href="<%= pageUrl({ assign: duty.id }) %>#dm-assign" data-bs-toggle="modal"
-           data-bs-target="#dm-assign-modal" data-duty-id="<%= duty.id %>"
-           data-duty-title="<%= duty.title %>" data-duty-teacher="<%= duty.assignee_id || "" %>"
-           data-duty-students="<%= assigned.join(",") %>" aria-label="Assign people to <%= duty.title %>">
-          <i class="bi bi-person-plus" aria-hidden="true"></i>
-        </a>
-        <form class="dm-delete" method="post" action="/csdl/duty-management/duties/<%= duty.id %>/delete">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <% filterFields() %>
-          <button class="dm-icon-btn dm-icon-btn--danger" type="submit"
-                  data-confirm="Delete &quot;<%= duty.title %>&quot;? This cannot be undone."
-                  aria-label="Delete <%= duty.title %>">
-            <i class="bi bi-trash" aria-hidden="true"></i>
-          </button>
-        </form>
-      </div>
-    </article>
-    <% }); %>
-  </div>
-  <% } else { %>
-  <div class="app-panel" id="dm-empty">
-    <div class="app-empty">
-      <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-calendar-week"></i></span>
-      <% if (hasAnyDuties) { %>
-      <h2 class="app-empty__title">No duty matches the current filters</h2>
-      <p class="app-empty__text">There are <%= scopeTotal %> duties in total, but none of them match this search, status or date.</p>
-      <a class="app-btn app-btn--quiet" href="/csdl/duty-management" id="dm-clear-filters">Clear filters</a>
-      <% } else { %>
-      <h2 class="app-empty__title">No duties scheduled yet</h2>
-      <p class="app-empty__text">Create the first duty schedule to get started.</p>
-      <a class="app-btn app-btn--primary" href="<%= pageUrl({ create: 1 }) %>#dm-create" data-bs-toggle="modal"
-         data-bs-target="#dm-create-modal">
+    <div class="page-header__actions">
+      <a class="app-btn app-btn--primary" href="/csdl/duty-management?create=1#duty-create-modal"
+         data-bs-toggle="modal" data-bs-target="#duty-create-modal" id="dm-create-btn">
         <i class="bi bi-plus-lg" aria-hidden="true"></i>
         <span>Create schedule</span>
       </a>
-      <% } %>
-    </div>
-  </div>
-  <% } %>
-
-  <!-- Footer: how much is listed, and the pager. -->
-  <div class="dm-footer">
-    <p class="dm-count" id="dm-count"><% if (duties.length === 0) { %>No duties to show<% } else { %>Showing <%= firstRow + 1 %>-<%= lastRow %> of <%= total %> duties<% } %></p>
-    <% if (pageCount > 1) { %>
-    <nav class="dm-pager" aria-label="Duty pages">
-      <% if (page > 1) { %>
-      <a class="dm-pager-btn" href="<%= pageUrl({ page: page - 1 }) %>" rel="prev" aria-label="Previous page">
-        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+      <a class="app-btn app-btn--quiet" href="/csdl/schedule" id="dm-go-browser">
+        <i class="bi bi-list-ul" aria-hidden="true"></i>
+        <span>See every schedule</span>
       </a>
-      <% } else { %>
-      <span class="dm-pager-btn is-disabled" aria-disabled="true">
-        <i class="bi bi-chevron-left" aria-hidden="true"></i>
-      </span>
-      <% } %>
-      <% pagerPages(page, pageCount).forEach(function (entry) { %>
-        <% if (entry === "gap") { %>
-        <span class="dm-pager-gap" aria-hidden="true">…</span>
-        <% } else if (entry === page) { %>
-        <a class="dm-pager-btn is-current" href="<%= pageUrl({ page: entry }) %>" aria-current="page" aria-label="Page <%= entry %>"><%= entry %></a>
+    </div>
+  </header>
+
+  <!-- The location catalogue -->
+  <section class="app-panel" id="dm-locations">
+    <div class="app-panel__head">
+      <h2 class="app-panel__title"><i class="bi bi-geo-alt" aria-hidden="true"></i> Locations</h2>
+      <p class="app-panel__note">The places a schedule can be held in.</p>
+    </div>
+    <div class="app-panel__body">
+      <% if (locationNotice && locationNotice.kind === "duplicate") { %>
+      <div class="app-alert app-alert--warn" role="alert" id="dm-location-duplicate">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <% if (locationNotice.name) { %>
+        "<%= locationNotice.name %>" is already in the catalogue. Use the one that is there.
         <% } else { %>
-        <a class="dm-pager-btn" href="<%= pageUrl({ page: entry }) %>" aria-label="Page <%= entry %>"><%= entry %></a>
+        That location could not be added. Give it a name and choose its kind.
         <% } %>
-      <% }); %>
-      <% if (page < pageCount) { %>
-      <a class="dm-pager-btn" href="<%= pageUrl({ page: page + 1 }) %>" rel="next" aria-label="Next page">
-        <i class="bi bi-chevron-right" aria-hidden="true"></i>
-      </a>
-      <% } else { %>
-      <span class="dm-pager-btn is-disabled" aria-disabled="true">
-        <i class="bi bi-chevron-right" aria-hidden="true"></i>
-      </span>
+      </div>
       <% } %>
-    </nav>
-    <% } %>
-  </div>
-</div>
 
-<!-- Create schedule -->
-<div class="modal fade app-modal <%= create ? "show d-block" : "" %>" id="dm-create-modal" tabindex="-1"
-     aria-labelledby="dm-create-modal-label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span class="app-modal__icon" aria-hidden="true"><i class="bi bi-calendar-plus"></i></span>
-        <div class="app-modal__heading">
-          <h2 class="modal-title" id="dm-create-modal-label">Create schedule</h2>
-          <p class="app-modal__note">Add a duty, when it runs and who is on it.</p>
+      <% if (locations.length === 0) { %>
+      <p class="app-empty__text" id="dm-no-locations">No location is in the catalogue yet. Add the first one below.</p>
+      <% } else { %>
+      <ul class="dm-location-list" id="dm-location-list">
+        <% locations.forEach(function (location) { %>
+        <li class="dm-location">
+          <span class="dm-location__name"><%= location.name %></span>
+          <span class="badge badge--neutral"><%= location.kind %></span>
+          <% if (location.building) { %><span class="dm-location__building"><%= location.building %></span><% } %>
+          <% if (!location.is_active) { %><span class="badge badge--muted">Out of circulation</span><% } %>
+        </li>
+        <% }); %>
+      </ul>
+      <% } %>
+
+      <% if (canManageLocations) { %>
+      <form class="app-form app-form--inline" method="post" action="/csdl/duty-management/locations" id="dm-location-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="app-field app-field--grow">
+          <label class="app-label" for="dm-location-name">Add a location</label>
+          <input class="app-input" type="text" id="dm-location-name" name="name" placeholder="Name" required>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form method="post" action="/csdl/duty-management/duties" id="dm-create-form">
-        <div class="modal-body">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <% filterFields() %>
-          <div class="app-form-grid">
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-title">Title/Task <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="text" id="dm-create-title" name="title" required aria-required="true" autocomplete="off">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-area">Location/Area <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="text" id="dm-create-area" name="area" required aria-required="true" autocomplete="off">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-start">Starts <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="datetime-local" id="dm-create-start" name="start_time" required aria-required="true">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-end">Ends</label>
-              <input class="app-input" type="datetime-local" id="dm-create-end" name="end_time">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-status">Status</label>
-              <select class="app-input app-select" id="dm-create-status" name="status">
-                <% STATUS_ORDER.forEach(function (status) { %>
-                <option value="<%= status %>" <%= status === "pending" ? "selected" : "" %>><%= statusView(status).label %></option>
-                <% }); %>
-              </select>
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-teacher">Teacher</label>
-              <select class="app-input app-select" id="dm-create-teacher" name="assigned_to">
-                <option value="">Unassigned</option>
-                <% teachers.forEach(function (teacher) { %>
-                <option value="<%= teacher.id %>"><%= teacher.name %> (<%= teacher.school_id %>)</option>
-                <% }); %>
-              </select>
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-create-class">Class/Group</label>
-              <input class="app-input" type="text" id="dm-create-class" name="class_group" autocomplete="off">
-            </div>
-            <div class="app-form-field app-form-field--wide">
-              <label class="app-label" for="dm-create-description">Description</label>
-              <textarea class="app-input" id="dm-create-description" name="description" rows="2"></textarea>
-            </div>
-            <div class="app-form-field app-form-field--wide">
-              <span class="app-label" id="dm-create-students-label">Students</span>
-              <div class="dm-checklist" role="group" aria-labelledby="dm-create-students-label">
-                <% if (students.length === 0) { %>
-                <p class="app-empty__text">No students are registered yet.</p>
-                <% } %>
-                <% students.forEach(function (student) { %>
-                <label class="app-check">
-                  <input type="checkbox" name="student_ids" value="<%= student.id %>">
-                  <span><%= student.name %> <span class="dm-check-id"><%= student.school_id %></span></span>
-                </label>
-                <% }); %>
-              </div>
-            </div>
-          </div>
+        <div class="app-field">
+          <label class="app-label" for="dm-location-kind">Kind</label>
+          <select class="app-input app-select" id="dm-location-kind" name="kind">
+            <option value="classroom">Classroom</option>
+            <option value="office">Office</option>
+            <option value="laboratory">Laboratory</option>
+            <option value="facility">Facility</option>
+            <option value="area">Area</option>
+          </select>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="app-btn app-btn--ghost" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="app-btn app-btn--primary" id="dm-create-save">
-            <i class="bi bi-check-lg" aria-hidden="true"></i>
-            <span>Save schedule</span>
-          </button>
+        <div class="app-field">
+          <label class="app-label" for="dm-location-building">Building</label>
+          <input class="app-input" type="text" id="dm-location-building" name="building" placeholder="Optional">
+        </div>
+        <div class="app-field app-field--action">
+          <button class="app-btn app-btn--navy" type="submit" id="dm-location-submit">Add location</button>
         </div>
       </form>
+      <% } %>
     </div>
-  </div>
+  </section>
 </div>
 
-<!-- Edit schedule -->
-<div class="modal fade app-modal <%= editDuty ? "show d-block" : "" %>" id="dm-edit-modal" tabindex="-1"
-     aria-labelledby="dm-edit-modal-label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span class="app-modal__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
-        <div class="app-modal__heading">
-          <h2 class="modal-title" id="dm-edit-modal-label">Edit schedule</h2>
-          <p class="app-modal__note">Change the details of this duty and save them.</p>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form method="post" action="/csdl/duty-management/duties/<%= editDuty ? editDuty.id : 0 %>" id="dm-edit-form">
-        <div class="modal-body">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <input type="hidden" name="id" id="dm-edit-id" value="<%= editDuty ? editDuty.id : "" %>">
-          <% filterFields() %>
-          <div class="app-form-grid">
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-title">Title/Task <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="text" id="dm-edit-title" name="title" required aria-required="true"
-                     autocomplete="off" value="<%= editDuty ? editDuty.title : "" %>">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-area">Location/Area <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="text" id="dm-edit-area" name="area" required aria-required="true"
-                     autocomplete="off" value="<%= editDuty ? editDuty.area : "" %>">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-start">Starts <span class="app-required" aria-hidden="true">*</span></label>
-              <input class="app-input" type="datetime-local" id="dm-edit-start" name="start_time" required aria-required="true"
-                     value="<%= editDuty ? toInputValue(editDuty.start_time) : "" %>">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-end">Ends</label>
-              <input class="app-input" type="datetime-local" id="dm-edit-end" name="end_time"
-                     value="<%= editDuty ? toInputValue(editDuty.end_time) : "" %>">
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-status">Status</label>
-              <select class="app-input app-select" id="dm-edit-status" name="status">
-                <% STATUS_ORDER.forEach(function (status) { %>
-                <option value="<%= status %>" <%= editDuty && editDuty.status === status ? "selected" : "" %>><%= statusView(status).label %></option>
-                <% }); %>
-              </select>
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-teacher">Teacher</label>
-              <select class="app-input app-select" id="dm-edit-teacher" name="assigned_to">
-                <option value="">Unassigned</option>
-                <% teachers.forEach(function (teacher) { %>
-                <option value="<%= teacher.id %>" <%= editDuty && editDuty.assignee_id === teacher.id ? "selected" : "" %>><%= teacher.name %> (<%= teacher.school_id %>)</option>
-                <% }); %>
-              </select>
-            </div>
-            <div class="app-form-field">
-              <label class="app-label" for="dm-edit-class">Class/Group</label>
-              <input class="app-input" type="text" id="dm-edit-class" name="class_group" autocomplete="off"
-                     value="<%= editDuty && editDuty.class_group ? editDuty.class_group : "" %>">
-            </div>
-            <div class="app-form-field app-form-field--wide">
-              <label class="app-label" for="dm-edit-description">Description</label>
-              <textarea class="app-input" id="dm-edit-description" name="description" rows="2"><%= editDuty && editDuty.description ? editDuty.description : "" %></textarea>
-            </div>
-            <div class="app-form-field app-form-field--wide">
-              <span class="app-label" id="dm-edit-students-label">Students</span>
-              <div class="dm-checklist" role="group" aria-labelledby="dm-edit-students-label">
-                <% students.forEach(function (student) { %>
-                <label class="app-check">
-                  <input type="checkbox" name="student_ids" value="<%= student.id %>" data-student-id="<%= student.id %>"
-                         <%= (editStudentIds || []).indexOf(student.id) > -1 ? "checked" : "" %>>
-                  <span><%= student.name %> <span class="dm-check-id"><%= student.school_id %></span></span>
-                </label>
-                <% }); %>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="app-btn app-btn--ghost" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="app-btn app-btn--primary" id="dm-edit-save">
-            <i class="bi bi-check-lg" aria-hidden="true"></i>
-            <span>Save changes</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Assign students and the teacher to a duty -->
-<div class="modal fade app-modal <%= assignDuty ? "show d-block" : "" %>" id="dm-assign-modal" tabindex="-1"
-     aria-labelledby="dm-assign-modal-label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span class="app-modal__icon" aria-hidden="true"><i class="bi bi-person-plus"></i></span>
-        <div class="app-modal__heading">
-          <h2 class="modal-title" id="dm-assign-modal-label">Assign people</h2>
-          <p class="app-modal__note">Choose the teacher and the students for <span id="dm-assign-title"><%= assignDuty ? assignDuty.title : "" %></span>.</p>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form method="post" action="/csdl/duty-management/duties/<%= assignDuty ? assignDuty.id : 0 %>/assign" id="dm-assign-form">
-        <div class="modal-body">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <input type="hidden" name="id" id="dm-assign-id" value="<%= assignDuty ? assignDuty.id : "" %>">
-          <% filterFields() %>
-          <div class="app-form-grid">
-            <div class="app-form-field app-form-field--wide">
-              <label class="app-label" for="dm-assign-teacher">Teacher</label>
-              <select class="app-input app-select" id="dm-assign-teacher" name="assigned_to">
-                <option value="">Unassigned</option>
-                <% teachers.forEach(function (teacher) { %>
-                <option value="<%= teacher.id %>" <%= assignDuty && assignDuty.assignee_id === teacher.id ? "selected" : "" %>><%= teacher.name %> (<%= teacher.school_id %>)</option>
-                <% }); %>
-              </select>
-            </div>
-            <div class="app-form-field app-form-field--wide">
-              <span class="app-label" id="dm-assign-students-label">Students</span>
-              <div class="dm-checklist" role="group" aria-labelledby="dm-assign-students-label">
-                <% students.forEach(function (student) { %>
-                <label class="app-check">
-                  <input type="checkbox" name="student_ids" value="<%= student.id %>" data-student-id="<%= student.id %>"
-                         <%= (assignStudentIds || []).indexOf(student.id) > -1 ? "checked" : "" %>>
-                  <span><%= student.name %> <span class="dm-check-id"><%= student.school_id %></span></span>
-                </label>
-                <% }); %>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="app-btn app-btn--ghost" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="app-btn app-btn--primary" id="dm-assign-save">
-            <i class="bi bi-check-lg" aria-hidden="true"></i>
-            <span>Save assignments</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+<%- include("./partials/duty-modals") %>

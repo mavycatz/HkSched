@@ -1,0 +1,294 @@
+/* The duty module's own components — the ones the schedule browser and the
+   authoring page share.
+
+   Every colour comes from a theme token, so the duty pages follow the app's
+   palette and the duty status colours stay in one place. Nothing here
+   hardcodes a colour. */
+
+/* ------------------------------------------------------------------ fields */
+.app-field--action {
+  justify-content: flex-end;
+}
+
+/* The reason a write was refused, beside the field that caused it. */
+.app-field-error {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--error);
+}
+
+.app-form-field--invalid .app-input,
+.app-form-field--invalid .app-select {
+  border-color: var(--error);
+}
+
+/* A form laid out in one row, for the small forms that sit inside a panel. */
+.app-form--inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divider);
+}
+
+/* --------------------------------------------------------------- selector */
+/* The list of matches the location and Student ID searches return. */
+.app-selector {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  background: var(--surface);
+}
+
+.app-selector:empty {
+  display: none;
+}
+
+.app-selector__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.app-selector__item:last-child {
+  border-bottom: none;
+}
+
+.app-selector__item:hover,
+.app-selector__item:focus-visible {
+  background: var(--surface-muted);
+  outline: none;
+}
+
+.app-selector__name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.app-selector__meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------ chips */
+/* The students who are on a duty, each one removable. */
+.app-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.app-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.45rem 0.3rem 0.7rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--chip-radius);
+  background: var(--surface);
+}
+
+.app-chip__text {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.app-chip__id {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.app-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-chip__remove:hover,
+.app-chip__remove:focus-visible {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
+}
+
+/* -------------------------------------------------------------- conflicts */
+/* The clashes a proposed schedule would cause. */
+.app-conflicts {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--error);
+  border-radius: var(--tile-radius);
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
+}
+
+.app-conflicts[hidden] {
+  display: none;
+}
+
+.app-conflicts__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.app-conflicts__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+/* ---------------------------------------------------------------- buttons */
+/* The small square actions on a row: edit, assign, cancel and delete. */
+.app-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  background: var(--surface);
+  color: var(--navy);
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.app-icon-btn:hover,
+.app-icon-btn:focus-visible {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+}
+
+.app-icon-btn--danger:hover,
+.app-icon-btn--danger:focus-visible {
+  background: var(--status-cancelled-solid);
+  border-color: var(--status-cancelled-solid);
+  color: var(--white);
+}
+
+/* ----------------------------------------------------------------- notices */
+.app-alert--warn {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-fg);
+}
+
+/* The small tags that name the kind of a location. */
+.badge--neutral {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  border-radius: var(--badge-radius);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge--muted {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
+  border-radius: var(--badge-radius);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ header */
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------ footer */
+/* The count of what is on the page and the pager that walks through it. The
+   same pair serves the schedule browser and the authoring page. */
+.dm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+}
+
+.dm-count {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.dm-pager {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dm-pager-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  background: var(--surface);
+  color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dm-pager-btn:hover,
+.dm-pager-btn:focus-visible {
+  background: var(--surface-muted);
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.dm-pager-btn.is-current {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+}
+
+.dm-pager-btn.is-disabled {
+  color: var(--placeholder);
+  background: var(--surface-muted);
+  cursor: not-allowed;
+}
+
+.dm-pager-gap {
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+}

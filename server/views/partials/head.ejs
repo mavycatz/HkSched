@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= typeof title !== "undefined" && title ? title + " · HK Scholastics" : "HK Scholastics" %></title>
+  <%# The token the client scripts send with every write they make. %>
+  <meta name="csrf-token" content="<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>">
   <%# Vendor assets are self-hosted so they load under the strict CSP (style-src 'self'). %>
   <%# The version parameter busts the browser cache whenever an asset changes. %>
   <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css?v=<%= typeof assetVersion !== "undefined" ? assetVersion : "0" %>">

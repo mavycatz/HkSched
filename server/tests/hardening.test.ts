@@ -17,7 +17,7 @@ describe("GET /health (DB ping)", () => {
     const pool = getPool();
     const spy = jest
       .spyOn(pool, "query")
-      .mockRejectedValueOnce(new Error("connection refused"));
+      .mockImplementationOnce(() => Promise.reject(new Error("connection refused")) as any);
     try {
       const res = await request(app).get("/health");
       expect(res.status).toBe(503);

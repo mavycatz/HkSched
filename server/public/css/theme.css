@@ -80,8 +80,8 @@
   --status-completed-fg: #1e6b2c;
   --status-pending-bg: #fef3c7;
   --status-pending-fg: #92400e;
-  --status-missed-bg: #fde2e2;
-  --status-missed-fg: #a82929;
+  --status-cancelled-bg: #fde2e2;
+  --status-cancelled-fg: #a82929;
 
   /* Solid status accents — one colour per status, used wherever a status is
      shown as a solid mark rather than a badge (card stripes, calendar dots,
@@ -90,7 +90,7 @@
   --status-ongoing-solid: #1d4ed8;
   --status-completed-solid: #15803d;
   --status-pending-solid: #ca8a04;
-  --status-missed-solid: #b91c1c;
+  --status-cancelled-solid: #b91c1c;
 
   /* stat-card accent palette */
   --accent-blue-bg: #e3eefb;
@@ -1365,9 +1365,9 @@ body.csdl-page {
   color: var(--status-pending-fg);
 }
 
-.status-badge--missed {
-  background: var(--status-missed-bg);
-  color: var(--status-missed-fg);
+.status-badge--cancelled {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
 }
 
 /* ---------- Dropdowns ---------- */

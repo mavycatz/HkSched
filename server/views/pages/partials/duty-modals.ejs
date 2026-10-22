@@ -1,0 +1,45 @@
+<%
+  /* The four duty modals, included by both the authoring page and the
+     schedule browser so the two never drift apart. */
+  const dmCreateForm = typeof createForm === "undefined" ? null : createForm;
+  const dmEditForm = typeof editForm === "undefined" ? null : editForm;
+  const dmEditingId = dmEditForm && dmEditForm.id ? dmEditForm.id : 0;
+  const dmCreateOpen = typeof createOpen === "undefined" ? false : createOpen;
+  const dmEditOpen = typeof editOpen === "undefined" ? false : editOpen;
+  const dmAssignStudentsOpen = typeof dutyAssignStudentsOpen === "undefined" ? false : dutyAssignStudentsOpen;
+  const dmAssignTeacherOpen = typeof dutyAssignTeacherOpen === "undefined" ? false : dutyAssignTeacherOpen;
+%>
+
+<%- include("./duty-form-modal", {
+  dutyFormModalId: "duty-create-modal",
+  dutyFormTitle: "Create schedule",
+  dutyFormNote: "Add a duty, when it runs and where it is held.",
+  dutyFormIcon: "bi-calendar-plus",
+  dutyFormOpen: dmCreateOpen,
+  dutyFormId: "create-duty-form",
+  dutyFormSubmitLabel: "Save schedule",
+  dutyFormPrefix: "create",
+  dutyFormAction: "/csdl/duty-management/duties",
+  dutyForm: dmCreateForm,
+}) %>
+
+<%- include("./duty-form-modal", {
+  dutyFormModalId: "duty-edit-modal",
+  dutyFormTitle: "Edit schedule",
+  dutyFormNote: "Change the details of this schedule and save them.",
+  dutyFormIcon: "bi-pencil-square",
+  dutyFormOpen: dmEditOpen,
+  dutyFormId: "edit-duty-form",
+  dutyFormSubmitLabel: "Save changes",
+  dutyFormPrefix: "edit",
+  dutyFormAction: "/csdl/duty-management/duties/" + dmEditingId,
+  dutyForm: dmEditForm,
+}) %>
+
+<%- include("./assign-students-modal", {
+  dutyAssignStudentsOpen: dmAssignStudentsOpen,
+}) %>
+
+<%- include("./assign-teacher-modal", {
+  dutyAssignTeacherOpen: dmAssignTeacherOpen,
+}) %>

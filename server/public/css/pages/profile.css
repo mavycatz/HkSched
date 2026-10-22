@@ -294,8 +294,8 @@
 }
 
 .profile-alert--error {
-  background: var(--status-missed-bg);
-  color: var(--status-missed-fg);
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
 }
 
 .profile-alert .bi {

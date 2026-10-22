@@ -96,16 +96,16 @@ describe("duty service", () => {
     const result = await listDuties(csdl, { pageSize: 50 });
     const counts = await getDutyStatusCounts(csdl);
     expect(counts.all).toBe(result.total);
-    expect(counts.ongoing + counts.completed + counts.pending + counts.missed).toBe(counts.all);
+    expect(counts.ongoing + counts.completed + counts.pending + counts.cancelled).toBe(counts.all);
   });
 
   test("a status filter returns only that status", async () => {
-    const result = await listDuties(csdl, { status: "missed", pageSize: 50 });
+    const result = await listDuties(csdl, { status: "cancelled", pageSize: 50 });
     expect(result.total).toBeGreaterThan(0);
     for (const duty of result.duties) {
-      expect(duty.status).toBe("missed");
+      expect(duty.status).toBe("cancelled");
     }
-    expect(result.counts.missed).toBe(result.total);
+    expect(result.counts.cancelled).toBe(result.total);
   });
 
   test("a search filter matches the title or the area", async () => {
@@ -156,7 +156,7 @@ describe("duty service", () => {
 
     for (const day of grid.days) {
       for (const status of day.statuses) {
-        expect(["ongoing", "completed", "pending", "missed"]).toContain(status);
+        expect(["ongoing", "completed", "pending", "cancelled"]).toContain(status);
       }
     }
   });

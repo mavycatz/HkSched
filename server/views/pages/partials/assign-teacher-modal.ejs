@@ -1,0 +1,13 @@
+<%
+  /* The modal that gives a duty its supervising teacher. */
+%>
+<%- include("../../partials/modal", {
+  modalId: "duty-assign-teacher-modal",
+  modalTitle: "Assign the teacher",
+  modalNote: "Choose the teacher who supervises this duty, or leave it unassigned.",
+  modalIcon: "bi-person-badge",
+  modalOpen: typeof dutyAssignTeacherOpen !== "undefined" ? dutyAssignTeacherOpen : false,
+  modalFormId: "duty-assign-teacher-form",
+  modalSubmitLabel: "Save teacher",
+  modalBody: "../pages/partials/assign-teacher-body",
+}) %>

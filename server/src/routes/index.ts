@@ -10,12 +10,15 @@ import {
   registerPlaceholderRoutes,
 } from "../controllers/pageController";
 import { getSchedule } from "../controllers/scheduleController";
+import { getScheduleBrowser } from "../controllers/scheduleBrowserController";
 import { getProfile, postProfilePassword } from "../controllers/profileController";
 import { requireAuth, requirePermission, requireRole, statusLocals } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { audit } from "../lib/audit";
 import * as app from "../controllers/dutyAppController";
 import * as duty from "../controllers/dutyManagementController";
+import * as dutyApi from "../controllers/dutyApiController";
+import * as completion from "../controllers/completionController";
 
 export const loginLimiter = rateLimit({
   windowMs: 60_000,
@@ -77,21 +80,33 @@ router.get("/attendance-profile", requireAuth, requirePermission("attendance.own
 
 // New end-to-end pages
 router.get("/todays-assignments", requireAuth, requirePermission("assignments.today.view"), app.getTodaysAssignments);
-router.post("/api/assignments/:id/done", requireAuth, app.postMarkDone);
+// Recording a completion is open to the teacher who supervises the duty and
+// to CSDL; the duty service refuses everyone else.
+router.post("/api/assignments/:id/done", requireAuth, requirePermission("completion.record"), completion.postCompleteAssignment);
+router.post("/api/duties/:id/complete", requireAuth, requirePermission("completion.record"), completion.postCompleteDuty);
 
-// Duty Schedule Management: the CSDL page that lists, creates, edits, deletes
-// and assigns duties. The old standalone pages folded into this one.
+// The duty module's JSON endpoints: the location catalogue, the Student ID
+// search and the conflict preview the modals use.
+router.get("/api/duty-locations", requireAuth, requirePermission("schedules.view"), dutyApi.getDutyLocations);
+router.post("/api/duty-locations", requireAuth, requirePermission("locations.manage"), dutyApi.postDutyLocation);
+router.get("/api/students/search", requireAuth, requirePermission("assign.students_teachers"), dutyApi.getStudentSearch);
+router.post("/api/duty-management/conflicts", requireAuth, requirePermission("schedules.manage"), dutyApi.postConflictPreview);
+
+// Duty Schedule Management: the CSDL page that creates and edits duties. The
+// list of schedules lives on the Duty Schedules page.
 router.get("/csdl/duty-management", requireAuth, requireRole("CSDL"), requirePermission("schedules.view"), duty.getDutyManagement);
 router.post("/csdl/duty-management/duties", requireAuth, requireRole("CSDL"), requirePermission("schedules.manage"), duty.postCreateDuty);
 router.post("/csdl/duty-management/duties/:id", requireAuth, requireRole("CSDL"), requirePermission("schedules.manage"), duty.postUpdateDuty);
 router.post("/csdl/duty-management/duties/:id/delete", requireAuth, requireRole("CSDL"), requirePermission("schedules.manage"), duty.postDeleteDuty);
+router.post("/csdl/duty-management/duties/:id/cancel", requireAuth, requireRole("CSDL"), requirePermission("schedules.manage"), duty.postCancelDuty);
 router.post("/csdl/duty-management/duties/:id/assign", requireAuth, requireRole("CSDL"), requirePermission("assign.students_teachers"), duty.postAssignDuty);
+router.post("/csdl/duty-management/locations", requireAuth, requireRole("CSDL"), requirePermission("locations.manage"), duty.postCreateLocation);
 // The old address of the page still works.
 router.get("/duty-management", requireAuth, requirePermission("schedules.view"), (_req, res) => res.redirect("/csdl/duty-management"));
 
-router.get("/monitor-completion", requireAuth, requirePermission("completion.monitor"), app.getMonitorCompletion);
-router.post("/api/duties/:id/complete", requireAuth, requirePermission("completion.monitor"), app.postMarkDutyComplete);
-router.post("/api/duties/:id/remind", requireAuth, requirePermission("completion.monitor"), app.postSendReminder);
+// The Monitor Completion screen was retired: the dashboard is the place where
+// completion is watched now.
+router.get("/monitor-completion", requireAuth, requirePermission("completion.monitor"), (_req, res) => res.redirect("/csdl/dashboard"));
 
 router.get("/applications", requireAuth, app.getApplications);
 router.post("/api/applications", requireAuth, app.postCreateApplication);
@@ -104,9 +119,10 @@ router.post("/api/profile/password", requireAuth, requirePermission("profile.own
 // CSDL dashboard and pages (CSDL role only).
 router.get("/csdl/dashboard", requireAuth, requireRole("CSDL"), requirePermission("dashboard.view"), getCsdlDashboard);
 router.get("/csdl/dashboard.json", requireAuth, requireRole("CSDL"), requirePermission("dashboard.view"), getCsdlDashboardJson);
-router.get("/csdl/schedule", requireAuth, requireRole("CSDL"), requirePermission("schedules.view"), getSchedule);
+router.get("/csdl/schedule", requireAuth, requireRole("CSDL"), requirePermission("schedules.view"), getScheduleBrowser);
 router.get("/csdl/applications", requireAuth, requireRole("CSDL"), requirePermission("applications.manage"), app.getApplications);
-router.get("/csdl/profile", requireAuth, requireRole("CSDL"), requirePermission("settings.manage"), app.getProfileSettings);
+router.get("/csdl/profile", requireAuth, requireRole("CSDL"), requirePermission("settings.manage"), getProfile);
+router.post("/csdl/profile/password", requireAuth, requireRole("CSDL"), requirePermission("settings.manage"), passwordChangeLimiter, postProfilePassword);
 
 // Schedule and profile pages
 router.get("/my-schedule", requireAuth, requirePermission("schedule.own.view"), getSchedule);

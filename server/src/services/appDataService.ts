@@ -1,8 +1,8 @@
 import { getPool } from "../db/pool";
-import type { DutyViewer } from "./dutyService";
+import { type DutyViewer } from "./dutyService";
 
 export type AppStatus = "pending" | "approved" | "rejected";
-export type AssignmentStatus = "assigned" | "done" | "completed";
+export type AssignmentStatus = "assigned" | "completed";
 export type NotificationType = "application_approved" | "application_rejected" | "reminder" | "assignment" | "general";
 
 export interface UserProfile {
@@ -200,14 +200,10 @@ export async function getMyAssignments(viewer: DutyViewer, filters: { date?: str
 
 export async function markAssignmentDone(assignmentId: number, actorId?: number): Promise<Assignment | null> {
   const { rows } = await getPool().query<Assignment>(
-    `UPDATE duty_assignments SET status = 'done', completed_at = now(), completed_by = $2 WHERE id = $1 RETURNING *`,
+    `UPDATE duty_assignments SET status = 'completed', completed_at = now(), completed_by = $2 WHERE id = $1 RETURNING *`,
     [assignmentId, actorId || null],
   );
   return rows[0] || null;
-}
-
-export async function markDutyComplete(dutyId: number): Promise<void> {
-  await getPool().query("UPDATE duties SET status = 'completed', updated_at = now() WHERE id = $1", [dutyId]);
 }
 
 // Applications
@@ -291,26 +287,4 @@ export async function getNotifications(userId: number, unreadOnly = false): Prom
 export async function markNotificationRead(id: number, userId: number): Promise<boolean> {
   const { rowCount } = await getPool().query("UPDATE notifications SET read = TRUE WHERE id = $1 AND user_id = $2", [id, userId]);
   return (rowCount || 0) > 0;
-}
-
-// Stats for monitor
-export async function getCompletionStats(viewer: DutyViewer, filters: { from?: string; to?: string } = {}): Promise<{ total: number; completed: number; pending: number; overdue: number; rate: number }> {
-  const params: unknown[] = [];
-  const clauses: string[] = [scopeDuty(viewer, params)];
-  if (filters.from) { params.push(`${filters.from}T00:00:00+08:00`); clauses.push(`d.start_time >= $${params.length}`); }
-  if (filters.to) { params.push(`${filters.to}T23:59:59.999+08:00`); clauses.push(`d.start_time <= $${params.length}`); }
-  const { rows } = await getPool().query(
-    `SELECT 
-       count(*)::int as total,
-       count(*) FILTER (WHERE d.status = 'completed' OR EXISTS (SELECT 1 FROM duty_assignments da WHERE da.duty_id = d.id AND da.status IN ('done','completed')))::int as completed,
-       count(*) FILTER (WHERE d.status = 'pending' OR (d.status != 'completed' AND EXISTS (SELECT 1 FROM duty_assignments da WHERE da.duty_id = d.id AND COALESCE(da.status,'assigned')='assigned')))::int as pending,
-       count(*) FILTER (WHERE d.status != 'completed' AND d.start_time < now())::int as overdue
-     FROM duties d WHERE ${clauses.join(" AND ")}`,
-    params,
-  );
-  const r = rows[0] as any;
-  const total = Number(r.total) || 0;
-  const completed = Number(r.completed) || 0;
-  const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-  return { total, completed, pending: Number(r.pending) || 0, overdue: Number(r.overdue) || 0, rate };
 }

@@ -1,274 +1,37 @@
-/* Duty Schedule Management — the CSDL list page.
-   Colours come from the theme tokens only, so the page follows the app's
-   palette and the duty status colours stay in one place.
+/* Duty Management — the authoring page.
 
-   The page is built from the shared components in pages/pages.css (the panel,
-   the toolbar, the fields, the buttons, the empty state and the modal), so it
-   looks exactly like the other pages of the app. Only what is specific to a
-   duty card is styled here. */
+   The page writes the schedules and keeps the location catalogue, so it needs
+   only the catalogue of its own; the shared components it is built from live
+   in pages/pages.css and pages/components.css, and every colour comes from a
+   theme token. */
 
-/* ------------------------------------------------------------------- cards */
-.dm-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.dm-card {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
-  padding: 1rem 1.25rem 1rem 1.5rem;
-  background: var(--surface);
-  border-radius: var(--panel-radius);
-  box-shadow: var(--surface-shadow);
-  border-left: 6px solid var(--divider);
-  overflow: hidden;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-}
-
-.dm-card:hover {
-  box-shadow: var(--surface-shadow-hover);
-  transform: translateY(-1px);
-}
-
-.dm-card--ongoing { border-left-color: var(--status-ongoing-solid); }
-.dm-card--completed { border-left-color: var(--status-completed-solid); }
-.dm-card--pending { border-left-color: var(--status-pending-solid); }
-.dm-card--missed { border-left-color: var(--status-missed-solid); }
-
-.dm-card-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.1rem;
-  min-width: 5.25rem;
-  padding: 0.6rem 0.5rem;
-  border-radius: var(--tile-radius);
-  background: var(--surface-muted);
-  color: var(--text);
-}
-
-.dm-card--ongoing .dm-card-date { background: var(--status-ongoing-bg); }
-.dm-card--completed .dm-card-date { background: var(--status-completed-bg); }
-.dm-card--pending .dm-card-date { background: var(--status-pending-bg); }
-.dm-card--missed .dm-card-date { background: var(--status-missed-bg); }
-
-.dm-date-month {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.dm-date-day {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--title-green);
-}
-
-.dm-date-week {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-.dm-card-main {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  justify-content: center;
-}
-
-.dm-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.dm-person {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 0;
-}
-
-.dm-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--role-chip-bg);
-  color: var(--navy);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.dm-person-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.dm-name {
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dm-role {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.dm-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.1rem;
-}
-
-.dm-meta-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.86rem;
-  color: var(--text-muted);
-}
-
-.dm-meta-item .bi {
-  color: var(--navy);
-}
-
-.dm-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 0 0 auto;
-}
-
-.dm-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--divider);
-  border-radius: var(--tile-radius);
-  background: var(--surface);
-  color: var(--navy);
-  font-size: 0.95rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.dm-icon-btn:hover,
-.dm-icon-btn:focus-visible {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: var(--white);
-}
-
-.dm-icon-btn--danger:hover,
-.dm-icon-btn--danger:focus-visible {
-  background: var(--status-missed-solid);
-  border-color: var(--status-missed-solid);
-  color: var(--white);
-}
-
-.dm-delete {
-  display: inline-flex;
+/* -------------------------------------------------------------- catalogue */
+.dm-location-list {
+  list-style: none;
   margin: 0;
-}
-
-/* ------------------------------------------------------------------ footer */
-.dm-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-top: 0.25rem;
-}
-
-.dm-count {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
-.dm-pager {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.dm-pager-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.25rem;
-  height: 2.25rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--divider);
-  border-radius: var(--tile-radius);
-  background: var(--surface);
-  color: var(--navy);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.dm-pager-btn:hover,
-.dm-pager-btn:focus-visible {
-  background: var(--surface-muted);
-  border-color: var(--navy);
-  color: var(--navy);
-}
-
-.dm-pager-btn.is-current {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: var(--white);
-}
-
-.dm-pager-btn.is-disabled {
-  color: var(--placeholder);
-  background: var(--surface-muted);
-  cursor: not-allowed;
-}
-
-.dm-pager-gap {
-  padding: 0 0.25rem;
-  color: var(--text-muted);
-}
-
-/* ----------------------------------------------------------------- students */
-.dm-checklist {
+  padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  gap: 0.35rem;
-  max-height: 14rem;
-  overflow-y: auto;
-  padding: 0.5rem;
-  border: 1px solid var(--divider);
-  border-radius: var(--tile-radius);
-  background: var(--surface);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
 }
 
-.dm-check-id {
-  color: var(--text-muted);
+.dm-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--tile-radius);
+  background: var(--surface-muted);
+}
+
+.dm-location__name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dm-location__building {
   font-size: 0.8rem;
+  color: var(--text-muted);
 }

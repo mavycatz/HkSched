@@ -1,0 +1,27 @@
+<%
+  /* The body of the assign-teacher modal. */
+  const dutyId = typeof assignDutyId !== "undefined" ? assignDutyId : 0;
+  const teacherList = typeof teachers !== "undefined" ? teachers : [];
+  const currentId = typeof assignTeacherId !== "undefined" && assignTeacherId !== null
+    ? String(assignTeacherId)
+    : "";
+  const currentName = typeof assignTeacherName !== "undefined" ? assignTeacherName : "";
+%>
+<form method="post" action="/csdl/duty-management/duties/<%= dutyId %>/assign" id="duty-assign-teacher-form">
+  <div class="modal-body">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="app-form-field app-form-field--wide">
+      <span class="app-label" id="duty-current-teacher-label">Supervising teacher</span>
+      <p class="app-hint" id="duty-current-teacher" data-current-teacher>
+        <% if (currentName) { %>Currently: <%= currentName %><% } else { %>This duty has no supervising teacher yet.<% } %>
+      </p>
+      <select class="app-input app-select" id="duty-teacher-select" name="assigned_to" aria-labelledby="duty-current-teacher-label">
+        <option value="">Unassigned</option>
+        <% teacherList.forEach(function (teacher) { %>
+        <option value="<%= teacher.id %>" <%= String(teacher.id) === currentId ? "selected" : "" %>><%= teacher.name %> (<%= teacher.school_id %>)</option>
+        <% }); %>
+      </select>
+    </div>
+  </div>
+</form>

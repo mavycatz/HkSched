@@ -1,0 +1,38 @@
+<%
+  /* The body of the assign-students modal. */
+  const dutyId = typeof assignDutyId !== "undefined" ? assignDutyId : 0;
+  const students = typeof assignStudents !== "undefined" ? assignStudents : [];
+%>
+<form method="post" action="/csdl/duty-management/duties/<%= dutyId %>/assign" id="duty-assign-students-form">
+  <div class="modal-body">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="app-form-field app-form-field--wide">
+      <label class="app-label" for="duty-student-search">Student ID</label>
+      <div class="app-search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input class="app-input" type="search" id="duty-student-search" autocomplete="off"
+               placeholder="Type a Student ID" data-student-search>
+      </div>
+      <ul class="app-selector" id="duty-student-results" role="listbox" aria-label="Matching students" data-student-results></ul>
+      <p class="app-hint d-none" id="duty-student-empty" data-student-empty>No student matches that ID.</p>
+    </div>
+
+    <div class="app-form-field app-form-field--wide">
+      <span class="app-label" id="duty-student-chips-label">Students on this duty</span>
+      <ul class="app-chips" id="duty-student-chips" aria-labelledby="duty-student-chips-label" data-student-chips>
+        <% students.forEach(function (student) { %>
+        <li class="app-chip">
+          <span class="app-chip__text"><%= student.name %> <span class="app-chip__id"><%= student.student_id %></span></span>
+          <button type="button" class="app-chip__remove" data-student-remove="<%= student.id %>"
+                  aria-label="Remove <%= student.name %>">&times;</button>
+          <input type="hidden" name="student_ids" value="<%= student.id %>" data-student-id="<%= student.id %>">
+        </li>
+        <% }); %>
+      </ul>
+      <p class="app-hint <%= students.length ? "d-none" : "" %>" id="duty-student-empty-list" data-student-empty-list>
+        No students are on this duty yet.
+      </p>
+    </div>
+  </div>
+</form>

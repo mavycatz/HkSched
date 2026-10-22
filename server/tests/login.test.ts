@@ -116,7 +116,7 @@ describe("POST /login", () => {
     expect(dash.status).toBe(200);
     expect(dash.text).toContain("Ana Reyes");
     expect(dash.text).toContain("CSDL");
-    expect(dash.text).toContain("Monitor Completion");
+    expect(dash.text).toContain("Duty Schedules");
   });
 
   test("wrong password returns generic 401 and establishes no session", async () => {

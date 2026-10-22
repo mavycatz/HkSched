@@ -1,0 +1,14 @@
+<%
+  /* The modal that puts students on a duty: a Student ID search and the
+     students who are already on it, as chips that can be taken off. */
+%>
+<%- include("../../partials/modal", {
+  modalId: "duty-assign-students-modal",
+  modalTitle: "Assign students",
+  modalNote: "Search by Student ID and add the students to this duty.",
+  modalIcon: "bi-person-plus",
+  modalOpen: typeof dutyAssignStudentsOpen !== "undefined" ? dutyAssignStudentsOpen : false,
+  modalFormId: "duty-assign-students-form",
+  modalSubmitLabel: "Save students",
+  modalBody: "../pages/partials/assign-students-body",
+}) %>

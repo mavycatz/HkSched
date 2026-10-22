@@ -2,12 +2,14 @@ import type { Request, Response, NextFunction } from "express";
 import { navFor } from "../config/navigation";
 import { csrfToken } from "../lib/csrf";
 import { jsonForScript } from "../lib/json";
+import { can } from "../../config/permissions";
 import {
-  listDutySlots, getDutySlot, getAssignmentsForDuty, getMyAssignments,
-  markAssignmentDone, markDutyComplete,
-  listApplications, createApplication, reviewApplication, getCompletionStats, createNotification
+  listApplications,
+  createApplication,
+  reviewApplication,
 } from "../services/appDataService";
-import type { DutyViewer } from "../services/dutyService";
+import { listDuties, listStudentsForDuties, type DutyViewer } from "../services/dutyService";
+import { manilaToday } from "../lib/time";
 
 function shellLocals(req: Request, res: Response) {
   const user = req.user;
@@ -16,20 +18,16 @@ function shellLocals(req: Request, res: Response) {
 
 function viewer(req: Request): DutyViewer { const u = req.user!; return { id: u.id, role: u.role as any }; }
 
-/** Today in the Philippines, as YYYY-MM-DD. */
-function manilaToday(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
-  }).format(new Date());
-}
-
 // Today's Assignments
 export async function getTodaysAssignments(req: Request, res: Response, next: NextFunction) {
   try {
     const v = viewer(req);
     const today = manilaToday();
-    const slots = await listDutySlots(v, { date: today });
-    const assignments = await getMyAssignments(v, { date: today });
+    // The page shows the signed-in teacher's own duties: the duty service
+    // scopes the query by the viewer's role, so a teacher never sees another
+    // teacher's duties and a CSDL sees every one.
+    const result = await listDuties(v, { date: today, pageSize: 50 });
+    const studentsByDuty = await listStudentsForDuties(result.duties.map((duty) => duty.id));
     res.render("pages/todays-assignments", {
       ...shellLocals(req, res),
       title: "Today's Assignments",
@@ -37,57 +35,14 @@ export async function getTodaysAssignments(req: Request, res: Response, next: Ne
       bodyClass: "app-page",
       pageStyles: ["pages"],
       pageScripts: ["todays-assignments"],
-      slots, assignments, today, jsonForScript
+      duties: result.duties,
+      studentsByDuty,
+      today,
+      // Only a role that may record a completion is offered the control.
+      canRecord: can(req.user!.role, "completion.record"),
+      jsonForScript
     });
   } catch (e) { next(e); }
-}
-
-export async function postMarkDone(req: Request, res: Response, next: NextFunction) {
-  try {
-    const id = Number(req.params.id);
-    await markAssignmentDone(id, req.user!.id);
-    res.json({ ok: true });
-  } catch (e) { next(e); }
-}
-
-// Monitor Completion
-export async function getMonitorCompletion(req: Request, res: Response, next: NextFunction) {
-  try {
-    const v = viewer(req);
-    const q = req.query as any;
-    const slots = await listDutySlots(v, { from: q.from, to: q.to, date: q.date, person: q.person });
-    const stats = await getCompletionStats(v, { from: q.from, to: q.to });
-    res.render("pages/monitor-completion", {
-      ...shellLocals(req, res),
-      title: "Monitor Completion",
-      activePath: "/monitor-completion",
-      bodyClass: "app-page",
-      pageStyles: ["pages"],
-      pageScripts: ["monitor-completion"],
-      slots, stats, filters: q, jsonForScript
-    });
-  } catch (e) { next(e); }
-}
-
-export async function postMarkDutyComplete(req: Request, res: Response, next: NextFunction) {
-  try {
-    await markDutyComplete(Number(req.params.id));
-    res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function postSendReminder(req: Request, res: Response, next: NextFunction) {
-  try {
-    const slot = await getDutySlot(Number(req.params.id));
-    if (slot && slot.assigned_to) {
-      await createNotification(slot.assigned_to, "reminder", "Duty Reminder", "You have an upcoming/pending duty that needs attention.", `/todays-assignments`);
-    }
-    const assignments = await getAssignmentsForDuty(Number(req.params.id));
-    for (const a of assignments) {
-      await createNotification(a.student_id, "reminder", "Duty Reminder", "Please complete your assigned duty.", `/todays-assignments`);
-    }
-    res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
 }
 
 // Applications

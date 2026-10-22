@@ -22,7 +22,7 @@ const MANILA = "Asia/Manila";
 /** Monday-first, the order the school week runs in. */
 export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export const SCHEDULE_STATUSES: DutyStatus[] = ["ongoing", "completed", "pending", "missed"];
+export const SCHEDULE_STATUSES: DutyStatus[] = ["ongoing", "completed", "pending", "cancelled"];
 
 export interface ScheduleLegendEntry {
   status: DutyStatus;
@@ -179,7 +179,8 @@ function toDutyCard(duty: DutyListItem): ScheduleDutyCard {
   return {
     id: duty.id,
     title: duty.title,
-    area: duty.area,
+    // The catalogue location, or the legacy area text when there is none.
+    area: duty.location_name || duty.area,
     status: duty.status,
     statusLabel: titleCase(duty.status),
     timeLabel: `${start} – ${end}`,

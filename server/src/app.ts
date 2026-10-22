@@ -51,11 +51,10 @@ export function createApp(): express.Express {
       },
     }),
   );
+  app.use(cookieParser());
+  app.use(sessionMiddleware());
   app.use(express.urlencoded({ extended: false, limit: "64kb" }));
   app.use(express.json({ limit: "64kb" }));
-
-  app.use(sessionMiddleware());
-  app.use(cookieParser());
   app.use(csrfProtection);
 
   app.get("/health", async (_req, res) => {

@@ -1,0 +1,37 @@
+<%
+  /* The shell every modal in the app is built from: the themed header, the
+     body a page fills in, and the pair of actions at the foot. The body comes
+     from the partial named in `modalBody`, so the same shell serves every
+     modal without any of them repeating its markup. */
+  const shellId = typeof modalId !== "undefined" ? modalId : "app-modal";
+  const shellTitle = typeof modalTitle !== "undefined" ? modalTitle : "";
+  const shellNote = typeof modalNote !== "undefined" ? modalNote : "";
+  const shellIcon = typeof modalIcon !== "undefined" ? modalIcon : "bi-window";
+  const shellOpen = typeof modalOpen !== "undefined" ? modalOpen : false;
+  const shellForm = typeof modalFormId !== "undefined" ? modalFormId : "";
+  const shellSubmit = typeof modalSubmitLabel !== "undefined" ? modalSubmitLabel : "Save";
+  const shellBody = typeof modalBody !== "undefined" ? modalBody : null;
+%>
+<div class="modal fade app-modal <%= shellOpen ? "show d-block" : "" %>" id="<%= shellId %>" tabindex="-1"
+     aria-labelledby="<%= shellId %>-label" aria-hidden="<%= shellOpen ? "false" : "true" %>">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="app-modal__icon" aria-hidden="true"><i class="bi <%= shellIcon %>"></i></span>
+        <div class="app-modal__heading">
+          <h2 class="modal-title" id="<%= shellId %>-label"><%= shellTitle %></h2>
+          <p class="app-modal__note"><%- shellNote %></p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <% if (shellBody) { %><%- include(shellBody, locals) %><% } %>
+      <div class="modal-footer">
+        <button type="button" class="app-btn app-btn--ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="app-btn app-btn--primary" id="<%= shellForm %>-save" form="<%= shellForm %>">
+          <i class="bi bi-check-lg" aria-hidden="true"></i>
+          <span><%= shellSubmit %></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

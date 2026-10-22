@@ -43,10 +43,8 @@ describe("sidebar filtering per role (6.2)", () => {
     ],
     CSDL: [
       "Dashboard",
-      "Today&#39;s Assignments",
       "Duty Schedules",
       "Duty Management",
-      "Monitor Completion",
       "Applications",
       "Profile &amp; Settings",
       "Logout",
@@ -138,15 +136,20 @@ describe("placeholder pages render per role (6.3-6.5)", () => {
   test("the CSDL pages that replaced the placeholders are real pages", async () => {
     const agent = await loginAs(app, "CSDL-001");
     for (const path of [
-      "/todays-assignments",
-      "/monitor-completion",
+      "/csdl/schedule",
       "/csdl/duty-management",
+      "/csdl/applications",
+      "/csdl/profile",
     ]) {
       const res = await agent.get(path);
       expect(res.status).toBe(200);
       expect(res.text).not.toContain("coming soon");
       expect(res.text).toContain('class="sidebar"');
     }
+
+    const retired = await agent.get("/monitor-completion");
+    expect(retired.status).toBe(302);
+    expect(retired.headers.location).toBe("/csdl/dashboard");
   });
 
   test("CSDL dashboard shows the CSDL name, role, and permission-driven nav", async () => {
@@ -154,7 +157,7 @@ describe("placeholder pages render per role (6.3-6.5)", () => {
     const dash = await agent.get("/csdl/dashboard");
     expect(dash.text).toContain("Ana Reyes");
     expect(dash.text).toContain("CSDL Staff");
-    expect(dash.text).toContain("Monitor Completion");
+    expect(dash.text).toContain("Duty Schedules");
     expect(dash.text).toContain("Logout");
   });
 });
@@ -210,7 +213,7 @@ describe("every page header reads the same (6.1)", () => {
     const agent = await loginAs(app, "CSDL-001");
     for (const path of [
       "/todays-assignments",
-      "/monitor-completion",
+      "/csdl/schedule",
       "/csdl/applications",
       "/csdl/profile",
     ]) {
@@ -229,8 +232,8 @@ describe("every page header reads the same (6.1)", () => {
 describe("every page is built from the shared components (6.1)", () => {
   /** The pages of the app, and the account that can open them. */
   const PAGES: [string, string][] = [
-    ["/todays-assignments", "CSDL-001"],
-    ["/monitor-completion", "CSDL-001"],
+    ["/todays-assignments", "T-001"],
+    ["/csdl/schedule", "CSDL-001"],
     ["/csdl/applications", "CSDL-001"],
     ["/csdl/profile", "CSDL-001"],
     ["/csdl/duty-management", "CSDL-001"],
@@ -264,7 +267,7 @@ describe("every page is built from the shared components (6.1)", () => {
     const agent = await loginAs(app, "CSDL-001");
     for (const page of [
       "/todays-assignments",
-      "/monitor-completion",
+      "/csdl/schedule",
       "/csdl/applications",
     ]) {
       const res = await agent.get(page);
@@ -275,13 +278,11 @@ describe("every page is built from the shared components (6.1)", () => {
     }
   });
 
-  test("the monitor page counts with the shared stat tiles", async () => {
+  test("the monitor completion route redirects to dashboard", async () => {
     const agent = await loginAs(app, "CSDL-001");
     const res = await agent.get("/monitor-completion");
-    expect(res.status).toBe(200);
-    expect(res.text).toContain('class="app-stats"');
-    expect(res.text).toContain("app-stat__value");
-    expect(res.text).not.toContain("text-muted\">Total");
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("/csdl/dashboard");
   });
 
   test("the applications page uses the shared tab control and a themed modal", async () => {
@@ -548,13 +549,11 @@ function manilaToday(): string {
 }
 
 describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () => {
-  test("CSDL, teacher and student routes render the same structure", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
+  test("teacher and student routes render the calendar structure", async () => {
     const teacher = await loginAs(app, "T-001");
     const student = await loginAs(app, "S-001");
 
     const pages = await Promise.all([
-      csdl.get("/csdl/schedule"),
       teacher.get("/my-schedule"),
       teacher.get("/schedule"),
       student.get("/schedule"),
@@ -572,9 +571,19 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
     }
   });
 
-  test("the calendar covers every day of the month and shows its number", async () => {
+  test("CSDL schedule route renders the duty schedules browser", async () => {
     const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get(`/csdl/schedule?month=${manilaMonth()}`);
+    const res = await csdl.get("/csdl/schedule");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('id="sb-filter-form"');
+    expect(res.text).toContain('id="sb-list"');
+    expect(res.text).toContain('id="sb-table"');
+    expect(res.text).toContain("Completion");
+  });
+
+  test("the calendar covers every day of the month and shows its number", async () => {
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get(`/my-schedule?month=${manilaMonth()}`);
     expect(res.status).toBe(200);
 
     const days = calendarDays(res.text);
@@ -587,14 +596,12 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
     }
   });
 
-  test("the CSDL calendar lists every duty and the others list only their own", async () => {
+  test("the teacher and student calendars list only their own duties", async () => {
     const month = manilaMonth();
-    const csdl = await loginAs(app, "CSDL-001");
     const teacher = await loginAs(app, "T-001");
     const student = await loginAs(app, "S-001");
 
-    const [csdlRes, teacherRes, studentRes] = await Promise.all([
-      csdl.get(`/csdl/schedule?month=${month}`),
+    const [teacherRes, studentRes] = await Promise.all([
       teacher.get(`/my-schedule?month=${month}`),
       student.get(`/schedule?month=${month}`),
     ]);
@@ -604,11 +611,6 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
       return Number(rows[0].n);
     };
 
-    const all = await count(
-      `SELECT count(*)::int AS n FROM duties
-       WHERE to_char(start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM') = $1`,
-      [month],
-    );
     const own = await count(
       `SELECT count(*)::int AS n FROM duties d JOIN users u ON u.id = d.assigned_to
        WHERE u.school_id = 'T-001'
@@ -627,16 +629,13 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
     const dots = (html: string) =>
       calendarDays(html).reduce((sum, day) => sum + day.dots.length, 0);
 
-    expect(dots(csdlRes.text)).toBe(all);
     expect(dots(teacherRes.text)).toBe(own);
     expect(dots(studentRes.text)).toBe(assigned);
-    expect(own).toBeLessThan(all);
-    expect(assigned).toBeLessThan(all);
   });
 
   test("each day's dots match the duties seeded for that day", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get(`/csdl/schedule?month=${manilaMonth()}`);
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get(`/my-schedule?month=${manilaMonth()}`);
     const days = calendarDays(res.text);
 
     const busy = days.filter((day) => day.dots.length > 0);
@@ -644,8 +643,10 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
 
     for (const day of busy) {
       const { rows } = await getPool().query<{ n: number }>(
-        `SELECT count(*)::int AS n FROM duties
-         WHERE to_char(start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') = $1`,
+        `SELECT count(*)::int AS n FROM duties d
+         JOIN users u ON u.id = d.assigned_to
+         WHERE u.school_id = 'T-001'
+           AND to_char(d.start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') = $1`,
         [day.date],
       );
       expect(day.dots.length).toBe(Number(rows[0].n));
@@ -653,25 +654,25 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
   });
 
   test("the legend names every status with the dot colour the calendar uses", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get("/csdl/schedule");
-    for (const status of ["ongoing", "completed", "pending", "missed"]) {
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get("/my-schedule");
+    for (const status of ["ongoing", "completed", "pending", "cancelled"]) {
       expect(res.text).toContain(`schedule-dot--${status}`);
     }
     const legend = res.text.match(/<ul class="schedule-legend"[\s\S]*?<\/ul>/);
     expect(legend).not.toBeNull();
-    for (const status of ["ongoing", "completed", "pending", "missed"]) {
+    for (const status of ["ongoing", "completed", "pending", "cancelled"]) {
       expect(legend![0]).toContain(`schedule-dot--${status}`);
     }
     expect(legend![0]).toContain("Ongoing");
     expect(legend![0]).toContain("Completed");
     expect(legend![0]).toContain("Pending");
-    expect(legend![0]).toContain("Missed");
+    expect(legend![0]).toContain("Cancelled");
   });
 
   test("today and the selected day are marked, and the selection is programmatic", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get("/csdl/schedule");
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get("/my-schedule");
     const days = calendarDays(res.text);
 
     const today = days.find((day) => day.date === manilaToday());
@@ -684,8 +685,8 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
   });
 
   test("month navigation moves between months and returns to today", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get("/csdl/schedule");
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get("/my-schedule");
 
     const next = res.text.match(/href="([^"]*month=[^"]*)"[^>]*rel="next"/);
     expect(next).not.toBeNull();
@@ -693,7 +694,7 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
     expect(nextUrl).toContain("month=");
     expect(nextUrl).toContain("date=");
 
-    const nextRes = await csdl.get(nextUrl);
+    const nextRes = await teacher.get(nextUrl);
     expect(nextRes.status).toBe(200);
     const [year, month] = manilaMonth().split("-").map(Number);
     const following = month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, "0")}`;
@@ -707,14 +708,14 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
     const previous = res.text.match(/href="([^"]*month=[^"]*)"[^>]*rel="prev"/);
     expect(previous).not.toBeNull();
     const previousUrl = previous![1].replace(/&amp;/g, "&");
-    const previousRes = await csdl.get(previousUrl);
+    const previousRes = await teacher.get(previousUrl);
     expect(previousRes.status).toBe(200);
     const preceding = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, "0")}`;
     expect(previousUrl).toContain(preceding);
 
     const current = res.text.match(/href="([^"]*month=[^"]*)"[^>]*>Today</);
     expect(current).not.toBeNull();
-    const currentRes = await csdl.get(current![1].replace(/&amp;/g, "&"));
+    const currentRes = await teacher.get(current![1].replace(/&amp;/g, "&"));
     expect(currentRes.status).toBe(200);
     const currentDays = calendarDays(currentRes.text);
     const todayCell = currentDays.find((day) => day.date === manilaToday());
@@ -722,19 +723,21 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
   });
 
   test("the day panel lists the duties of the selected day with their details", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
+    const teacher = await loginAs(app, "T-001");
     const month = manilaMonth();
 
     const { rows } = await getPool().query<{ day: string }>(
-      `SELECT to_char(start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') AS day
-       FROM duties
-       WHERE to_char(start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM') = $1
+      `SELECT to_char(d.start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') AS day
+       FROM duties d
+       JOIN users u ON u.id = d.assigned_to
+       WHERE u.school_id = 'T-001'
+         AND to_char(d.start_time AT TIME ZONE 'Asia/Manila', 'YYYY-MM') = $1
        GROUP BY 1 ORDER BY 1 LIMIT 1`,
       [month],
     );
-    const date = rows[0].day;
+    const date = rows[0]?.day || manilaToday();
 
-    const res = await csdl.get(`/csdl/schedule?month=${month}&date=${date}`);
+    const res = await teacher.get(`/my-schedule?month=${month}&date=${date}`);
     expect(res.status).toBe(200);
 
     const cards = panelDuties(res.text);
@@ -744,13 +747,13 @@ describe("schedule page renders the calendar and the duty panel (5.2-5.5)", () =
       expect(card.time).toMatch(/\d{1,2}:\d{2}/);
       expect(card.area.length).toBeGreaterThan(0);
       expect(card.students).toMatch(/\d+ students?/);
-      expect(["ongoing", "completed", "pending", "missed"]).toContain(card.status);
+      expect(["ongoing", "completed", "pending", "cancelled"]).toContain(card.status);
     }
   });
 
   test("a day without duties shows an empty state naming that day", async () => {
-    const csdl = await loginAs(app, "CSDL-001");
-    const res = await csdl.get("/csdl/schedule?month=2020-01&date=2020-01-15");
+    const teacher = await loginAs(app, "T-001");
+    const res = await teacher.get("/my-schedule?month=2020-01&date=2020-01-15");
     expect(res.status).toBe(200);
     expect(res.text).toContain("schedule-empty");
     expect(res.text).toContain("No duties on January 15");
@@ -862,7 +865,7 @@ describe("profile page renders the shared profile (6.1-6.3, 6.6)", () => {
     // No preference storage was introduced.
     const { rows } = await getPool().query<{ n: number }>(
       `SELECT count(*)::int AS n FROM information_schema.tables
-       WHERE table_schema = 'public' AND table_name ILIKE '%notification%'`,
+       WHERE table_schema = 'public' AND table_name = 'notification_preferences'`,
     );
     expect(Number(rows[0].n)).toBe(0);
   });

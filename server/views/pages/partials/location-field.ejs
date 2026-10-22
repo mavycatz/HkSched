@@ -1,0 +1,39 @@
+<%
+  /* The location selector. The catalogue is narrowed on the server, so the
+     staff member types part of a name and the matching locations come back;
+     the chosen one is held in a hidden field that the form posts. */
+  const searchId = typeof fieldNameSearch !== "undefined" ? fieldNameSearch : "duty-location-search";
+  const chosenId = typeof fieldValue !== "undefined" && fieldValue !== null ? String(fieldValue) : "";
+  const catalogue = (typeof locations !== "undefined" ? locations : []).filter(function (location) {
+    return location.is_active || String(location.id) === chosenId;
+  });
+  const chosenName = typeof locationName !== "undefined" && locationName ? locationName : "";
+  const reason = typeof fieldError !== "undefined" ? fieldError : null;
+  const inputName = typeof fieldName !== "undefined" ? fieldName : "location_id";
+%>
+<div class="app-form-field app-form-field--wide <%= reason ? "app-form-field--invalid" : "" %>">
+  <label class="app-label" for="<%= searchId %>"><%= typeof fieldLabel !== "undefined" ? fieldLabel : "Location" %> <span class="app-required" aria-hidden="true">*</span></label>
+  <div class="app-search">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <input class="app-input" type="search" id="<%= searchId %>" autocomplete="off"
+           placeholder="<%= typeof fieldPlaceholder !== "undefined" ? fieldPlaceholder : "Search the catalogue" %>"
+           value="<%= chosenName %>" data-location-search>
+  </div>
+  <input type="hidden" id="<%= searchId %>-value" name="<%= inputName %>" value="<%= chosenId %>" data-location-value>
+  <ul class="app-selector" id="<%= searchId %>-results" role="listbox" aria-label="Matching locations" data-location-results></ul>
+  <p class="app-hint d-none" id="<%= searchId %>-empty" data-location-empty>
+    No location matches that name. Add it to the catalogue on this page.
+  </p>
+  <% if (reason) { %>
+  <p class="app-field-error" id="<%= searchId %>-error"><%= reason %></p>
+  <% } %>
+  <noscript>
+    <label class="app-label" for="<%= searchId %>-select">Or choose from the catalogue</label>
+    <select class="app-input app-select" id="<%= searchId %>-select" name="<%= inputName %>">
+      <option value="">Choose a location</option>
+      <% catalogue.forEach(function (location) { %>
+      <option value="<%= location.id %>" <%= String(location.id) === chosenId ? "selected" : "" %>><%= location.name %></option>
+      <% }); %>
+    </select>
+  </noscript>
+</div>

@@ -4,6 +4,7 @@ import type { Role } from "../../config/permissions";
 import { requireAuth, requirePermission } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { canViewStudentRecord, sendNotFound } from "../lib/authorization";
+import { can } from "../../config/permissions";
 import { getDashboardSummary, computeRange } from "../services/dashboardService";
 
 interface Placeholder {
@@ -175,6 +176,7 @@ export async function getCsdlDashboard(
       rangeTo: range.to.toISOString().split("T")[0],
       totals: data.totals,
       assignmentsToday: data.assignmentsToday,
+      canRecordCompletion: can(user.role, "completion.record"),
     });
   } catch (err) {
     next(err);

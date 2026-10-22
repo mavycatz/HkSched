@@ -3,6 +3,7 @@
  * Tables used: users, duties (created by migrations 003/004).
  */
 import { getPool } from "../db/pool";
+import { dutyStatusSql } from "./dutyService";
 
 export interface DashboardTotals {
   /** Students assigned to at least one duty in the period. */
@@ -13,15 +14,25 @@ export interface DashboardTotals {
   ongoing: number;
   assignments: number;
   pendingApplications: number;
-  missed: number;
+  cancelled: number;
 }
 
 export interface AssignmentToday {
+  id: number;
   date: string;
   time: string;
+  /** The duty's location: the catalogue name, or the area text of a legacy duty. */
   area: string;
   tasks: string;
   status: string;
+  /** The supervising teacher, or null when the duty has none. */
+  teacher: string | null;
+  /** The students on the duty. */
+  students: { id: number; name: string; student_id: string }[];
+  /** How many students are on the duty. */
+  studentCount: number;
+  /** How many of them are recorded complete. */
+  completedCount: number;
 }
 
 export interface DashboardData {
@@ -169,28 +180,51 @@ export async function getDashboardSummary(
 ): Promise<DashboardData> {
   const pool = getPool();
 
-  // All duties in the range, joined with assignee info
+  // All duties in the range, with their derived status, their location and
+  // their supervising teacher.
   const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.area, d.status, d.start_time, d.end_time,
-            u.id AS assigned_to_id, u.school_id, u.name AS full_name, u.role
+    `SELECT d.id, d.title, d.area, (${dutyStatusSql}) AS status, d.start_time, d.end_time,
+            COALESCE(l.name, d.area) AS location,
+            u.id AS assigned_to_id, u.school_id, u.name AS full_name, u.role,
+            (SELECT count(*)::int FROM duty_assignments da WHERE da.duty_id = d.id) AS student_count,
+            (SELECT count(*)::int FROM duty_assignments da
+              WHERE da.duty_id = d.id AND COALESCE(da.status, 'assigned') = 'completed') AS completed_count
      FROM duties d
      LEFT JOIN users u ON u.id = d.assigned_to
+     LEFT JOIN duty_locations l ON l.id = d.location_id
      WHERE d.start_time >= $1 AND d.start_time <= $2
      ORDER BY d.start_time ASC`,
     [range.from, range.to],
   );
 
+  // The students of every duty in the range, so the table can name them.
+  const { rows: studentRows } = await pool.query(
+    `SELECT da.duty_id, u.id, u.name, u.school_id AS student_id
+     FROM duty_assignments da
+     JOIN users u ON u.id = da.student_id
+     JOIN duties d ON d.id = da.duty_id
+     WHERE d.start_time >= $1 AND d.start_time <= $2
+     ORDER BY u.name ASC`,
+    [range.from, range.to],
+  );
+  const studentsByDuty = new Map<number, { id: number; name: string; student_id: string }[]>();
+  for (const row of studentRows) {
+    const bucket = studentsByDuty.get(row.duty_id) ?? [];
+    bucket.push({ id: row.id, name: row.name, student_id: row.student_id });
+    studentsByDuty.set(row.duty_id, bucket);
+  }
+
   // Total students: the distinct students assigned to a duty in the period.
   // A duty's `assigned_to` is the staff member in charge of it, so the
   // students come from the assignment rows, not from that column.
-  const { rows: studentRows } = await pool.query(
+  const { rows: distinctStudents } = await pool.query(
     `SELECT count(DISTINCT da.student_id)::int AS assigned
      FROM duty_assignments da
      JOIN duties d ON d.id = da.duty_id
      WHERE d.start_time >= $1 AND d.start_time <= $2`,
     [range.from, range.to],
   );
-  const students = Number(studentRows[0]?.assigned ?? 0);
+  const students = Number(distinctStudents[0]?.assigned ?? 0);
 
   // The denominator of the "Total Students" caption: every student account.
   const { rows: studentTotalRows } = await pool.query(
@@ -198,12 +232,9 @@ export async function getDashboardSummary(
   );
   const studentsTotal = Number(studentTotalRows[0]?.total ?? 0);
 
-  // Completed: duties with status 'completed' in the period
+  // Completed and ongoing follow the derived status, so the counts and the
+  // rows always agree.
   const completed = rows.filter((r) => r.status === "completed").length;
-
-  // Ongoing: duties with status 'ongoing' in the period. `duties.status` is
-  // constrained to ongoing, completed, pending and missed, so there is no
-  // other status to exclude.
   const ongoing = rows.filter((r) => r.status === "ongoing").length;
 
   // Assignment: every duty in the period.
@@ -211,6 +242,7 @@ export async function getDashboardSummary(
 
   // Assignments table detail
   const assignmentsToday: AssignmentToday[] = rows.map((r) => ({
+    id: r.id,
     date: new Date(r.start_time).toLocaleDateString("en-PH", {
       month: "short",
       day: "numeric",
@@ -221,11 +253,15 @@ export async function getDashboardSummary(
       minute: "2-digit",
       hour12: true,
     }),
-    area: r.area || "",
+    area: r.location || "",
     tasks: r.title || "",
     status: (r.status || "ongoing")
       .charAt(0)
       .toUpperCase() + (r.status || "ongoing").slice(1),
+    teacher: r.full_name || null,
+    students: studentsByDuty.get(r.id) ?? [],
+    studentCount: Number(r.student_count) || 0,
+    completedCount: Number(r.completed_count) || 0,
   }));
 
   return {
@@ -236,7 +272,7 @@ export async function getDashboardSummary(
       ongoing,
       assignments,
       pendingApplications: 0, // applications table not yet in schema
-      missed: rows.filter((r) => r.status === "missed").length,
+      cancelled: rows.filter((r) => r.status === "cancelled").length,
     },
     assignmentsToday,
   };

@@ -1,0 +1,16 @@
+<%
+  /* The create and edit schedule modal. The page that shows it fills in
+     `dutyForm` with the values it holds, `dutyFormErrors` with the reasons a
+     write was refused, and `locations` with the catalogue. */
+%>
+<%- include("../../partials/modal", {
+  modalId: typeof dutyFormModalId !== "undefined" ? dutyFormModalId : "duty-create-modal",
+  modalTitle: typeof dutyFormTitle !== "undefined" ? dutyFormTitle : "Create schedule",
+  modalNote: typeof dutyFormNote !== "undefined" ? dutyFormNote : "Add a duty, when it runs and where it is held.",
+  modalIcon: typeof dutyFormIcon !== "undefined" ? dutyFormIcon : "bi-calendar-plus",
+  modalOpen: typeof dutyFormOpen !== "undefined" ? dutyFormOpen : false,
+  modalFormId: typeof dutyFormId !== "undefined" ? dutyFormId : "create-duty-form",
+  modalSubmitLabel: typeof dutyFormSubmitLabel !== "undefined" ? dutyFormSubmitLabel : "Save schedule",
+  modalBody: "../pages/partials/duty-form-body",
+  dutyForm: typeof dutyForm !== "undefined" ? dutyForm : null,
+}) %>

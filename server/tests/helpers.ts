@@ -22,10 +22,11 @@ export function cookieNamed(res: request.Response, name: string): string | undef
 /** Create an agent, load /login, and log in as the given account (school id or email). */
 export async function loginAs(app: Express, identifier: string): Promise<Agent> {
   const agent = request.agent(app);
-  const page = await agent.get("/login");
+  const page = await agent.get("/login").set("User-Agent", "Mozilla/5.0 JestTest");
   const token = csrfFrom(page.text);
   const res = await agent
     .post("/login")
+    .set("User-Agent", "Mozilla/5.0 JestTest")
     .type("form")
     .send({ identifier, password: PASSWORD, _csrf: token });
   if (res.status !== 302) {

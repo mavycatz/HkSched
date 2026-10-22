@@ -24,12 +24,16 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
 
 export function csrfToken(req: Request, res: Response): string {
   if (res.locals.csrfToken) return res.locals.csrfToken;
-  const token = generateCsrfToken(req, res);
-  res.locals.csrfToken = token;
-  if (req.session && !req.session.userId && !req.session.csrfAnchor) {
-    req.session.csrfAnchor = true;
+  try {
+    const token = generateCsrfToken(req, res);
+    res.locals.csrfToken = token;
+    if (req.session && !req.session.userId && !req.session.csrfAnchor) {
+      req.session.csrfAnchor = true;
+    }
+    return token;
+  } catch {
+    return "";
   }
-  return token;
 }
 
 /** Drop the CSRF cookie so a fresh token is minted bound to the next request's session. */

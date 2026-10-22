@@ -30,11 +30,9 @@ describe("requireAuth (public vs protected)", () => {
 
   test("a remembered but destroyed session is sent back to login", async () => {
     const agent = await loginAs(app, "S-001");
-    await agent.post("/logout").type("form").send({
-      _csrf: (await agent.get("/dashboard")).text.match(
-        /name="_csrf" value="([^"]+)"/,
-      )![1],
-    });
+    const dash = await agent.get("/dashboard");
+    const token = dash.text.match(/name="_csrf" value="([^"]+)"/)![1];
+    await agent.post("/logout").type("form").send({ _csrf: token });
     const res = await agent.get("/dashboard");
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("/login");
@@ -91,7 +89,8 @@ describe("requirePermission (cross-role denials render themed 403)", () => {
     await teacher.get("/verification").expect(200);
 
     const csdl = await loginAs(app, "CSDL-001");
-    await csdl.get("/monitor-completion").expect(200);
+    await csdl.get("/csdl/schedule").expect(200);
+    await csdl.get("/monitor-completion").expect(302);
   });
 });
 

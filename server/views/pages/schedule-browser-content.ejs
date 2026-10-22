@@ -1,0 +1,309 @@
+<%
+  /* ---------------------------------------------------------------------------
+     The Duty Schedules browser. Everything on the page is rendered on the
+     server from the query string, so the filters live in the address bar and
+     the view survives a reload.
+     --------------------------------------------------------------------------- */
+  const MANILA = "Asia/Manila";
+
+  function fmtDate(value) {
+    if (!value) return "—";
+    return new Date(value).toLocaleDateString("en-PH", {
+      timeZone: MANILA, month: "short", day: "numeric", year: "numeric",
+    });
+  }
+
+  function fmtTime(value) {
+    if (!value) return "—";
+    return new Date(value).toLocaleTimeString("en-PH", {
+      timeZone: MANILA, hour: "2-digit", minute: "2-digit", hour12: true,
+    });
+  }
+
+  function fmtTimeRange(start, end) {
+    if (!start) return "—";
+    const from = fmtTime(start);
+    return end ? from + " – " + fmtTime(end) : from;
+  }
+
+  /* The address of the browser with the current filters and the overrides. */
+  function pageUrl(overrides) {
+    const params = new URLSearchParams();
+    if (filters.search) params.set("q", filters.search);
+    if (filters.from) params.set("from", filters.from);
+    if (filters.to) params.set("to", filters.to);
+    if (filters.locationId) params.set("location", String(filters.locationId));
+    if (filters.teacherId) params.set("teacher", String(filters.teacherId));
+    if (filters.status) params.set("status", filters.status);
+    const options = overrides || {};
+    if (options.page) params.set("page", String(options.page));
+    for (const key of Object.keys(options)) {
+      if (key === "page") continue;
+      const value = options[key];
+      if (value === null || value === undefined || value === "") params.delete(key);
+      else params.set(key, String(value));
+    }
+    const query = params.toString();
+    return "/csdl/schedule" + (query ? "?" + query : "");
+  }
+
+  function pagerPages(current, total) {
+    const wanted = [1, current - 1, current, current + 1, total];
+    const pages = wanted.filter(function (n) { return n >= 1 && n <= total; })
+      .filter(function (n, index, all) { return all.indexOf(n) === index; })
+      .sort(function (a, b) { return a - b; });
+    const out = [];
+    pages.forEach(function (n, index) {
+      if (index > 0 && n - pages[index - 1] > 1) out.push("gap");
+      out.push(n);
+    });
+    return out;
+  }
+
+  const firstRow = (page - 1) * pageSize;
+  const lastRow = Math.min(firstRow + duties.length, total);
+  const hasFilters = Boolean(filters.search || filters.from || filters.to ||
+    filters.locationId || filters.teacherId || filters.status);
+
+  /* How the completion of a duty reads on its row. */
+  function completionText(duty) {
+    if (!duty.student_count) return "No students";
+    if (duty.completed_count >= duty.student_count) return "All students complete";
+    return duty.completed_count + " of " + duty.student_count + " complete";
+  }
+
+  /* The students of a duty, as the row shows them. */
+  function studentsOf(duty) {
+    return (studentsByDuty && studentsByDuty[duty.id]) || [];
+  }
+%>
+
+<div class="app-stack">
+
+  <% if (message) { %>
+  <div class="app-alert" role="status">
+    <i class="bi bi-check-circle" aria-hidden="true"></i>
+    <% if (message === "created") { %>The schedule was created.
+    <% } else if (message === "updated") { %>The schedule was updated.
+    <% } else if (message === "deleted") { %>The schedule was deleted.
+    <% } else if (message === "assigned") { %>The assignments were saved.
+    <% } else if (message === "cancelled") { %>The schedule was cancelled.
+    <% } else { %>Done.
+    <% } %>
+  </div>
+  <% } %>
+
+  <header class="page-header page-header--row">
+    <div>
+      <h1 class="page-title">Duty Schedules</h1>
+      <p class="page-subtitle">Every schedule: who is on it, where it is held and whether it is done.</p>
+    </div>
+    <% if (canManage) { %>
+    <a class="app-btn app-btn--primary" href="<%= pageUrl({ create: 1 }) %>#duty-create-modal"
+       data-bs-toggle="modal" data-bs-target="#duty-create-modal" id="sb-create-btn">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+      <span>Create schedule</span>
+    </a>
+    <% } %>
+  </header>
+
+  <!-- The filters: search, date range, location, teacher and status. -->
+  <form class="app-panel" method="get" action="/csdl/schedule" id="sb-filter-form">
+    <div class="app-panel__body">
+      <div class="app-toolbar">
+        <div class="app-field app-field--grow">
+          <label class="app-label" for="sb-q">Search</label>
+          <div class="app-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input class="app-input" type="search" id="sb-q" name="q"
+                   value="<%= filters.search || "" %>" placeholder="Search by title, location or student">
+          </div>
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="sb-from">From</label>
+          <input class="app-input" type="date" id="sb-from" name="from" value="<%= filters.from || "" %>">
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="sb-to">To</label>
+          <input class="app-input" type="date" id="sb-to" name="to" value="<%= filters.to || "" %>">
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="sb-location">Location</label>
+          <select class="app-input app-select" id="sb-location" name="location">
+            <option value="">All locations</option>
+            <% filterLocations.forEach(function (location) { %>
+            <option value="<%= location.id %>" <%= filters.locationId === location.id ? "selected" : "" %>><%= location.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="sb-teacher">Teacher</label>
+          <select class="app-input app-select" id="sb-teacher" name="teacher">
+            <option value="">All teachers</option>
+            <% filterTeachers.forEach(function (teacher) { %>
+            <option value="<%= teacher.id %>" <%= filters.teacherId === teacher.id ? "selected" : "" %>><%= teacher.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="app-field">
+          <label class="app-label" for="sb-status">Status</label>
+          <select class="app-input app-select" id="sb-status" name="status">
+            <option value="">All statuses</option>
+            <% ["pending", "ongoing", "completed", "cancelled"].forEach(function (status) { %>
+            <option value="<%= status %>" <%= filters.status === status ? "selected" : "" %>><%= statusView(status).label %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="app-toolbar__actions">
+          <button class="app-btn app-btn--navy" type="submit">Apply</button>
+          <a class="app-btn app-btn--quiet" href="/csdl/schedule" id="sb-clear-filters">Clear</a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- The list -->
+  <% if (duties.length > 0) { %>
+  <div class="app-panel" id="sb-list">
+    <div class="app-panel__body app-panel__body--flush">
+      <div class="app-table-wrap">
+        <table class="app-table" id="sb-table">
+          <thead>
+            <tr>
+              <th>Schedule</th>
+              <th>Location</th>
+              <th>Date and time</th>
+              <th>Students</th>
+              <th>Teacher</th>
+              <th>Status</th>
+              <th>Completion</th>
+              <% if (canManage) { %><th class="app-table__actions">Actions</th><% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% duties.forEach(function (duty) {
+                 const view = statusView(duty.status);
+                 const students = studentsOf(duty);
+                 const names = students.map(function (student) { return student.name; });
+            %>
+            <tr class="sb-row" data-duty-id="<%= duty.id %>">
+              <td>
+                <span class="app-table__title"><%= duty.title %></span>
+                <% if (duty.class_group) { %><span class="sb-sub"><%= duty.class_group %></span><% } %>
+              </td>
+              <td><%= duty.location_name || duty.area || "—" %></td>
+              <td>
+                <span class="sb-date"><%= fmtDate(duty.start_time) %></span>
+                <span class="sb-sub"><%= fmtTimeRange(duty.start_time, duty.end_time) %></span>
+              </td>
+              <td>
+                <% if (students.length === 0) { %>
+                <span class="sb-none">No students</span>
+                <% } else { %>
+                <span class="sb-students" title="<%= names.join(", ") %>"><%= names.join(", ") %></span>
+                <span class="sb-sub"><%= students.length %> student<%= students.length === 1 ? "" : "s" %></span>
+                <% } %>
+              </td>
+              <td><%= duty.assignee_name || "Unassigned" %></td>
+              <td><span class="status-badge status-badge--<%= view.status %>"><%= view.label %></span></td>
+              <td><span class="sb-completion"><%= completionText(duty) %></span></td>
+              <% if (canManage) { %>
+              <td class="app-table__actions">
+                <div class="sb-actions">
+                  <a class="app-icon-btn" href="<%= pageUrl({ edit: duty.id }) %>#duty-edit-modal"
+                     data-bs-toggle="modal" data-bs-target="#duty-edit-modal" aria-label="Edit <%= duty.title %>">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                  </a>
+                  <a class="app-icon-btn" href="<%= pageUrl({ assign: duty.id }) %>#duty-assign-students-modal"
+                     data-bs-toggle="modal" data-bs-target="#duty-assign-students-modal"
+                     aria-label="Assign students to <%= duty.title %>">
+                    <i class="bi bi-person-plus" aria-hidden="true"></i>
+                  </a>
+                  <a class="app-icon-btn" href="<%= pageUrl({ assign_teacher: duty.id }) %>#duty-assign-teacher-modal"
+                     data-bs-toggle="modal" data-bs-target="#duty-assign-teacher-modal"
+                     aria-label="Assign the teacher of <%= duty.title %>">
+                    <i class="bi bi-person-badge" aria-hidden="true"></i>
+                  </a>
+                  <% if (duty.status !== "cancelled") { %>
+                  <form class="sb-inline" method="post" action="/csdl/duty-management/duties/<%= duty.id %>/cancel">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="app-icon-btn" type="submit" data-confirm="Cancel &quot;<%= duty.title %>&quot;?"
+                            aria-label="Cancel <%= duty.title %>">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </form>
+                  <% } %>
+                  <form class="sb-inline" method="post" action="/csdl/duty-management/duties/<%= duty.id %>/delete">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="app-icon-btn app-icon-btn--danger" type="submit"
+                            data-confirm="Delete &quot;<%= duty.title %>&quot;? This cannot be undone."
+                            aria-label="Delete <%= duty.title %>">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+              <% } %>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="app-panel" id="sb-empty">
+    <div class="app-empty">
+      <span class="app-empty__icon" aria-hidden="true"><i class="bi bi-calendar-week"></i></span>
+      <% if (hasFilters) { %>
+      <h2 class="app-empty__title">No schedule matches the current filters</h2>
+      <p class="app-empty__text">There are schedules in your scope, but none of them match this search, date range, location, teacher or status.</p>
+      <a class="app-btn app-btn--quiet" href="/csdl/schedule" id="sb-clear-filters-empty">Clear filters</a>
+      <% } else { %>
+      <h2 class="app-empty__title">No schedules yet</h2>
+      <p class="app-empty__text">Create the first schedule to get started.</p>
+      <% if (canManage) { %>
+      <a class="app-btn app-btn--primary" href="<%= pageUrl({ create: 1 }) %>#duty-create-modal"
+         data-bs-toggle="modal" data-bs-target="#duty-create-modal">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        <span>Create schedule</span>
+      </a>
+      <% } %>
+      <% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <div class="dm-footer">
+    <p class="dm-count" id="sb-count"><% if (duties.length === 0) { %>No schedules to show<% } else { %>Showing <%= firstRow + 1 %>-<%= lastRow %> of <%= total %> schedules<% } %></p>
+    <% if (pageCount > 1) { %>
+    <nav class="dm-pager" aria-label="Schedule pages">
+      <% if (page > 1) { %>
+      <a class="dm-pager-btn" href="<%= pageUrl({ page: page - 1 }) %>" rel="prev" aria-label="Previous page">
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+      </a>
+      <% } else { %>
+      <span class="dm-pager-btn is-disabled" aria-disabled="true"><i class="bi bi-chevron-left" aria-hidden="true"></i></span>
+      <% } %>
+      <% pagerPages(page, pageCount).forEach(function (entry) { %>
+      <% if (entry === "gap") { %>
+      <span class="dm-pager-gap" aria-hidden="true">…</span>
+      <% } else if (entry === page) { %>
+      <a class="dm-pager-btn is-current" href="<%= pageUrl({ page: entry }) %>" aria-current="page" aria-label="Page <%= entry %>"><%= entry %></a>
+      <% } else { %>
+      <a class="dm-pager-btn" href="<%= pageUrl({ page: entry }) %>" aria-label="Page <%= entry %>"><%= entry %></a>
+      <% } %>
+      <% }); %>
+      <% if (page < pageCount) { %>
+      <a class="dm-pager-btn" href="<%= pageUrl({ page: page + 1 }) %>" rel="next" aria-label="Next page">
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      </a>
+      <% } else { %>
+      <span class="dm-pager-btn is-disabled" aria-disabled="true"><i class="bi bi-chevron-right" aria-hidden="true"></i></span>
+      <% } %>
+    </nav>
+    <% } %>
+  </div>
+</div>
+
+<%- include("./partials/duty-modals") %>
