@@ -119,31 +119,13 @@ export async function updateUserProfile(userId: number, data: Partial<Pick<UserP
   return rows[0] || null;
 }
 
-export async function searchUsers(q: string, roles?: Array<"STUDENT" | "TEACHER">): Promise<Array<{ id: number; name: string; school_id: string; role: string; email: string | null }>> {
-  const params: unknown[] = [];
-  let where = `is_active = TRUE`;
-  if (q && q.trim()) {
-    params.push(`%${q.trim()}%`);
-    where += ` AND (name ILIKE $${params.length} OR school_id ILIKE $${params.length} OR email ILIKE $${params.length})`;
-  }
-  if (roles && roles.length) {
-    params.push(roles);
-    where += ` AND role = ANY($${params.length}::user_role[])`;
-  }
-  const { rows } = await getPool().query(
-    `SELECT id, name, school_id, role, email FROM users WHERE ${where} ORDER BY name ASC LIMIT 50`,
-    params,
-  );
-  return rows;
-}
-
 // Duties/Slots
 export async function listDutySlots(viewer: DutyViewer, filters: { date?: string; from?: string; to?: string; class_group?: string; person?: string; q?: string } = {}): Promise<DutySlot[]> {
   const params: unknown[] = [];
   const clauses: string[] = [scopeDuty(viewer, params)];
   if (filters.date) {
     params.push(filters.date);
-    clauses.push(`d.start_time::date = $${params.length}::date`);
+    clauses.push(`(d.start_time AT TIME ZONE 'Asia/Manila')::date = $${params.length}::date`);
   }
   if (filters.from) {
     params.push(`${filters.from}T00:00:00+08:00`);
@@ -185,48 +167,6 @@ export async function getDutySlot(id: number): Promise<DutySlot | null> {
   return rows[0] || null;
 }
 
-export async function createDutySlot(data: { title: string; description?: string | null; area: string; start_time: string; end_time?: string | null; assigned_to?: number | null; status?: string; required_headcount?: number; class_group?: string | null }, actorId?: number): Promise<DutySlot> {
-  const { rows } = await getPool().query<DutySlot>(
-    `INSERT INTO duties (title, description, area, start_time, end_time, assigned_to, assigned_by, status, required_headcount, class_group)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9,1),$10)
-     RETURNING *`,
-    [data.title, data.description || null, data.area, data.start_time, data.end_time || null, data.assigned_to || null, actorId || null, data.status || "pending", data.required_headcount || 1, data.class_group || null],
-  );
-  return rows[0];
-}
-
-export async function updateDutySlot(id: number, data: Partial<DutySlot>): Promise<DutySlot | null> {
-  const fields: string[] = [];
-  const params: unknown[] = [];
-  let i = 1;
-  const allowed = ["title", "description", "area", "start_time", "end_time", "assigned_to", "status", "required_headcount", "class_group"];
-  for (const key of allowed) {
-    if ((data as any)[key] !== undefined) {
-      fields.push(`${key} = $${i++}`);
-      params.push((data as any)[key]);
-    }
-  }
-  if (fields.length === 0) return getDutySlot(id);
-  fields.push(`updated_at = now()`);
-  params.push(id);
-  const { rows } = await getPool().query<DutySlot>(`UPDATE duties SET ${fields.join(", ")} WHERE id = $${i} RETURNING *`, params);
-  return rows[0] || null;
-}
-
-export async function deleteDutySlot(id: number): Promise<boolean> {
-  const { rowCount } = await getPool().query("DELETE FROM duties WHERE id = $1", [id]);
-  return (rowCount || 0) > 0;
-}
-
-export async function checkDutyConflict(startTime: string, endTime?: string | null, excludeId?: number): Promise<boolean> {
-  const params: unknown[] = [startTime];
-  let where = `start_time = $1`;
-  if (excludeId) { params.push(excludeId); where += ` AND id != $${params.length}`; }
-  if (endTime) { params.push(endTime); where += ` AND (end_time = $${params.length} OR end_time IS NULL)`; }
-  const { rowCount } = await getPool().query(`SELECT 1 FROM duties WHERE ${where} LIMIT 1`, params);
-  return (rowCount || 0) > 0;
-}
-
 // Assignments
 export async function getAssignmentsForDuty(dutyId: number): Promise<Assignment[]> {
   const { rows } = await getPool().query<Assignment>(
@@ -245,7 +185,7 @@ export async function getMyAssignments(viewer: DutyViewer, filters: { date?: str
   let where = `1=1`;
   if (viewer.role === "STUDENT") { params.push(viewer.id); where += ` AND da.student_id = $${params.length}`; }
   else if (viewer.role === "TEACHER") { params.push(viewer.id); where += ` AND (d.assigned_to = $${params.length} OR da.student_id = $${params.length})`; }
-  if (filters.date) { params.push(filters.date); where += ` AND d.start_time::date = $${params.length}::date`; }
+  if (filters.date) { params.push(filters.date); where += ` AND (d.start_time AT TIME ZONE 'Asia/Manila')::date = $${params.length}::date`; }
   if (filters.status) { params.push(filters.status); where += ` AND COALESCE(da.status,'assigned') = $${params.length}`; }
   const { rows } = await getPool().query<Assignment>(
     `SELECT da.*, u.name as student_name, u.school_id as student_school_id, d.title as duty_title, d.area as duty_area, d.start_time
@@ -256,21 +196,6 @@ export async function getMyAssignments(viewer: DutyViewer, filters: { date?: str
     params,
   );
   return rows;
-}
-
-export async function assignUserToDuty(dutyId: number, userId: number, notes?: string): Promise<Assignment> {
-  const { rows } = await getPool().query<Assignment>(
-    `INSERT INTO duty_assignments (duty_id, student_id, notes, status) VALUES ($1,$2,$3,'assigned') ON CONFLICT DO NOTHING RETURNING *`,
-    [dutyId, userId, notes || null],
-  );
-  if (rows[0]) return rows[0];
-  const existing = await getPool().query<Assignment>("SELECT * FROM duty_assignments WHERE duty_id=$1 AND student_id=$2", [dutyId, userId]);
-  return existing.rows[0];
-}
-
-export async function removeAssignment(assignmentId: number): Promise<boolean> {
-  const { rowCount } = await getPool().query("DELETE FROM duty_assignments WHERE id = $1", [assignmentId]);
-  return (rowCount || 0) > 0;
 }
 
 export async function markAssignmentDone(assignmentId: number, actorId?: number): Promise<Assignment | null> {

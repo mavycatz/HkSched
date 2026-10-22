@@ -6,6 +6,7 @@
   font-size: 1.75rem;
   font-weight: 600;
   margin: 0;
+  color: var(--page-title-color);
 }
 .page-subtitle {
   color: var(--text-muted);
@@ -45,9 +46,9 @@
   border-radius: 999px;
   font-size: 0.8rem;
 }
-.badge-pending { background: #fff3cd; color: #856404; }
-.badge-done, .badge-completed { background: #d1e7dd; color: #0f5132; }
-.badge-overdue, .badge-missed { background: #f8d7da; color: #842029; }
-.badge-ongoing, .badge-assigned { background: #e7f1ff; color: #0c63e4; }
+.badge-pending { background: var(--status-pending-bg); color: var(--status-pending-fg); }
+.badge-done, .badge-completed { background: var(--status-completed-bg); color: var(--status-completed-fg); }
+.badge-overdue, .badge-missed { background: var(--status-missed-bg); color: var(--status-missed-fg); }
+.badge-ongoing, .badge-assigned { background: var(--status-ongoing-bg); color: var(--status-ongoing-fg); }
 .list-group-item { cursor: pointer; }
 .table th { font-weight: 600; color: var(--text-muted); }

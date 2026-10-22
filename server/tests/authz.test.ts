@@ -18,7 +18,7 @@ describe("requireAuth (public vs protected)", () => {
       "/dashboard",
       "/my-duties",
       "/verification",
-      "/duty-schedules",
+      "/csdl/duty-management",
       "/attendance-profile",
       "/settings",
     ]) {
@@ -50,7 +50,7 @@ describe("requirePermission (cross-role denials render themed 403)", () => {
     expect(verification.text).toContain("You don&#39;t have access to this page.");
     expect(verification.text).toContain("/css/theme.css");
 
-    const dutySchedules = await student.get("/duty-schedules");
+    const dutySchedules = await student.get("/csdl/duty-management");
     expect(dutySchedules.status).toBe(403);
     expect(dutySchedules.text).toContain("You don&#39;t have access to this page.");
 
@@ -68,7 +68,7 @@ describe("requirePermission (cross-role denials render themed 403)", () => {
 
   test("TEACHER cannot open STUDENT or CSDL pages", async () => {
     const teacher = await loginAs(app, "T-001");
-    for (const path of ["/my-duties", "/upcoming-duties", "/attendance-profile", "/duty-schedules"]) {
+    for (const path of ["/my-duties", "/upcoming-duties", "/attendance-profile", "/csdl/duty-management"]) {
       const res = await teacher.get(path);
       expect(res.status).toBe(403);
       expect(res.text).toContain("You don&#39;t have access to this page.");

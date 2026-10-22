@@ -45,8 +45,7 @@ describe("sidebar filtering per role (6.2)", () => {
       "Dashboard",
       "Today&#39;s Assignments",
       "Duty Schedules",
-      "Create/Edit Schedule",
-      "Assign Students &amp; Teachers",
+      "Duty Management",
       "Monitor Completion",
       "Applications",
       "Profile &amp; Settings",
@@ -90,10 +89,9 @@ describe("sidebar filtering per role (6.2)", () => {
     for (const label of [
       "Monitor Completion",
       "Duty Schedules",
+      "Duty Management",
       "Verification",
       "Approvals",
-      "Assign Students & Teachers",
-      "Create/Edit Schedule",
       "Assignments",
     ]) {
       expect(dash.text).not.toContain(`>${label}<`);
@@ -104,26 +102,11 @@ describe("sidebar filtering per role (6.2)", () => {
 describe("placeholder pages render per role (6.3-6.5)", () => {
   const pagesByRole: { role: string; account: string; pages: [string, string][] }[] = [
     {
-      role: "CSDL",
-      account: "CSDL-001",
-      pages: [
-        ["/todays-assignments", "Today&#39;s Assignments"],
-        ["/duty-schedules", "Duty Schedules"],
-        ["/create-edit-schedule", "Create/Edit Schedule"],
-        ["/assign-students-teachers", "Assign Students &amp; Teachers"],
-        ["/monitor-completion", "Monitor Completion"],
-        ["/applications", "Applications"],
-        ["/profile-settings", "Profile &amp; Settings"],
-      ],
-    },
-    {
       role: "STUDENT",
       account: "S-001",
       pages: [
         ["/my-duties", "My Duties"],
         ["/upcoming-duties", "Upcoming Duties"],
-        ["/attendance-profile", "Attendance Profile"],
-        ["/applications", "Applications"],
         ["/settings", "Settings"],
       ],
     },
@@ -131,11 +114,9 @@ describe("placeholder pages render per role (6.3-6.5)", () => {
       role: "TEACHER",
       account: "T-001",
       pages: [
-        ["/todays-assignments", "Today&#39;s Assignments"],
         ["/assignments", "Assignments"],
         ["/verification", "Verification"],
         ["/approvals", "Approvals"],
-        ["/applications", "Applications"],
         ["/settings", "Settings"],
       ],
     },
@@ -153,6 +134,20 @@ describe("placeholder pages render per role (6.3-6.5)", () => {
       }
     });
   }
+
+  test("the CSDL pages that replaced the placeholders are real pages", async () => {
+    const agent = await loginAs(app, "CSDL-001");
+    for (const path of [
+      "/todays-assignments",
+      "/monitor-completion",
+      "/csdl/duty-management",
+    ]) {
+      const res = await agent.get(path);
+      expect(res.status).toBe(200);
+      expect(res.text).not.toContain("coming soon");
+      expect(res.text).toContain('class="sidebar"');
+    }
+  });
 
   test("CSDL dashboard shows the CSDL name, role, and permission-driven nav", async () => {
     const agent = await loginAs(app, "CSDL-001");
@@ -181,7 +176,7 @@ describe("Forgot password and status pages (6.7)", () => {
 
   test("cross-role denial renders themed 403", async () => {
     const agent = await loginAs(app, "S-002");
-    const res = await agent.get("/create-edit-schedule");
+    const res = await agent.get("/monitor-completion");
     expect(res.status).toBe(403);
     expect(res.text).toContain("403");
     expect(res.text).toContain("/css/theme.css");

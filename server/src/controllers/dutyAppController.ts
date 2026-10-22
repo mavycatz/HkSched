@@ -2,9 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import { navFor } from "../config/navigation";
 import { csrfToken } from "../lib/csrf";
 import {
-  listDutySlots, getDutySlot, createDutySlot, updateDutySlot, deleteDutySlot, checkDutyConflict,
-  getAssignmentsForDuty, getMyAssignments, assignUserToDuty, removeAssignment, markAssignmentDone, markDutyComplete,
-  listApplications, createApplication, reviewApplication, getCompletionStats, searchUsers, createNotification
+  listDutySlots, getDutySlot, getAssignmentsForDuty, getMyAssignments,
+  markAssignmentDone, markDutyComplete,
+  listApplications, createApplication, reviewApplication, getCompletionStats, createNotification
 } from "../services/appDataService";
 import type { DutyViewer } from "../services/dutyService";
 
@@ -15,11 +15,18 @@ function shellLocals(req: Request, res: Response) {
 
 function viewer(req: Request): DutyViewer { const u = req.user!; return { id: u.id, role: u.role as any }; }
 
+/** Today in the Philippines, as YYYY-MM-DD. */
+function manilaToday(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+}
+
 // Today's Assignments
 export async function getTodaysAssignments(req: Request, res: Response, next: NextFunction) {
   try {
     const v = viewer(req);
-    const today = new Date().toISOString().split("T")[0];
+    const today = manilaToday();
     const slots = await listDutySlots(v, { date: today });
     const assignments = await getMyAssignments(v, { date: today });
     res.render("pages/todays-assignments", {
@@ -40,128 +47,6 @@ export async function postMarkDone(req: Request, res: Response, next: NextFuncti
     await markAssignmentDone(id, req.user!.id);
     res.json({ ok: true });
   } catch (e) { next(e); }
-}
-
-// Duty Schedules
-export async function getDutySchedules(req: Request, res: Response, next: NextFunction) {
-  try {
-    const v = viewer(req);
-    const q = req.query as any;
-    const slots = await listDutySlots(v, { date: q.date, class_group: q.class, person: q.person, from: q.from, to: q.to, q: q.q });
-    res.render("pages/duty-management", {
-      ...shellLocals(req, res),
-      title: "Duty Schedule Management",
-      activePath: req.path === "/duty-management" ? "/duty-management" : "/duty-schedules",
-      bodyClass: "app-page",
-      pageStyles: ["pages", "duty-management"],
-      pageScripts: ["duty-management"],
-      slots, filters: q
-    });
-  } catch (e) { next(e); }
-}
-
-
-export async function getDutyDetail(req: Request, res: Response, next: NextFunction) {
-  try {
-    const slot = await getDutySlot(Number(req.params.id));
-    if (!slot) return res.status(404).json({ error: "Not found" });
-    const assignments = await getAssignmentsForDuty(slot.id);
-    res.json({ slot, assignments });
-  } catch (e) { next(e); }
-}
-
-// Create/Edit Schedule
-export async function getCreateEditSchedule(req: Request, res: Response, next: NextFunction) {
-  try {
-    const v = viewer(req);
-    const slots = await listDutySlots(v, {});
-    res.render("pages/create-edit-schedule", {
-      ...shellLocals(req, res),
-      title: "Create/Edit Schedule",
-      activePath: "/create-edit-schedule",
-      bodyClass: "app-page",
-      pageStyles: ["pages"],
-      pageScripts: ["create-edit-schedule"],
-      slots
-    });
-  } catch (e) { next(e); }
-}
-
-export async function postCreateSchedule(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { title, description, area, start_time, end_time, required_headcount, class_group, assigned_to } = req.body as any;
-    if (!title || !area || !start_time) return res.status(400).json({ error: "title, area, start_time required" });
-    if (await checkDutyConflict(start_time, end_time)) return res.status(400).json({ error: "Time conflict with existing duty" });
-    const slot = await createDutySlot({ title, description, area, start_time, end_time, required_headcount: Number(required_headcount)||1, class_group, assigned_to: assigned_to ? Number(assigned_to) : null }, req.user!.id);
-    res.json({ ok: true, slot });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function putUpdateSchedule(req: Request, res: Response, next: NextFunction) {
-  try {
-    const id = Number(req.params.id);
-    const body = req.body as any;
-    if (body.start_time && await checkDutyConflict(body.start_time, body.end_time, id)) return res.status(400).json({ error: "Time conflict with existing duty" });
-    const slot = await updateDutySlot(id, body);
-    res.json({ ok: true, slot });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function deleteSchedule(req: Request, res: Response, next: NextFunction) {
-  try {
-    await deleteDutySlot(Number(req.params.id));
-    res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-// Assign Students & Teachers
-export async function getAssignStudentsTeachers(req: Request, res: Response, next: NextFunction) {
-  try {
-    const v = viewer(req);
-    const slots = await listDutySlots(v, {});
-    res.render("pages/assign-students-teachers", {
-      ...shellLocals(req, res),
-      title: "Assign Students & Teachers",
-      activePath: "/assign-students-teachers",
-      bodyClass: "app-page",
-      pageStyles: ["pages"],
-      pageScripts: ["assign-students-teachers"],
-      slots
-    });
-  } catch (e) { next(e); }
-}
-
-export async function getSlotAssignments(req: Request, res: Response, next: NextFunction) {
-  try {
-    const assignments = await getAssignmentsForDuty(Number(req.params.id));
-    const slot = await getDutySlot(Number(req.params.id));
-    res.json({ assignments, slot });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function postAssign(req: Request, res: Response, next: NextFunction) {
-  try {
-    const dutyId = Number(req.body.duty_id);
-    const userId = Number(req.body.user_id);
-    const asg = await assignUserToDuty(dutyId, userId, req.body.notes);
-    await createNotification(userId, "assignment", "Duty Assignment", "You have been assigned to a duty.", `/todays-assignments`);
-    res.json({ ok: true, assignment: asg });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function postRemoveAssignment(req: Request, res: Response, next: NextFunction) {
-  try {
-    await removeAssignment(Number(req.params.id));
-    res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
-}
-
-export async function getSearchUsers(req: Request, res: Response, next: NextFunction) {
-  try {
-    const q = String(req.query.q || "");
-    const users = await searchUsers(q, ["STUDENT", "TEACHER"]);
-    res.json({ users });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
 }
 
 // Monitor Completion

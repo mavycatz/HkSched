@@ -5,12 +5,6 @@ import { requireAuth, requirePermission } from "../middleware/auth";
 import { csrfToken } from "../lib/csrf";
 import { canViewStudentRecord, sendNotFound } from "../lib/authorization";
 import { getDashboardSummary, computeRange } from "../services/dashboardService";
-import {
-  DUTY_STATUSES,
-  getDutyStatusCounts,
-  listDuties,
-  type DutyStatus,
-} from "../services/dutyService";
 
 interface Placeholder {
   path: string;
@@ -18,36 +12,22 @@ interface Placeholder {
   permission: string | Record<Role, string>;
 }
 
+/**
+ * The pages that are still placeholders. The ones with a real page of their
+ * own (Today's Assignments, Applications, Profile & Settings, Monitor
+ * Completion) are routed in routes/index.ts and are not listed here.
+ */
 const PLACEHOLDERS: Placeholder[] = [
-  { path: "/todays-assignments", title: "Today's Assignments", permission: "assignments.today.view" },
   { path: "/assignments", title: "Assignments", permission: "assignments.manage" },
   { path: "/verification", title: "Verification", permission: "duty.verify" },
   { path: "/approvals", title: "Approvals", permission: "approvals.review" },
   { path: "/my-duties", title: "My Duties", permission: "duties.own.view" },
   { path: "/upcoming-duties", title: "Upcoming Duties", permission: "duties.upcoming.view" },
-  {
-    path: "/applications",
-    title: "Applications",
-    permission: {
-      STUDENT: "applications.own.view",
-      TEACHER: "applications.own.view",
-      CSDL: "applications.manage",
-    },
-  },
   { path: "/settings", title: "Settings", permission: "settings.manage" },
-  { path: "/profile-settings", title: "Profile & Settings", permission: "settings.manage" },
-  { path: "/duty-schedules", title: "Duty Schedules", permission: "schedules.view" },
-  { path: "/create-edit-schedule", title: "Create/Edit Schedule", permission: "schedules.manage" },
-  { path: "/assign-students-teachers", title: "Assign Students & Teachers", permission: "assign.students_teachers" },
-  { path: "/monitor-completion", title: "Monitor Completion", permission: "completion.monitor" },
 ];
 
-/** True when the value is a YYYY-MM-DD date. */
-function isIsoDate(value: string | undefined): boolean {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
-}
-
-function shellLocals(req: Request, res: Response) {  const user = req.user;
+function shellLocals(req: Request, res: Response) {
+  const user = req.user;
   return {
     user,
     nav: user ? navFor(user.role) : [],
@@ -195,54 +175,6 @@ export async function getCsdlDashboard(
       rangeTo: range.to.toISOString().split("T")[0],
       totals: data.totals,
       assignmentsToday: data.assignmentsToday,
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function getCsdlDutyManagement(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const user = req.user!;
-    const query = req.query as Record<string, string>;
-
-    const status = DUTY_STATUSES.includes(query.status as DutyStatus)
-      ? (query.status as DutyStatus)
-      : null;
-    const search = typeof query.q === "string" ? query.q.trim() : null;
-    const from = isIsoDate(query.from) ? query.from : null;
-    const to = isIsoDate(query.to) ? query.to : null;
-    const page = Number.parseInt(query.page ?? "1", 10);
-    const pageSize = 9;
-
-    const result = await listDuties(
-      { id: user.id, role: user.role },
-      { status, search, from, to, page: Number.isFinite(page) ? page : 1, pageSize },
-    );
-
-    // The unfiltered scope total decides between "no duties exist" and
-    // "no duty matches the current filters".
-    const scopeCounts = await getDutyStatusCounts({ id: user.id, role: user.role });
-
-    res.render("pages/csdl/duty-management", {
-      ...shellLocals(req, res),
-      title: "Duty Management",
-      activePath: "/csdl/duty-management",
-      bodyClass: "csdl-page",
-      pageStyles: ["duty-management"],
-      pageScripts: ["duty-management"],
-      duties: result.duties,
-      counts: result.counts,
-      total: result.total,
-      page: result.page,
-      pageCount: result.pageCount,
-      pageSize: result.pageSize,
-      filters: { status, search, from, to },
-      hasAnyDuties: scopeCounts.all > 0,
     });
   } catch (err) {
     next(err);

@@ -125,11 +125,14 @@ describe("page stylesheet plumbing", () => {
     expect(pageAt).toBeGreaterThan(themeAt);
   });
 
-  test("a page without pageStyles links no page stylesheet", async () => {
+  test("a page without a stylesheet of its own links only the shared one", async () => {
     const agent = await loginAs(app, "CSDL-001");
     const res = await agent.get("/csdl/applications");
     expect(res.status).toBe(200);
-    expect(res.text).not.toContain("/css/pages/");
+    expect(res.text).toContain("/css/pages/pages.css?v=");
+    expect(res.text).not.toContain("/css/pages/dashboard.css");
+    expect(res.text).not.toContain("/css/pages/profile.css");
+    expect(res.text).not.toContain("/css/pages/schedule.css");
   });
 
   test("the duty management page links only its own page stylesheet", async () => {

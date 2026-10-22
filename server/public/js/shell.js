@@ -5,11 +5,45 @@
   var toggle = document.getElementById("drawer-toggle");
   var sidebar = document.getElementById("sidebar");
   var backdrop = document.getElementById("backdrop");
+
+  /* The sidebar slides in below the 900px breakpoint, so the open state is
+     only ever shown on a small screen. */
+  function setOpen(open) {
+    if (!sidebar) return;
+    var isOpen = Boolean(open) && window.innerWidth < 900;
+    sidebar.classList.toggle("open", isOpen);
+    if (backdrop) {
+      backdrop.classList.toggle("is-visible", isOpen);
+      backdrop.classList.toggle("show", isOpen);
+    }
+    if (toggle) toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      setOpen(!sidebar.classList.contains("open"));
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", function () {
+      setOpen(false);
+    });
+  }
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") setOpen(false);
+  });
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth >= 900) setOpen(false);
+  });
+
   /* ---------- Sidebar auto-close on navigation (off-canvas) ---------- */
   if (sidebar) {
     sidebar.querySelectorAll('.nav-item-link[href]').forEach(function(link){
       link.addEventListener('click', function(){
-        if (window.innerWidth < 1024) {
+        if (window.innerWidth < 900) {
           setOpen(false);
         }
       });
